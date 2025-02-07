@@ -301,6 +301,7 @@ export default function MiniDrawer( {signUserOut} ) {
   }, [location.pathname]);
 //________________________________________________________________________________________
     //Notifiche
+    {/** 
     React.useEffect(() => {
       const collectionRef = collection(db, "notify");
       const q = query(collectionRef, );
@@ -324,9 +325,8 @@ export default function MiniDrawer( {signUserOut} ) {
               setNotiPa("")
             }
           } )
-      console.log(notiPa)
         }, [todoNoti]);
-
+*/}
 //________________________________________________________________________________________
   return (
     <Box sx={{ display: 'flex' }}>
@@ -348,7 +348,7 @@ export default function MiniDrawer( {signUserOut} ) {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             
           </Typography>
-
+{/**
         <div>
         {sup &&
         <>
@@ -381,7 +381,7 @@ export default function MiniDrawer( {signUserOut} ) {
               </>
             }
         </div>
-
+    */}
 
           <div >
             <Avatar alt="Remy Sharp" src={localStorage.getItem("profilePic")} onClick={handleMenu}/>
@@ -588,7 +588,7 @@ export default function MiniDrawer( {signUserOut} ) {
                   <ListItemText primary="Ordine Clienti" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>
             </ListItem>
-
+          {/***** 
             <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/ordinefornitoridata")}}>
                 <ListItemButton sx={{ pl: 4 }}
                   selected={selectedItem === "ordinefornitoridata"}
@@ -598,7 +598,7 @@ export default function MiniDrawer( {signUserOut} ) {
                   </ListItemIcon>
                   <ListItemText primary="Ordine Fornitori" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>
-            </ListItem>
+            </ListItem> */}
         </List>
       </Collapse>
       </div>

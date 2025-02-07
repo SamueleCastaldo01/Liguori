@@ -11,14 +11,19 @@ body {
   --sabbia: #f8dcb5;
   --darker: #262336;
   --blue: #61DAFB;
-  --green: #2AC900;
+  --green: #2E7D32;
   --greenHo: #39A675;
-  --red: #FD2B38;
+  --red: #D32F2F;
+  --primary: #152c51;
 }
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 -webkit-appearance: none;
 margin: 0;
+}
+
+a {
+  color: var(--primary);
 }
 
 .grafici {
@@ -28,11 +33,18 @@ margin: 0;
   margin: 0 auto;
   border-radius: 20px;
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  
+}
+
+.gradient {
+  background: rgb(2,0,36);
+  background: linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(51,47,47,1) 19%, rgba(255,255,255,1) 100%);
 }
 
 .title {
   text-align: center;
-  color: black;
+  color: var(--primary);
   font-weight: bold;
   font-size: 32px;
 }
@@ -40,6 +52,10 @@ margin: 0;
 button:active {
   box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
   transform: translateY(-1px);
+}
+
+button:hover {
+  box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
 }
 
 .linq {
@@ -59,8 +75,10 @@ button:active {
   float: left;
 }
 .backArrowPage{
-  background-color: #EFEFEF;
-  border-radius: 10px;
+  background-color: #CCCBCBCC;
+  border-radius: 30px;
+  border-style: solid;
+  border-color: var(--primary);
 }
 
 .backArrowPage:hover{
@@ -376,6 +394,10 @@ width: 794px;
   padding-bottom: 45px;
 }
 
+.Login{
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
 
 .formScortTinte,
 .formForni,
@@ -475,8 +497,17 @@ width: 794px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+
+
 .divScalDipData{
 width: 110%;
+}
+
+.pac-container {
+  z-index: 1051 !important;
+  box-shadow: none !important; /* Rimuovi l'ombra */
+  border-style: solid;
+  border-width: 0px;
 }
 
 .todo_containerScalet,
@@ -497,10 +528,9 @@ width: 110%;
   overflow-y: hidden;
   overflow-x: hidden;
   text-align: center;
-  border-width: 3px;
   background-color: #efefef;
   border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
 }
 
 .ContaScaletDip {
@@ -569,7 +599,7 @@ width: 110%;
 }
 
 .todo_containerFor{
-  width: 500px;
+  width: auto;
 }
 .todo_containerOrdCli{
   width: 350px;
@@ -579,13 +609,103 @@ width: 110%;
 }
 
 .LoginPage {
-position: fixed;
-top: 0;
-left: 0;
-background-color: white;
-width: 100%;
-height: 100%;
-z-index: 9999;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+
+.backPage {
+  margin: 0;
+  padding: 0;
+  background-size: cover;
+  background-position: center;
+  top: 0;
+  left: 0;
+  padding-top: 80px;
+  padding-left: 200px;
+  padding-right: 100px;
+  width: 100%;
+  height: 100vh;
+}
+
+.background-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://img.freepik.com/premium-vector/barber-tools-make-up-seamless-pattern_255494-296.jpg?w=1060');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  filter: blur( 6px); /* Applica il filtro di sfocatura solo all'immagine di sfondo */
+}
+
+.background-imagePage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://img.freepik.com/vettori-gratuito/interno-del-magazzino-con-scatole-di-cartone_107791-3324.jpg?t=st=1708683765~exp=1708687365~hmac=fb5e4b05ea091fc17459e8d1fc76dbb5aaca891f04ad7df6b21eccf7f4963006&w=1380');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  filter: blur( 3px); /* Applica il filtro di sfocatura solo all'immagine di sfondo */
+}
+
+.buttonMenuI {
+  font-size: 13px;
+  color: #152C51;
+  border-radius: 5px;
+  border-color: #152c51;
+  border-width: 2px;
+  border-bottom-width: 0px;
+  background-color: rgba(204, 203, 203, 0.8); /* Colore di sfondo con trasparenza */
+  border-style: solid;
+  height: 35px;
+  text-transform: uppercase;
+}
+
+.google-sign-in-button {
+  background-color: white;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: arial, sans-serif;
+  font-size: 16px;
+  height: 48px;
+  justify-content: center;
+  line-height: 48px;
+  outline: none;
+  padding: 0 16px;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  width: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-sign-in-button:hover {
+  background-color: #f5f5f5;
+}
+
+.google-sign-in-button:focus {
+  box-shadow: 0 0 0 1px black;
+}
+
+.google-icon {
+  height: 24px;
+  margin-right: 12px;
+  width: auto;
 }
 
 .popup {
@@ -606,11 +726,14 @@ z-index: 9999;
 
 .popup-inner {
   position: absolute;
+  top: 500;
+  left: 0;
   width: 300px;
   margin-right: 100px;
   top: 120px;
   background-color: var(--sabbia);
   padding: 0rem;
+  z-index: 1;
   border-radius: 0.5rem;
   overflow: auto;
   max-height: calc(100vh - 4rem);
@@ -625,7 +748,7 @@ z-index: 9999;
   background-color: var(--red);
   border: none;
   outline: none;
-  border-radius: 0px 10px 0px 0px;
+  border-radius: 0px 5px 0px 0px;
 }
 
 .button-close:hover {
@@ -666,7 +789,7 @@ z-index: 9999;
 .button-delete {
   padding-top: 10px;
   padding-bottom: 10px;
-  color: rgb(255, 122, 98);
+  color: var(--red)
 }
 .button-rem {
   padding-top: 10px;

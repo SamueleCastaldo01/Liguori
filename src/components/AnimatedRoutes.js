@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from "react";
 import Page_per from '../pages/Page_per';
 import Login from "../pages/Login";
+import { SingUp } from '../pages/SingUp';
 import HomePage from '../pages/HomePage';
 import ScaletData from '../pages/ScaletData';
 import Scalet from '../pages/Scalet';
@@ -78,6 +79,7 @@ function AnimatedRoutes() {
     const [dataOrdForn, setDataOrdForn] = useState(localStorage.getItem("dataOrdForn")); 
     const [dataOrdFornConf, setDataOrdFornConf] = useState(localStorage.getItem("dataOrdFornConfronto"));
   
+    const [idCliente, setIdCliente] = useState(localStorage.getItem("idCliente")); 
     const [notaId, setNotaId] = useState(localStorage.getItem("NotaId")); 
     const [notaCont, setNotaCont] = useState(localStorage.getItem("NotaCon")); 
     const [notaNomeC, setNotaNomeC] = useState(localStorage.getItem("NotaNomeC")); 
@@ -156,7 +158,8 @@ function AnimatedRoutes() {
         setDataOrdFornConf(data);
       };
     
-      const getNotadHandler = (id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot, indi, tel, iva, comp, idDebito, numBust) => {
+      const getNotadHandler = (idCliente, id, cont, nome, datav, datac, numCart, sommaTot, debiResi, debiTot, indi, tel, iva, comp, idDebito, numBust) => {
+        localStorage.setItem("idCliente", idCliente); 
         localStorage.setItem("NotaId", id); 
         localStorage.setItem("NotaCon", cont); //save the value locally
         localStorage.setItem("NotaNomeC", nome); 
@@ -172,7 +175,7 @@ function AnimatedRoutes() {
         localStorage.setItem("notaCompleta", comp);
         localStorage.setItem("idDebNot", idDebito);
         localStorage.setItem("notaNumBuste", numBust);
-        console.log({comp})
+        setIdCliente(idCliente)
         setNotaId(id);
         setNotaCont(cont);
         setNotaNomeC(nome);
@@ -258,7 +261,7 @@ function AnimatedRoutes() {
     <Route path="/scortatinte" element={<ScortaTinte />} />
     <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
     <Route path="/preventivodata" element={<PreventivoData getOrdId={getOrderIdHandler}/>} />
-    <Route path="/ordineclientidata" element={<OrdineCliData getOrdId={getOrderIdHandler}/>} />
+    <Route path="/ordineclientidata" element={<OrdineCliData TodayData={todayC} getOrdId={getOrderIdHandler} getNotaId={getNotadHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
     <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
     <Route path="/stampamassiva" element={<StampaMassiva notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
@@ -297,7 +300,7 @@ function AnimatedRoutes() {
   
 
       <Route path="/preventivo" element={<Preventivo notaDat={todayC} notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
-      <Route path="/nota" element={<Nota notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
+      <Route path="/nota" element={<Nota idCliente={idCliente} notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
 
   
       <Route element={<PrivateNotaForni notaFornId={notaFornId}/>}>
@@ -306,10 +309,14 @@ function AnimatedRoutes() {
     </Route>
     </Route>
     <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
+    <Route path="/singup" element={<SingUp setIsAuth={setIsAuth} />} />
     <Route path="/block" element={<Page_per/>} />
   
-    {isAuth ? <Route path="*" element={<Page_per /> }/> :
-              <Route path="*" element={<Login setIsAuth={setIsAuth} />}/>    }
+    {isAuth ? <Route path="*" element={<Page_per /> }/> : <>
+    <Route path="*" element={<SingUp setIsAuth={setIsAuth} />} />
+    <Route path="*" element={<Login setIsAuth={setIsAuth} />}/>   </> }
+
+              
     </Routes>
     </AnimatePresence>
   )

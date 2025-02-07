@@ -98,8 +98,8 @@ function App() {
   <MiniDrawer signUserOut={signUserOut}/>
 }
   
-  
-    <Box component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center", padding: matches ? "0px" : "24px", paddingTop: "24px" }}>
+    <Box className='backPage' component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center", padding: matches ? "0px" : "24px", paddingTop: "24px" }}>
+    <div className="background-imagePage"></div>
     <div><ToastContainer limit={1} /></div>
 
   <div style={{marginTop: !matches && "50px"}}>
@@ -108,7 +108,6 @@ function App() {
   
   </div>
     </Box>
-
     </Box>
 
   <BottomNavi/>

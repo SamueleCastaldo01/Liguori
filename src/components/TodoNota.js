@@ -12,15 +12,18 @@ import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import { TextField } from "@mui/material";
 import InputLabel from '@mui/material/InputLabel';
-import { AutoProdCli } from "../pages/AddNota";
+import { AutoProdCli } from "../pages/OrdineCliData";
 import { fontSize } from "@mui/system";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import { FlareSharp } from "@mui/icons-material";
 
-export const AutoCompProd = [];
 
 export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot, flagBho}) {
+
+  const [todosProdottiCli, setTodosProdottiCli] = React.useState([]);
+
+  const [flagProd, setFlagProd] = React.useState("1");
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -44,6 +47,25 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   let navigate = useNavigate();
+
+  {/********** 
+//vado a prendere i prodotti del cliente--------------------------------
+  React.useEffect(() => {
+    console.log("entrato")
+    const collectionRef = collection(db, "prodottoClin");
+    const q = query(collectionRef, where("author.idCliente", "==", todo.idCliente));
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+
+      setTodosProdottiCli(todosArray);
+    });
+    return () => unsub();
+  }, [flagProd]);
+*/}
 
   const handleInputChange = async (event, value) => {  //trova il prezzo unitario del prodotto
     setNewProdotto(value);
@@ -456,24 +478,29 @@ const handleChangeAge = (event) => {
       <h3 className="inpTabNota" style={{ textAlign: "center"}}> {todo.simbolo2} </h3>
     )}
 
-    {sup ===true && Completa == 1 &&( 
-      <>
-      { (todo.simbolo2 == "-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P.") ?  
+    {sup && Completa === 1 && ( 
+  <>
+    {todo.simbolo2 === "-" || todo.simbolo2 === "In Omaggio" || todo.simbolo2 === "G. P." ?  
       <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.simbolo2} </h3>  :
-      <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.prezzoUniProd} €</h3> }
-      </>
-    )}
+      <h3 className="inpTabNota" style={{ marginLeft: "20px"}}>
+        € {parseFloat(todo.prezzoUniProd.replace(',', '.')).toFixed(2).replace('.', ',')}
+      </h3>
+    }
+  </>
+)}
     </div>
 {/***************************Prezzo Tot************************************************************************** */}
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px", marginBottom:"0px"}}>
-    {sup ===true && ( 
+    {sup === true && ( 
         <h4 
-      style={{textAlign:"center", fontSize:"16px", marginTop:"0px", paddingTop:"10px"  }}
-        type="text"
-        className="inpTab"
-        >{ todo.prezzoTotProd } €</h4>
+            style={{textAlign:"center", fontSize:"16px", marginTop:"0px", paddingTop:"10px"  }}
+            type="text"
+            className="inpTab"
+        >
+            € {parseFloat(todo.prezzoTotProd).toFixed(2).replace('.', ',')}
+        </h4>
     )}
-    </div>
+</div>
 {/*************Button**************************************************************************************** */}
       <div className="col-1" style={{padding: "0px"}}>
       <button hidden
@@ -483,7 +510,7 @@ const handleChangeAge = (event) => {
         </button>
         {sup ===true && flagStampa==false && Completa == 0 && (   
           <>
-        <button type="button" className="buttonMenu" style={{padding: "0px"}} >
+   <button type="button" className="buttonMenu" style={{padding: "0px"}} >
         <MoreVertIcon id="i" onClick={handleMenu}/>
         <Menu  sx={
         { mt: "1px", "& .MuiMenu-paper": 
@@ -504,18 +531,19 @@ const handleChangeAge = (event) => {
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
-              >
+              > {/** 
                 <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
                 <MenuItem onClick={handleChangeEt}>ET</MenuItem>
-                <MenuItem onClick={handleChangeNo}>(NO)</MenuItem>
+                <MenuItem onClick={handleChangeNo}>(NO)</MenuItem> **/} 
                 <MenuItem onClick={handleChangeMeno}>(- )</MenuItem>
-                <MenuItem onClick={handleChangeInterro}>?</MenuItem>
+
+              {/*<MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeX}>X</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
                 <MenuItem onClick={handleChangeSospe}>-</MenuItem>
                 <MenuItem onClick={handleChangeInOmaggio}>In Omaggio</MenuItem>
                 <MenuItem onClick={handleChangeGP}>G. P.</MenuItem>
-                <MenuItem onClick={handleChangeRem2}>Rimuovi2</MenuItem>
+                <MenuItem onClick={handleChangeRem2}>Rimuovi2</MenuItem> */}
                 <MenuItem onClick={() => {
                 localStorage.setItem("flagRemove", 0);
                 localStorage.setItem("IDNOTa", todo.id);
@@ -524,7 +552,7 @@ const handleChangeAge = (event) => {
                     toast.clearWaitingQueue(); 
                             }}>Elimina Pr.</MenuItem>
               </Menu>
-        </button>
+        </button> 
         </>
         )}
       </div>

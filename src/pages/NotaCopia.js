@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, getDoc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer} from 'firebase/firestore';
 import { useRef } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import BeenhereIcon from '@mui/icons-material/Beenhere';
-import Brightness1Icon from '@mui/icons-material/Brightness1';
 import TodoNota from '../components/TodoNota';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -16,7 +15,7 @@ import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { IconButton } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
-import { supa, guid, tutti, flagStampa, rosso } from '../components/utenti';
+import { supa, guid, tutti, flagStampa } from '../components/utenti';
 import { fontSize } from '@mui/system';
 import { motion } from 'framer-motion';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -26,10 +25,9 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
-export const AutoProdCli = [];
 
 
-function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
+function Nota({notaId, cont, nomeCli, dataNota, nProd, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, indirizzo, tel, iva, completa, idDebito }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -47,7 +45,6 @@ function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, num
     const [Progress, setProgress] = React.useState(false);
 
     const [prodottoC, setProdottoC] = React.useState("");
-    const [notaIddo, setnotaIddo] = React.useState(notaId);
     const [numProd, setNumProd] = React.useState(nProd);
     const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
     const [t2, setT2] = React.useState("");
@@ -137,7 +134,7 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
 //********************************************************************************** */ 
     React.useEffect(() => {
       const collectionRef = collection(db, "Nota");
-      const q = query(collectionRef, where("idNota", "==", notaId));
+      const q = query(collectionRef, where("dataC", "==", dataNotaC), where("nomeC", "==", nomeCli));
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
         querySnapshot.forEach((doc) => {
@@ -185,11 +182,8 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
       }, [todos, sumTot]);
 //********************************************************************************** */
   //aggiunge un prodotto nella nota
-  const createCate = async () => {
-
+const createCate = async () => {
   await addDoc(collection(db, "Nota"), {
-    idCliente,
-    idNota: notaIddo,
     dataC: dataNotaC,
     nomeC: nomeCli,
     qtProdotto: 1,
@@ -426,21 +420,19 @@ const print = async () => {
       </div>
       </div>
 
-
         <motion.div
         initial= {{opacity: 0}}
         animate= {{opacity: 1}}
-        transition={{ duration: 0.7 }}
-        style={{ position: "absolute" }}>
+        transition={{ duration: 0.7 }}>
 
 {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> }
 
-      {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px", position: "relative", bottom: "15px" }}>Ordine di {idCliente} {nomeCli} </h1> : <div style={{marginBottom:"60px"}}></div>} 
+      
+      {!matches ? <h1 className='title mt-3'> Nota</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
-<div style={{ justifyContent: "left", textAlign: "left", marginTop: "20px" }}>
       <ToggleButtonGroup
       color="primary"
       value={alignment}
@@ -451,23 +443,14 @@ const print = async () => {
 
     {Completa ==0 && 
     <>
-    <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
+    <Button onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
     {/*****<Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button> */}
-    {/****** 
       <ToggleButton onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
-      <ToggleButton onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}} color='secondary' value="scortatinte1">In Sospeso</ToggleButton> */}
+      <ToggleButton onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}} color='secondary' value="scortatinte1">In Sospeso</ToggleButton>
     </>}
-    <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }} onClick={print} size="small" variant="contained">Stampa</Button>
-     {Completa== 0 ? 
-      <button type="button" className="button-delete" style={{padding: "0px", float: "left", }}>
-        <Brightness1Icon sx={{ fontSize: 40 }}/>
-        </button> :
-        <button type="button" className="button-complete" style={{padding: "0px", float: "center"}}>
-        <Brightness1Icon sx={{ fontSize: 40 }}/>
-        </button>
-        }
+    {sup == true &&<Button onClick={print} size="small" variant="contained">Stampa</Button>}
+
     </ToggleButtonGroup>
-    </div>
 
 {/**********tabella in ordine********************** */}
 {flagInOrdine == true && 
@@ -584,8 +567,17 @@ const print = async () => {
   }
 
 {/*********************DDT***************************** */}
-  <div className='containerA4' style={{ position: "relative", overflow: "auto", height: "70vh", width: "815px"  }}> 
-    <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px", position: "absolute", backgroundColor: "white", borderRadius: "20px", }}>
+<div>
+    {Completa== 0 ? 
+      <button type="button" className="button-delete" style={{padding: "0px", float: "left"}}>
+        <BeenhereIcon sx={{ fontSize: 40 }}/>
+        </button> :
+        <button type="button" className="button-complete" style={{padding: "0px", float: "left"}}>
+        <BeenhereIcon sx={{ fontSize: 40 }}/>
+        </button>
+        }
+</div>
+    <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
     <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
         <h6 style={{fontSize:"9px"}}>MITTENTE: Ditta, Domicilio o Residenza, Codice Fiscale, Partita IVA</h6>
@@ -618,8 +610,7 @@ const print = async () => {
       <h5 style={{marginBottom:"0px", marginTop:"0px"}}> {nomeCli} </h5>
         <h5 className='sinistraNota'>{indirizzo}</h5>
         <h5 className='sinistraNota'>Tel {tel}</h5>
-        <h5 className='sinistraNota'>Cod.Fisc. e Partita IVA n.{iva}</h5>
-        <h5 className='sinistraNota'  style={{marginBottom:"5px"}}>Indirizzo di consegna: {indirizzo}</h5>
+        <h5 className='sinistraNota'  style={{marginBottom:"5px"}}>Cod.Fisc. e Partita IVA n.{iva}</h5>
       </div>
     </div>
 
@@ -674,7 +665,7 @@ const print = async () => {
         <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumCart}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
       </span> }
     </h6> 
-    <h6 className='mt-2' style={{ width: "300px" }}>Numero Buste: <span style={{ marginLeft: "10px" }}> {NumBuste} </span> 
+    <h6 className='mt-2'>Numero Buste: <span> {NumBuste} </span> 
     {Completa == 0 && flagStampa ==false &&
       <span>
         <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumBuste}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
@@ -684,17 +675,17 @@ const print = async () => {
        </div>
 
     <div className='col' style={{textAlign:"right", padding:"0px"}}>
-    <h6>Totale: €{parseFloat(sumTot).toFixed(2).replace('.', ',')}</h6>
+    <h6>Totale: {sumTot} €</h6>
     <form onSubmit={handleEditDebitoRes}>
     <h6>Debito Residuo:     <input value={debitoRes} onBlur={handleEditDebitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
       onChange={(event) => {
       setDebitoRes(event.target.value);}}
     />  €</h6>
     </form>
-    <h6>Debito Totale: €{parseFloat(debitoTot).toFixed(2).replace('.', ',')}</h6>
+    <h6>Debito Totale: {debitoTot} €</h6>
     {flagStampa == false && <>
-  {Completa==0 ?  <Button variant='contained' color='success' onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</Button> :
-    <Button variant='contained' color='error' onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</Button>
+  {Completa==0 ?  <button onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</button> :
+    <button onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</button>
      }
   </>}
 
@@ -702,7 +693,6 @@ const print = async () => {
     </div>
 
   </div>
-    </div>
     </div>
     <div style={{marginBottom: "120px"}}></div>
 </motion.div>

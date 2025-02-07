@@ -103,7 +103,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
 <div className="col-1 diviCol"  >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
-        type="text"
+      
         className="inpTab"
         >{todo.idCliente}</h5>
 
@@ -112,7 +112,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     <div className="col-3 diviCol"  >
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
-        type="text"
+  
         className="inpTab"
         >{ newNomeC}</h5>
 
@@ -122,7 +122,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
+        type="number"
         onBlur={handleSubm}
         value={todo.deb1 === "" ? d1 : todo.deb1}
         className="inpNumb"
@@ -136,7 +136,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
+        type="number"
         onBlur={handleSubm}
         value={todo.deb2 === "" ? d2 : todo.deb2}
         className="inpNumb"
@@ -149,7 +149,7 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     {sup ===true && ( 
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
+        type="number"
         onBlur={handleSubm}
         value={todo.deb3 === "" ? d3 : todo.deb3}
         className="inpNumb"
@@ -159,15 +159,15 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     </div>
 {/*******************D4********************************************************************************** */}
 <div className="col diviCol1" style={{padding: "0px"}}>
-    {sup ===true && ( 
+    {sup ===true && ( <>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
-        type="text"
+        type="number"
         onBlur={handleSubm}
         value={todo.deb4 === "" ? d4 : todo.deb4}
         className="inpNumb"
         onChange={handleChangeD4}
-      />
+      /></>
     )}
     </div>
   {/*******************Debito totale********************************************************************************** */}
@@ -175,9 +175,8 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     {sup ===true && ( 
       <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
-        type="text"
         className="inpTab"
-        >  {todo.debitoTot}  </h5>
+        > €{Number(todo.debitoTot).toFixed(2).replace('.', ',')}</h5>
     )}
     </div>
     </div>

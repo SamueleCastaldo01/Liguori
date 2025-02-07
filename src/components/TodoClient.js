@@ -3,7 +3,7 @@ import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderB
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { supa, guid, tutti } from '../components/utenti';
+import { supa, guid, tutti, primary, rosso } from '../components/utenti';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { padding } from "@mui/system";
@@ -11,7 +11,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 export const AutoCompProd = [];
 
-export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg, getCliId, flagDelete}) {
+export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg, getCliId, flagDelete, handleActiveEdit}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -79,11 +79,11 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 <form  onSubmit={handleSubm}>
     <div className="row diviCol1">
 {/*********************idCliente************************************************************************ */}
-  <div className="col-1 diviCol" >
+  <div className="col-1 diviCol" style={{ width: "90px" }}>
     <h5
-      style={{ textDecoration: todo.completed && "line-through"  }}
+      style={{ textDecoration: todo.completed && "line-through", color: primary  }}
         type="text"
-        className="inpTab">{ todo.idCliente}</h5>
+        className="inpTab"><b>{todo.idCliente}</b></h5>
 
     </div>
 {/*********************NomeC************************************************************************ */}
@@ -92,23 +92,42 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
         className="inpTab"
-        onClick={() => {
+        onClick={() => { /*-
             getCliId(todo.id, todo.nomeC)
             navigate("/dashclienti");
             auto();
-            AutoCompProd.length = 0
+            AutoCompProd.length = 0 */
+            handleActiveEdit(todo)
                             }}
-        >{ newNomeC}</h5>
+        >{ todo.nomeC}</h5>
 
     </div>
-{/********************Indirizzo************************************************************************* */}
-    <div className="col-5 diviCol" style={{padding: "0px"}}>
+  {/*********************email************************************************************************ */}
+  <div className="col-2 diviCol" style={{ width:"260px" }} >
+    <h5
+      style={{ textDecoration: todo.completed && "line-through"  }}
+        type="text"
+        className="inpTab"
+        >{ todo.indirizzoEmail}</h5>
+    </div>
+
+{/*********************Cellulare************************************************************************ */}
+  <div className="col-2 diviCol" style={{ width:"120px" }} >
+    <h5
+      style={{ textDecoration: todo.completed && "line-through"  }}
+        type="text"
+        className="inpTab"
+        >{ todo.cellulare}</h5>
+    </div>
+
+{/********************Indirizzo Maps************************************************************************* */}
+    <div className="col-3 diviCol" style={{padding: "0px", width: "295px"}}>
     <p className="inpTab" ><a
-      style={{ textAlign: "center"}}
-        href={ newIndirizzoLink }
+      style={{ textAlign: "center", color: primary}}
+        href={ todo.indirizzoLink }
         target="_blank"
         className="linkTab"
-        >{ newIndirizzo.substr(0, 35)}...</a> </p>
+        >{ todo.indirizzo.substr(0, 35)}...</a> </p>
     </div>
 
 {/************************partita Iva***************************************************************************** */}
@@ -128,13 +147,13 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
         className="inpNumb"
-        >{ newPartIva}</h4>
+        >{ todo.partitaIva}</h4>
     )}
     </div>
 
 {/***************************************************************************************************** */}
-      {flagDelete &&
-      <div className="col-1 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
+      {flagDelete ?
+      <div className="col-1 diviCol" style={{padding:"0px", marginTop:"-8px", width: "50px"}}>
       <button
       hidden
           className="button-edit"
@@ -143,17 +162,18 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
           <EditIcon id="i" />
       </button>
         {sup ===true && (   
-        <button type="reset" className="button-delete"                          
+        <button type="reset" className="button-delete"     style={{ color: rosso }}                     
           onClick={() => {
                 localStorage.setItem("IDscal", todo.id);
-                localStorage.setItem("NomeCliProd", todo.nomeC);
+                localStorage.setItem("IdCliProd", todo.idCliente);
                     displayMsg();
                     toast.clearWaitingQueue(); 
                             }}>
           <DeleteIcon id="i" />
         </button>
         )}
-      </div>
+      </div> :
+      <div className="col-1" style={{width: "50px"}}></div>
         }
     </div>
 

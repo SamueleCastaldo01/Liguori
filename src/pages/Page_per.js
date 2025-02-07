@@ -11,7 +11,7 @@ function Page_per({ getColId }) {
 //************************************************************** */
     return ( 
     <> <div className='wrapper'>
-            <h2>Non hai il permesso di accesso</h2>
+            <h2>Accesso Negato</h2>
 
             <button className='mt-5' onClick={()=> {navigate("/login")}}>Login</button>
            </div>

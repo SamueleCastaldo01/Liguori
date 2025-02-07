@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs, serverTimestamp, limit} from 'firebase/firestore';
 import moment from 'moment/moment';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { TextField } from '@mui/material';
@@ -9,15 +9,23 @@ import { useNavigate } from "react-router-dom";
 import { notifyError, notifyErrorDat } from '../components/Notify';
 import Calendar from 'react-calendar';
 import Button from '@mui/material/Button';
+import { Modal } from 'react-bootstrap';
+import Autocomplete from '@mui/material/Autocomplete';
+import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
 import 'moment/locale/it'
 import DeleteIcon from "@mui/icons-material/Delete";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import PendingIcon from '@mui/icons-material/Pending';
 import CloseIcon from '@mui/icons-material/Close';
-import { supa, guid, tutti } from '../components/utenti';
+import { supa, guid, tutti, primary, rosso } from '../components/utenti';
 import MiniDrawer from '../components/MiniDrawer';
 import Box from '@mui/material/Box';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import LockIcon from '@mui/icons-material/Lock';
@@ -28,11 +36,29 @@ import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
+export const AutoProdCli = [];
+//stati: 0= in lavorazione;  1=evaso; 2=Consegnato; 4 per i filtri mi fa vedere tutti gli stati
 
-function OrdineCliData({ getOrdId }) {
+function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     const[colle, setColle] = useState([]); 
+    const [todosClienti, setTodosClienti] = React.useState([]);
     const colleCollectionRef = collection(db, "addNota");
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    let iddo=""
+
+    //dati per l'input dell'ordine
+    const [idCliente, setIdCliente] = React.useState("");
+    const [idOrdine, setIdOrdine] = React.useState("");
+    const dataInizialeFormatted = moment(TodayData, "DD/MM/YYYY").format("YYYY-MM-DD");
+    const [dataOrd, setDataOrd] = useState(dataInizialeFormatted);
+    const [status, setStatus] = React.useState("0");
+    const [nomeC, setNomeC] = React.useState("");
+    const [debitoRes, setDebitoRes] = React.useState("");
+    const [indirizzo, setIndirizzo] = React.useState("");
+    const [telefono, setTelefono] = React.useState("");
+    const [cont, setCont] = React.useState(1);
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte
@@ -50,6 +76,7 @@ function OrdineCliData({ getOrdId }) {
     const [popupActive, setPopupActive] = useState(false);  
 
     const [nome, setData] = useState("");
+    const [stato, setStato] = useState("4"); 
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è un dispositivo più piccolo del value
 
     moment.locale("it");
@@ -61,13 +88,46 @@ function OrdineCliData({ getOrdId }) {
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
+//funzioni per il menu per elimianre la trupla
+    const handleMenu = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {  //chiude il menu
+      setAnchorEl(null);
+    };
 
+  // vado a prendere i prodotti per singolo cliente
+    const auto = async (idCliente) => {  //array per i prodotti dei clienti
+      const q = query(collection(db, "prodottoClin"), where("author.idCliente", "==", idCliente));
+      const querySnapshot = await  getDocs(q);
+      querySnapshot.forEach((doc) => {
 
+      let car = { label: doc.data().nomeP,
+                  id: doc.id,
+                  prezzoUni: doc.data().prezzoUnitario }
+      AutoProdCli.push(car);
+      });
+      }
 
 
       const handleChangeTogg = (event) => {
         setAlignment(event.target.value);
       };
+
+    //Per input aggiunta ordine
+      const handleChangeDataSelect1 = (event) => {
+        console.log(event.target.value)
+        setStatus(event.target.value);      //prende il valore del select
+      };
+
+      function handleInputChange(event, value) {
+        setNomeC(value)
+        todosClienti.map((cli) => {
+          if(cli.nomeC== value) {
+            setIdCliente(cli.idCliente)
+          } 
+        })
+      }
   //_________________________________________________________________________________________________________________
          const handleChangeDataSelect = (event) => {
           var ok= event.target.value
@@ -84,7 +144,7 @@ function OrdineCliData({ getOrdId }) {
             querySnapshot.forEach((doc) => {
               todosArray.push({ ...doc.data(), id: doc.id });
             });
-            todosArray.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()); // Ordine decrescente
+            todosArray.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate()); // Ordine crescente
             setColle(todosArray);
             setProgress(true);
           });
@@ -93,7 +153,7 @@ function OrdineCliData({ getOrdId }) {
 
   //_________________________________________________________________________________________________________________
   const handleChangeStatoSelect = (event) => {
-    var ok= event.target.value
+    setStato(event.target.value)
   };
 
    //_________________________________________________________________________________________________________________
@@ -113,7 +173,7 @@ function OrdineCliData({ getOrdId }) {
     )
 
       const Remove = () => {
-          deleteCol(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli") );
+          handleDelete(localStorage.getItem("ordId"), localStorage.getItem("ordIdCliente"))
       //    bloccaNota(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli"));
           toast.clearWaitingQueue(); 
                }
@@ -172,12 +232,134 @@ function OrdineCliData({ getOrdId }) {
       querySnapshot.forEach((doc) => {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
-      todosArray.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()); // Ordine decrescente
+      todosArray.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
       setColle(todosArray);
       setProgress(true);
     });
     return () => unsub();
   }, [todayMilli]);
+
+    //********************************************************************************** */
+  React.useEffect(() => {
+    const collectionRef = collection(db, "clin");
+    const q = query(collectionRef);
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+
+  // Ordina l'array per la proprietà nomeC
+  todosArray.sort((a, b) => {
+    const nomeC1 = a.nomeC.toLowerCase();
+    const nomeC2 = b.nomeC.toLowerCase();
+
+    if (nomeC1 < nomeC2) {
+      return -1;
+    }
+    if (nomeC1 > nomeC2) {
+      return 1;
+    }
+    return 0;
+  });
+      setTodosClienti(todosArray);
+    });
+    return () => unsub();
+  }, []);
+
+
+  /********************************************************************************************************* */
+  const CreateOrdine = async (e) => {   //aggiunta Ordine
+    e.preventDefault(); 
+    var debRes=0;
+    var id=0;
+    var indiri;
+    var telefo;
+    var iva;
+    var idOrdine="1";
+
+
+    const dateObject = new Date(dataOrd); //conversione da stringa a data per ottenere la data in millisecondi
+    const dataInizialeFormatted = moment(dataOrd, "YYYY-MM-DD").format("DD-MM-YYYY");
+
+//va a  prendere d1, tramite nome del cliente e anche il suo id
+    const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  
+    const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        debRes=doc.data().deb1 ;
+        id= doc.id;
+        });
+        setDebitoRes(debRes);
+
+    //andiamo a  prendere l'indirizzo e il tel, tramite nome del cliente, viene richiamata quando si crea la nota
+        const p = query(collection(db, "clin"), where("idCliente", "==", idCliente));  
+        const querySnapshotp = await getDocs(p);
+        querySnapshotp.forEach((doc) => {
+          indiri= doc.data().indirizzo;
+          telefo= doc.data().cellulare;
+          iva = doc.data().partitaIva;
+          });
+          setIndirizzo(indiri);
+          setTelefono(telefo);
+
+    //vado a prendere l'id dell'ultimo ordine, in modo tale da aggiungere il nuovo id al nuovo ordine
+    const d = query(collection(db, "addNota"), orderBy("createdAt", "desc"), limit(1));  
+    const querySnapshotd = await getDocs(d);
+    // Controlla se ci sono risultati nella query
+    if (!querySnapshotd.empty) {
+      // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
+      querySnapshotd.forEach((doc) => {
+        idOrdine = doc.data().idOrdine.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
+        let idOrdInt = parseInt(idOrdine) + 1 //fa la converisione in intero. e fa la somma
+        idOrdine = idOrdInt.toString()  // lo riconverte in stringa
+      });
+    }
+
+    idOrdine= "O" + idOrdine
+
+    var bol= true
+        //andiamo a fare il controllo, per verificare se questo ordine è già presente nel nostro database
+        const s = query(collection(db, "addNota"), where("idCliente", "==", idCliente));  
+        const querySnapshots = await getDocs(s);
+        querySnapshots.forEach((doc) => {
+          if (nomeC == doc.data().nomeC && dataInizialeFormatted ==doc.data().data) {   //va a prendere la trupla di questo cliente di questa data
+            notifyErrorCli()
+            toast.clearWaitingQueue(); 
+            bol=false
+        }
+          });
+
+    if(!nomeC) {
+      notifyErrorCliEm();
+      toast.clearWaitingQueue(); 
+      return
+    }
+    if(bol == true) {
+    await addDoc(collection(db, "addNota"), {
+      idOrdine,
+      cont,
+      idCliente,
+      nomeC,
+      quota: 0,
+      completa : status,
+      data: dataInizialeFormatted,
+      NumCartoni:"0",
+      dataMilli: dateObject.getTime(),
+      NumBuste:"0",
+      sommaTotale:0,
+      altezza: "1123px",
+      debitoTotale:0,
+      createdAt: serverTimestamp(),
+      idDebito:  id,
+      debitoRes: debRes,
+      indirizzo: indiri,
+      tel: telefo,
+      partitaIva: iva
+    });
+    setNomeC("");
+    }
+  };
   //_________________________________________________________________________________________________________________
 
     const deleteCol = async (id, dat) => { //cancella tutto dalla data fino ai prodotti che fanno parte della lista
@@ -197,6 +379,22 @@ function OrdineCliData({ getOrdId }) {
         
         await deleteDoc(colDoc); //3 infine elimina la data
     }
+
+  //___________________________________________________________________________________________________
+        const handleDelete = async () => {
+    
+          console.log(iddo)
+          const colDoc = doc(db, "addNota", iddo); 
+        //elimina tutti i dati di nota di quel ordine, i prodotti
+          const q = query(collection(db, "Nota"),  where("idNota", "==", iddo));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach(async (hi) => {
+          await deleteDoc(doc(db, "Nota", hi.id)); 
+          });
+          //infine elimina l'ordine
+          await deleteDoc(colDoc);
+          handleClose() //chiude il menu elimina ordine
+        };
   //__________________________________________________________________________________________________________________________________________________
     const bloccaNota = async (id, dat, numNot, dtMilli, TotQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
       const colDoc = doc(db, "ordDat", id); 
@@ -243,35 +441,7 @@ function OrdineCliData({ getOrdId }) {
       });
       await deleteDoc(colDoc); //3 infine elimina la data
   }
-  //_________________________________________________________________________________________________________________
-  const createCol = async (e) => {    
-    e.preventDefault();  
-    var formattedDate = moment(nome).format('DD-MM-YYYY');
-    var bol= true
-    if(!nome) {            
-      notifyError();
-      toast.clearWaitingQueue(); 
-      return
-    }
-    colle.map(async (nice) => {    //va a fare il controllo e va a vedere se questa data già è stat inserita
-      if (formattedDate == nice.data) {   //va a prendere la trupla di questo cliente di questa data
-        notifyErrorDat()
-        toast.clearWaitingQueue(); 
-       bol=false
-      }
-    })
-    if(bol == true) {
-    await addDoc (collection(db, "addNotaBloccata"), {
-      numeroNote: 0,
-      data: formattedDate,
-      dataMilli: nome.getTime(),
-      nome,
-      totalQuota:0,
-      totalAsc:0
-    });
-    setClear();
-    }
-  };
+
 
 //*************************************************************** */
 //************************************************************** */
@@ -299,8 +469,9 @@ function OrdineCliData({ getOrdId }) {
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
-   {!matches ? <h1 className='title mt-3'> Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
+    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
+   <div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}> 
     <ToggleButtonGroup
       color="primary"
       value={alignment}
@@ -308,47 +479,14 @@ function OrdineCliData({ getOrdId }) {
       onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {sup == true && <Button onClick={() => {setFlagDelete(true); setFlagBlock(false)}} color="error" variant="contained">Elimina</Button> }
-    {sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}
+    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { setPopupActive(true); }}  variant="contained">Aggiungi Ordine</Button>
+    <Button color='error'  style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}  onClick={() => {setFlagDelete(!flagDelete)  }}  variant="contained">Elimina</Button>
+    {/*{sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}  */}
     </ToggleButtonGroup>
-{/** inserimento Data *************************************************************/}
-{sup ===true && (
-        <>    
-{popupActive &&
-  <div>  
-      <form className='formSD' onSubmit={createCol}>
-      <div>  <button onClick={() => { setPopupActive(false); }} type='button' className="button-close float-end mb-2" >
-              <CloseIcon id="i" />
-              </button>   
-      </div>
-      <div className="input_container">
-      <Calendar onChange={setData} value={nome}  elevation={3} />
-      </div>
-      <div className="btn_container">
-      <Button type='submit' variant="outlined">Aggiungi la data</Button>
-      </div>
-    </form>
-  </div> }
-{!popupActive &&
-  <div className="btn_container mt-5"> 
-  <Button  onClick={() => { navigate("/addnota") }}  variant="outlined">Aggiungi Ordine</Button>
-  </div>
-  }
-  </>
-    )}
-{/*************************************************************************************************** */}
+    </div>
 
-            <div className="container">
-              <div className="row">
-                <div className="col"> <h3></h3></div>
-                <div className="col">
 
-                </div>
 
-                <div className="col mt-4">
-          
-                </div>
-              </div>
 {/*************************TABELLA ORDINI CLIENTI DATA************************************************************************** */}
           <div className='todo_container' style={{width: "auto"}}>
               <div className='row'>
@@ -380,25 +518,25 @@ function OrdineCliData({ getOrdId }) {
                         <Select sx={{height:39, marginLeft:-1, width: 150}}
                          labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        defaultValue={0}
+                        defaultValue={"4"}
                         onChange={handleChangeStatoSelect}>
-                        <MenuItem value={4}>Tutti</MenuItem>
-                        <MenuItem value={0}>In Lavorazione</MenuItem>
-                        <MenuItem value={1}>Da Evadere</MenuItem>
-                        <MenuItem value={2}>Conseganto</MenuItem>
+                        <MenuItem value={"4"}>Tutti</MenuItem>
+                        <MenuItem value={"0"}>In Lavorazione</MenuItem>
+                        <MenuItem value={"1"}>Evaso</MenuItem>
+                        <MenuItem value={"2"}>Conseganto</MenuItem>
                         </Select>
                         </FormControl>
                         </div>
                     </div>
                     <div className='row' style={{ height: "25px", marginTop: "7px" }}>
-                      <div className='col-1 coltext'>id Ordine</div>
-                      <div className='col-3 coltext'>Cliente</div>
-                      <div className='col coltext'>Data</div>
-                      <div className='col coltext'>Stato</div>
-                      <div className='col coltext'>€Totale</div>
-                      <div className='col coltext'>€Guadagno</div>
-                      <div className='col coltext'>N. Cartoni</div>
-                      <div className='col coltext'>N. Buste</div>
+                      <div className='col-1 coltext' style={{ width:"100px" }}>id Ordine</div>
+                      <div className='col-4 coltext'>Cliente</div>
+                      <div className='col-1 coltext'style={{ width: "125px" }} >Data</div>
+                      <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
+                      <div className='col-1 coltext' style={{ width:"110px" }}>€Totale</div>
+                      <div className='col-1 coltext' style={{ width:"110px" }}>€Guadagno</div>
+                      <div className='col-1 coltext'style={{ width:"100px" }}>N. Cartoni</div>
+                      <div className='col-1 coltext'style={{ width:"100px" }}>N. Buste</div>
                     </div>
 
                     {Progress == false && 
@@ -408,34 +546,59 @@ function OrdineCliData({ getOrdId }) {
                     }
                 {colle.map((col) => (
                   <div key={col.id}>
-                  {col.dataMilli >= localStorage.getItem("bho3") && 
+                  {(col.completa == stato  || stato == "4") && 
                     <>
-                    <div className="diviCol1"> 
+                    <div className="diviCol1" > 
                       <div className="row">
-                      <div className='col-1'><h3 className='inpTab' >{ col.idO }</h3></div>
-                      <div className='col-3'><h3 className='inpTab' >{ col.nomeC }</h3></div>
-                      <div className="col" > <h3 className='inpTab' >{ col.data }</h3></div>
-                      <div className="col" > <h3 className='inpTab' >{ col.completa }</h3></div>
-                      <div className='col'><h3 className='inpTab' >{ col.sommaTotale }€</h3></div>
-                      <div className='col'><h3 className='inpTab' >{ col.quota }€</h3></div>
-                      <div className='col'><h3 className='inpTab' >{ col.NumCartoni }</h3></div>
-                      <div className='col'><h3 className='inpTab' >{ col.NumBuste }</h3></div>
+                      <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' style={{color: primary}} ><b>{ col.idOrdine }</b></h3></div>
+                      <div className='col-4'><h3 className='inpTab' onClick={()=> {
+                        getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
+                        navigate("/nota")
+                        auto(col.idCliente);
+                        AutoProdCli.length = 0
+                        }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
 
 
-                        { flagDelete &&
-                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
-                        <button
-                         className="button-delete"
-                         onClick={() => {
-                            localStorage.setItem("ordDataEli", col.data);
-                            localStorage.setItem("ordId", col.id);
-                            displayMsg();
-                            toast.clearWaitingQueue(); 
-                            }}>
-                          <DeleteIcon id="i" />
-                        </button>            
+                      <div className="col-1" style={{ width: "125px" }}> <h3 className='inpTab' >{ col.data }</h3></div>
+                      {col.completa == 0 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><PendingIcon className='inpTab' style={{ color: rosso }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: rosso }}>In Lavorazione</h3></div>
+                          </div>
                         </div>
-                        }
+                      )}
+                      {col.completa == 1 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><LocalShippingIcon className='inpTab' style={{ color: "orange" }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: "orange" }}>Evaso</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      {col.completa == 2 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><CheckCircleIcon className='inpTab' style={{ color: "green" }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: "green" }}>Consegnato</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.sommaTotale).toFixed(2).replace('.', ',')}</h3></div>
+                      <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.quota).toFixed(2).replace('.', ',')}</h3></div>
+                      <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' >{ col.NumCartoni }</h3></div>
+                      <div className='col-1' style={{ width:"100px", }}><h3 className='inpTab' >{ col.NumBuste }</h3></div>
+
+                    {flagDelete ?
+                      <div className='col-1' style={{padding:"0px", marginTop:"-8px", width: "20px"}}>
+                  <button className="button-delete" style={{color: rosso, marginLeft: "-70px"}} onClick={()=> {console.log(col.id); iddo=col.id; displayMsg();}}>  <DeleteIcon id="i" /> </button>
+                  </div> :
+                  <div className='col-1'>
+                  
+                  </div> }
+
+
+
                         {/*
                         { flagBlock &&
                         <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
@@ -468,8 +631,50 @@ function OrdineCliData({ getOrdId }) {
 
 
 
-            </div>
-            </motion.div>
+{/******Aggiungi Prodotto  modal***************************************************************************** */}
+<Modal  size="lg" show={popupActive} onHide={()=> { setPopupActive(false) }} style={{ marginTop: "50px" }}>
+      <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false);  }}>
+              <CloseIcon id="i" /></button> </div>
+    {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Ordine </h4>}
+          <Modal.Body>
+          <div className='row mt-4' >
+          <div className='col'>
+        <TextField color="secondary" className='mt-2' style={{ width: "100%" }} type='date' label="Data di Creazione"
+              placeholder="DD/MM/YYYY" value={dataOrd} onChange={(e) => setDataOrd(e.target.value)} />
+        </div>
+          <div className='col'>
+            <FormControl style={{ marginTop: "7.4px" }}>
+                <InputLabel id="demo-simple-select-label" color="secondary">Stato</InputLabel>
+                  <Select sx={{height:57,  width: "400px"}}
+                  label="Stato"
+                  color='secondary'
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    defaultValue={0}
+                    onChange={handleChangeDataSelect1}>
+                  <MenuItem value={"0"}>In Lavorazione</MenuItem>
+                  <MenuItem value={"1"}>Evaso</MenuItem>
+                  <MenuItem value={"2"}>Coseganto</MenuItem>
+                    </Select>
+              </FormControl>
+          </div>
+          </div>
+      <div className='row mt-4 mb-4'>
+        <Autocomplete
+            value={nomeC}
+            options={todosClienti.map(cliente => cliente.nomeC)}
+            onInputChange={handleInputChange}
+            componentsProps={{ popper: { style: { width: 'fit-content' } } }}
+            renderInput={(params) => <TextField color='secondary' {...params} label="Cliente" />}
+          />
+
+      </div>
+       {popupActive && <Button onClick={CreateOrdine} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Ordine </Button>}
+          </Modal.Body>
+      </Modal>
+
+    
+        </motion.div>
            </>
       )
 }

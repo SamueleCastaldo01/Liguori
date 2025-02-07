@@ -15,7 +15,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TodoScorta from '../components/TodoScorta';
 import Button from '@mui/material/Button';
-import { supa, guid, tutti, dipen } from '../components/utenti';
+import { supa, guid, tutti, dipen, primary } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import RestoreIcon from '@mui/icons-material/Restore';
 import PrintIcon from '@mui/icons-material/Print';
@@ -28,7 +28,7 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import ToggleButton from '@mui/material/ToggleButton';
-import Modal from '@mui/material/Modal';
+import { Modal } from 'react-bootstrap';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { color, motion } from 'framer-motion';
@@ -46,7 +46,8 @@ function Scorta() {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const [tipologia, setTipologia] = React.useState("");
+  const [idProdotto, setIdProdtto] = React.useState("");
+  const [idDocumentoEdit, setIdDocumentoEdit] = React.useState("");
   const [brand, setBrand] = React.useState("");
   const [descrizione, setDescrizione] = React.useState("");
   const [nomeP, setNomeP] = React.useState("");
@@ -93,7 +94,10 @@ function Scorta() {
 
   const [popupActive, setPopupActive] = useState(false);  
   const [popupActiveScorta, setPopupActiveScorta] = useState(true);  
+  const [popupActiveScortaEdit, setPopupActiveScortaEdit] = useState(false); 
   const [searchTerm, setSearchTerm] = useState("");  //search
+  const [searchTermCrono, setSearchTermCrono] = useState("");  //search
+  const [searchTermCronoPa, setSearchTermCronoPa] = useState("");  //search
   const inputRef= useRef();
 
   //permessi utente
@@ -104,6 +108,8 @@ function Scorta() {
 
   let navigate = useNavigate();
 
+  const handleCloseMod = () =>{ setPopupActive(false); setPopupActiveScortaEdit(false)};
+  const handleShowMod = () => setPopupActive(true);
    //_________________________________________________________________________________________________________________
      //messaggio di conferma per cancellare la trupla
      const Msg = () => (
@@ -116,7 +122,7 @@ function Scorta() {
     )
 
       const Remove = () => {
-          handleDelete(localStorage.getItem("IdProd"),  localStorage.getItem("NomeProd"));
+          handleDelete(localStorage.getItem("IdProd"),  localStorage.getItem("NomeProd"), localStorage.getItem("IdProdP"));
           toast.clearWaitingQueue(); 
                }
 
@@ -137,26 +143,36 @@ function Scorta() {
 //********************************************************************************** */
 React.useEffect(() => {
     const collectionRef = collection(db, "prodotto");
-    var q;
-    q = query(collectionRef, orderBy("nomeP"));  //questa se flagFilter è diverso da 1 e 2
-    if(FlagFilter === "1") {   //quantità crescente
-      q = query(collectionRef, orderBy("quantita"),  orderBy("nomeP"));
-   }
-    else if(FlagFilter === "2") {  //quantita descrescente
-       q = query(collectionRef, orderBy("quantita", "desc"),  orderBy("nomeP"));
-    }
-
+    const q = query(collectionRef);  //questa se flagFilter è diverso da 1 e 2
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
       querySnapshot.forEach((doc) => {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
+      if(FlagFilter != "1"  && FlagFilter != 2) { //crescente
+        todosArray.sort((a, b) => a.nomeP.localeCompare(b.nomeP));
+      }
+  
+      if(FlagFilter == "1") { //crescente
+        todosArray.sort((a, b) => a.quantita - b.quantita);
+      }
+      
+      if(FlagFilter == "2") { //decrescente
+        todosArray.sort((a, b) => b.quantita - a.quantita);
+      }
       setTodos(todosArray);
       setProgress(true);
+      console.log("entrato")
     });
     return () => unsub();
 
-  }, [FlagFilter, FlagEdit]);
+  }, [FlagFilter,FlagEdit]);
+
+
+
+  const AggDatabaseProdotto = useReactToPrint({
+
+  })
 
 //cronologia debito
   React.useEffect(() => {
@@ -314,32 +330,39 @@ function handlePopUp(todo) {
   setPopupActiveSearch(true);
 }
  //******************************************************************************* */
- const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
+ const handleProdClien = async ( idProdotto) => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
   const q = query(collection(db, "clin"));  //prendo tutti i clienti, va ad aggiungere i prodotti personalizzati, quando si aggiuge un nuovo prodotto
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (doc) => {
       await addDoc(collection(db, "prodottoClin"), {
-        author: { name: doc.data().nomeC, id: doc.id },
+        author: { name: doc.data().nomeC, idCliente: doc.data().idCliente},
+        idProdotto,
         nomeP: nomeP,
         prezzoUnitario: prezzoIndi
       })
       });
  } 
-  
+  {/************** */}
  const handleSubmit = async (e) => {   //creazione prodotto
   e.preventDefault();
     var bol= true
-    var idProdotto=1;
+    var idProdotto="1";
 
     if(!nomeP) {            //controllo che il nom sia inserito
       notifyErrorProd();
       toast.clearWaitingQueue(); 
       return
     }
-    if(!prezzoIndi) {         //controllo che il prezzo sia inserito   
+    if (!prezzoIndi) { // Controllo che il prezzo sia inserito
       notifyErrorPrezzoProd();
-      return
+      return;
     }
+    
+    if (prezzoIndi.includes(',')) {
+      notifyErrorPrezzoProd();
+      return;
+    }
+
     // verifica che il prodotto sia univoco
     const q = query(collection(db, "prodotto"), where("nomeP", "==", nomeP));
     const querySnapshot = await getDocs(q);
@@ -352,18 +375,23 @@ function handlePopUp(todo) {
     });
 
      //vado a prendere l'id dell'ultimo ordine, in modo tale da aggiungere il nuovo id al nuovo ordine
-     const d = query(collection(db, "prodotto"), orderBy("idProdotto", "desc"), limit(1));  
+     const d = query(collection(db, "prodotto"), orderBy("createdAt", "desc"), limit(1));  
      const querySnapshotd = await getDocs(d);
      // Controlla se ci sono risultati nella query
      if (!querySnapshotd.empty) {
        // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
        querySnapshotd.forEach((doc) => {
-         idProdotto = doc.data().idProdotto + 1;
+         idProdotto = doc.data().idProdotto.substring(1);  //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
+         let idRpdodInt = parseInt(idProdotto) + 1 //fa la converisione in intero. e fa la somma
+         idProdotto = idRpdodInt.toString()  // lo riconverte in stringa
        });
      }   
 
+     idProdotto= "P" + idProdotto
+
     if(bol == true) {
       await addDoc(collection(db, "prodotto"), {
+        createdAt: serverTimestamp(),
         idProdotto,
         nomeP,
         quantita: 0,
@@ -376,25 +404,34 @@ function handlePopUp(todo) {
         reparto,      //se è 0 è femminile, se è 1 è maschile
         quantitaOrdinabile,
       });
-      handleProdClien();
+      handleProdClien(idProdotto);
       }
-      setNomeP("");
-      setTipologia("");
-      setBrand("");
-      setQuantita("");
-      setImage("");
-      setPrezzoIndi("");
-      setNota("");
-      setSottoScorta("");
-      setquantitaOrdinabile("");
+      handleClearSet()
       setFlagEdit(+FlagEdit+1);
   };
+
+  const handleClearSet =  () => {   //aggiunta della trupla cronologia quantità
+    setNomeP("");
+    setReparto(0)
+    setBrand("");
+    setQuantita("");
+    setImage("");
+    setPrezzoIndi("");
+    setNota("");
+    setSottoScorta("");
+    setquantitaOrdinabile("");
+  };
+
  //******************************************************************************************************** */
   const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia quantità
+    let dataOd= serverTimestamp();
+    let dataFormattata = moment(dataOd).format('DD-MM-YYYY');
+
     if (flag === "true") { var quant= "+"+ag }
     else { var quant= "-"+ag }
       await addDoc(collection(db, "cronologia"), {
         autore: auth.currentUser.displayName,
+        data: dataFormattata,
         createdAt: serverTimestamp(),
         idProdotto: todo.idProdotto,
         nomeP: todo.nomeP,
@@ -405,23 +442,55 @@ function handlePopUp(todo) {
   };
    //******************************************************************************************************** */
    const handleCronologiaPa = async (todo, pap ) => {   //aggiunta della trupla cronologia Pa
+    let dataOd= serverTimestamp();
+
+    let dataFormattata = moment(dataOd).format('DD-MM-YYYY');
+
       await addDoc(collection(db, "cronologiaPa"), {
         autore: auth.currentUser.displayName,
+        data: dataFormattata,
         createdAt: serverTimestamp(),
         idProdotto: todo.idProdotto,
         nomeP: todo.nomeP,
-        paI: todo.pa,
+        paI: todo.prezzoIndi,
         paF: pap,
       });
       await updateDoc(doc(db, "notify", notiPaId), { NotiPa: true });  //va a modificare il valore della notifica
   };
 //****************************************************************************************** */
-  const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
+const handleActiveEdit = async ( todo) => {
+  setPopupActiveScortaEdit(true)
+  setNomeP(todo.nomeP);
+  setIdProdtto(todo.idProdotto)
+  setPrezzoIndi(todo.prezzoIndi);
+  setIdDocumentoEdit(todo.id);
+  setReparto(todo.reparto);
+};
+
+const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
     if(todo.pa != pap) {    //la trupla viene inserita solo se pa viene cambiato
       handleCronologiaPa(todo, pap)
     }
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd, pa:pap});
+    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd, prezzoIndi:pap});
     setFlagEdit(+FlagEdit+1);
+    toast.clearWaitingQueue(); 
+  };
+
+  const handleEditNomeProd = async () => {
+    console.log(idProdotto)
+    await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto});
+
+    //aggiorno il nome dei prodotti per ogni cliente     va a prendere tutti o prodotti con questo id
+    const q = query(collection(db, "prodottoClin"), where("idProdotto", "==", idProdotto));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (hi) => {
+      await updateDoc(doc(db, "prodottoClin", hi.id), { nomeP: nomeP});  //va a cambiare il nome al singolo prodotto per cliente
+    });
+    
+
+    setFlagEdit(+FlagEdit+1);
+    handleClearSet();
+    setPopupActiveScortaEdit(false);
     toast.clearWaitingQueue(); 
   };
   //****************************************************************************************** */
@@ -480,17 +549,30 @@ function handlePopUp(todo) {
   };
 
 //**************************************************************************** */
-  const handleDelete = async (id, nomeProd) => {
+  const handleDelete = async (id, nomeProd, IdProdP) => {
     console.log({nomeProd})
+    console.log({IdProdP})
         // se si elimina il prodotto dalla scorta, questo prodotto viene eliminato per tutti i clienti
-        const q = query(collection(db, "prodottoClin"), where("nomeP", "==", nomeProd));
+        const q = query(collection(db, "prodottoClin"), where("idProdotto", "==", IdProdP));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach(async (hi) => {
           await deleteDoc(doc(db, "prodottoClin", hi.id));  
         });
 
+        const p = query(collection(db, "cronologia"), where("idProdotto", "==", IdProdP));  //vado ad eliminare il prodotto nella cronologia Qta
+        const querySnapshotP = await getDocs(p);
+        querySnapshotP.forEach(async (hi) => {
+          console.log("entrato cronologia 1")
+          await deleteDoc(doc(db, "cronologia", hi.id));  
+        });
 
-    await deleteDoc(doc(db, "prodotto", id));
+        const s = query(collection(db, "cronologiaPa"), where("idProdotto", "==", IdProdP));  //vado ad eliminare il prodotto nella Tabella Pa
+        const querySnapshotS = await getDocs(s);
+        querySnapshotS.forEach(async (hi) => {
+          await deleteDoc(doc(db, "cronologiaPa", hi.id));  
+        });
+
+    await deleteDoc(doc(db, "prodotto", id)); //infine elimina il prodotto
   };
 //**************************************************************************** */
   const actions = [     //speedDial
@@ -520,10 +602,12 @@ function handlePopUp(todo) {
 </div>
 }
   </div>
-   <motion.div
-        initial= {{opacity: 0}}
-        animate= {{opacity: 1}}
-        transition={{ duration: 0.7 }}>
+   <motion.div className=''
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
+  
+
   
   {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
@@ -531,9 +615,10 @@ function handlePopUp(todo) {
       <ArrowBackIcon id="i" /></button> 
     }
 {/**************TITLE*************************************** */}
-{!matches ? <h1 className='title mt-3'> Prodotti </h1> : <div style={{marginBottom:"60px"}}></div>} 
+{!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Prodotti</h1> : <div style={{marginBottom:"60px"}}></div>}
 
 {/**************Bottoni*************************************** */}
+<div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}>
       <ToggleButtonGroup
       color="primary"
       value={alignment}
@@ -541,29 +626,50 @@ function handlePopUp(todo) {
       onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {sup == true &&<Button onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Prodotto</Button>}
-      <ToggleButton onClick={handleSpeedScorta} color='secondary' value="scorta">Scorta</ToggleButton>
-      {/**<ToggleButton onClick={() => {navigate("/scortatinte")}} color='secondary' value="scortatinte">Scorta Tinte</ToggleButton> */}
-      <ToggleButton onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia Qta</ToggleButton> 
-      <ToggleButton onClick={handleSpeedCronologiaPa} color='secondary' value="cronologiaPa">Cronologia PR</ToggleButton> 
-      {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+    {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Prodotto</Button>}
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  variant="contained"  onClick={handleSpeedScorta}  value="scorta">Scorta</Button>
+      {/**<Button onClick={() => {navigate("/scortatinte")}}  value="scortatinte">Scorta Tinte</Button> */}
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}   variant="contained" onClick={handleSpeedCronologia}  value="cronologia">Cronologia Qta</Button> 
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  variant="contained" onClick={handleSpeedCronologiaPa}  value="cronologiaPa">Cronologia PR</Button> 
+      {sup == true && <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}   onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
     </ToggleButtonGroup>
+</div>
 
-
-{/******Aggiungi Prodotto*********** */}
-    {popupActive && <div className="popup">
-        <div className="popup-inner rounded-4" style={{ backgroundColor: "white", width: "600px" }}>
-        <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
-              <CloseIcon id="i" />
-              </button> </div>
-      <h4 className='title'> Aggiungi Prodotto </h4>
-              <form style={{  }} onSubmit={handleSubmit}>
-      <div>
-        <TextField className='inp mt-2' color='secondary' id="filled-basic" label="Prodotto" variant="outlined" autoComplete='off' value={nomeP} 
+{/******Aggiungi Prodotto  modal***************************************************************************** */}
+      <Modal  size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod} style={{ marginTop: "50px" }}>
+      <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); setPopupActiveScortaEdit(false); }}>
+              <CloseIcon id="i" /></button> </div>
+    {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Prodotto </h4>}
+    {popupActiveScortaEdit && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Modifica Prodotto </h4>}
+          <Modal.Body>
+          <div className='row mt-4' >
+      <div className='col'>
+      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Prodotto" variant="outlined" autoComplete='off' value={nomeP} 
           onChange={(e) => setNomeP(e.target.value)}/>
       </div>
-      <div>
-      <TextField className='inp mt-3 mb-2' type="number"  color='secondary'                
+      <div className='col'>
+      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Brand" variant="outlined" autoComplete='off' value={brand} 
+          onChange={(e) => setBrand(e.target.value)}/>
+      </div>
+      </div>
+      <div className='row mt-4'>
+        <div className='col'>
+          <FormControl className='mb-5' color='secondary'>
+            <InputLabel  color='secondary' id="demo-simple-select-label"></InputLabel>
+            <Select sx={{height:55, width: "370px"}}
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              defaultValue={1}
+              onChange={handleChangeDataSelect}
+            >
+              <MenuItem value={1}>Reparto Femminile</MenuItem>
+              <MenuItem value={2}>Reparto Maschile</MenuItem>
+              <MenuItem value={3}>Reparto Attrezzature</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+        <div className='col'>
+        <TextField  style={{width: "100%"}} type="number"  color='secondary'                
         inputProps={{
                   step: 0.01,
                 }} id="filled-basic" label="Prezzo" variant="outlined" autoComplete='off' value={prezzoIndi} 
@@ -573,42 +679,23 @@ function handlePopUp(todo) {
           }}
         />
         </div>
-          <FormControl className='mb-5' color='secondary'>
-        <InputLabel color='secondary' id="demo-simple-select-label"></InputLabel>
-        <Select sx={{height:39, marginLeft:-1, width: 200, marginTop: "10px"}}
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          defaultValue={1}
-          onChange={handleChangeDataSelect}
-        >
-          <MenuItem value={1}>Reparto Femminile</MenuItem>
-          <MenuItem value={2}>Reparto Maschile</MenuItem>
-          <MenuItem value={3}>Reparto Attrezzature</MenuItem>
-        </Select>
-      </FormControl>
-    
-      <div className="btn_container">
-      <Button className='mb-3' type='submit' variant="outlined" >Aggiungi Prodotto </Button>
       </div>
-    </form>
-             
-        </div>
-      </div> }
-
-
+       {popupActive && <Button onClick={handleSubmit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Prodotto </Button>}
+       {popupActiveScortaEdit && <Button onClick={handleEditNomeProd} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Prodotto </Button>}   
+          </Modal.Body>
+      </Modal>
 
 {/** tabella prodotti nel magazzino *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-{sup == true  && <div style={{marginTop: "50px"}}></div>}
 {sup == false  && <div style={{marginTop: "20px"}}></div>}
-
+{/***** 
 <div>
 <h7> &nbsp; </h7>
  {flagFiltroDisp &&  <h7> Prodotti Disponibili; </h7>} 
  {flagFiltroCres &&  <h7> Quantità Crescente; </h7>} 
  {flagFiltroDesc && <h7> Quantità Decrescente; </h7> } 
-</div>
+</div> */}
 <div ref={componentRef} className='todo_containerScorta'style={{width: dip == true && "100%"}}>
 <div className='row' > 
 <div className='col-4' style={{width: "100px"}}>
@@ -680,22 +767,25 @@ function handlePopUp(todo) {
 <div className='col-1' >
 <p className='coltext'>Id Prodotto</p>
 </div>
-<div className='col-4' >
+<div className='col-3' >
 <p className='coltext'>Prodotto</p>
 </div>
 {sup == true && 
 <>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col-2' >
+<p className='coltext'>Categoria</p>
+</div>
+<div className='col-1' style={{padding: "0px", width:"80px"}}>
   <p className='coltext'>Qt</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
   <p className='coltext'>Pr(€)</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Ss</p>
+  <p className='coltext'>Sogl. Sott.</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Qo</p>
+  <p className='coltext'>Qta Ord.</p>
 </div>
 <div className='col-1' style={{padding: "0px"}}>
   <p className='coltext'>Variazioni</p>
@@ -736,6 +826,7 @@ function handlePopUp(todo) {
     <TodoScorta
       key={todo.id}
       todo={todo}
+      handleActiveEdit= {handleActiveEdit}
       handleDelete={handleDelete}
       handleEdit={handleEdit}
       handleReparto={handleReparto}
@@ -777,9 +868,57 @@ function handlePopUp(todo) {
 
 {/* tabella cronologia Quantità*******************************************************************************************************************/}
 {popupActiveCrono &&
-  <div className='todo_containerCronoo mt-5'>
+  <div className='todo_containerCronoo'>
   <div className='row'> 
-<p className='colTextTitle'> Cronologia Quantità</p>
+  <div className='col'>
+    <p className='colTextTitle'> Cronologia Quantità</p>
+  </div>
+  <div className='col'>
+  <TextField color='secondary'
+      inputRef={inputRef}
+      className="inputSearchScorta"
+      onChange={event => {setSearchTermCrono(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Prodotto, Utente, id Prodotto"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+  </div>
+  <div className='col-1' style={{marginLeft: "20px"}}>   
+  <button type="button" className="buttonMenu" style={{paddingRight:"15px",float:"right"}} >
+        <FilterListIcon id="i" onClick={handleMenu}/>
+        <Menu  sx={
+        { mt: "1px", "& .MuiMenu-paper": 
+        { backgroundColor: "#333",
+          color: "white" }, 
+        }
+        }
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClosi}
+              >
+                <MenuItem onClick={handleCloseFilter}>Annulla Filtri</MenuItem>
+                <MenuItem onClick={handleProdDisp}>Data Crescente</MenuItem>
+                <MenuItem onClick={handleQuantCre}>Data Decrescente</MenuItem>
+              </Menu>
+        </button>
+  </div>
+
 </div>
   <div className='row' style={{marginRight: "5px"}}>
       <div className='col-2' style={{}}><p  className='coltext' >DataModifica</p></div>
@@ -797,7 +936,13 @@ function handlePopUp(todo) {
       <CircularProgress />
   </div>
       }
-  {crono.map((col) => (
+  {crono.filter((val)=> {
+        if(searchTermCrono === ""){
+          return val
+      } else if (val.nomeP.toLowerCase().includes(searchTermCrono.toLowerCase()) ||  val.data.toLowerCase().includes(searchTermCrono.toLowerCase()) ||  val.idProdotto.toLowerCase().includes(searchTermCrono.toLowerCase()) ||  val.autore.toLowerCase().includes(searchTermCrono.toLowerCase()) ) {
+        return val
+                }
+            }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
       <div className='col-2 diviCol' style={{}}><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
@@ -817,9 +962,56 @@ function handlePopUp(todo) {
 
 {/* tabella cronologiaPR*******************************************************************************************************************/}
 {popupActiveCronoPa &&
-  <div className='todo_containerCronoo mt-5'>
+  <div className='todo_containerCronoo'>
   <div className='row'> 
-<p className='colTextTitle'> Cronologia PR</p>
+  <div className='col'>
+  <p className='colTextTitle'> Cronologia PR</p>
+  </div>
+  <div className='col'>
+  <TextField color='secondary'
+      inputRef={inputRef}
+      className="inputSearchScorta"
+      onChange={event => {setSearchTermCronoPa(event.target.value)}}
+      type="text"
+      placeholder="Ricerca Prodotto, Utente, id Prodotto"
+      InputProps={{
+      startAdornment: (
+      <InputAdornment position="start">
+      <SearchIcon color='secondary'/>
+      </InputAdornment>
+                ),
+                }}
+       variant="outlined"/>
+  </div>
+<div className='col-1' style={{marginLeft: "20px"}}>   
+  <button type="button" className="buttonMenu" style={{paddingRight:"15px",float:"right"}} >
+        <FilterListIcon id="i" onClick={handleMenu}/>
+        <Menu  sx={
+        { mt: "1px", "& .MuiMenu-paper": 
+        { backgroundColor: "#333",
+          color: "white" }, 
+        }
+        }
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorEl)}
+                onClose={handleClosi}
+              >
+                <MenuItem onClick={handleCloseFilter}>Annulla Filtri</MenuItem>
+                <MenuItem onClick={handleProdDisp}>Data Crescente</MenuItem>
+                <MenuItem onClick={handleQuantCre}>Data Decrescente</MenuItem>
+              </Menu>
+        </button>
+  </div>
 </div>
   <div className='row' style={{marginRight: "5px"}}>
       <div className='col-2' ><p  className='coltext' >Data Modifica</p></div>
@@ -836,15 +1028,21 @@ function handlePopUp(todo) {
       <CircularProgress />
   </div>
       }
-  {cronoPa.map((col) => (
+  {cronoPa.filter((val)=> {
+        if(searchTermCronoPa === ""){
+          return val
+      } else if (val.nomeP.toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  val.data.toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  val.idProdotto.toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  val.autore.toLowerCase().includes(searchTermCronoPa.toLowerCase())  ) {
+        return val
+                }
+            }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
       <div className='col-2 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.idProdotto} </p> </div>
       <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
       <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.paI}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.paF}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.paI).toFixed(2).replace('.', ',')}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.paF).toFixed(2).replace('.', ',')}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     </div>
@@ -855,8 +1053,8 @@ function handlePopUp(todo) {
 
   {/***************************************************************************************************************************************/}
     {/* POPUP VISUALIZZA Descrizione */}
-    {/** 
-          {popupActiveSearch && <div className="popup">
+
+          {popupActiveSearch && <div className="">
         <div className="popup-inner rounded-4" style={{ backgroundColor: "white" }}>
         <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActiveSearch(false); }}>
               <CloseIcon id="i" />
@@ -893,7 +1091,7 @@ function handlePopUp(todo) {
              
         </div>
       </div> }
-      */}
+     
   {/***************************************************************************************************************************************/}
 
 

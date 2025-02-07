@@ -52,6 +52,8 @@ function AddNota({getNotaDataScal, TodayData, getNotaId}) {
 
     const [todos, setTodos] = React.useState([]);
     const [todosClienti, setTodosClienti] = React.useState([]);
+
+    const [idCliente, setIdCliente] = React.useState("");
     const [nomeC, setNomeC] = React.useState("");
     const [cont, setCont] = React.useState(1);
     const [flagDelete, setFlagDelete] = useState(false); 
@@ -79,6 +81,11 @@ function AddNota({getNotaDataScal, TodayData, getNotaId}) {
   
     function handleInputChange(event, value) {
       setNomeC(value)
+      todosClienti.map((cli) => {
+        if(cli.nomeC== value) {
+          setIdCliente(cli.idCliente)
+        } 
+      })
     }
 
     const handleChangeTogg = (event) => {
@@ -225,7 +232,6 @@ const contEffect = async () => {
       }
       return 0;
     });
-
         setTodosClienti(todosArray);
       });
       return () => unsub();
@@ -238,14 +244,14 @@ const contEffect = async () => {
     setPopupActive(true);
   }
   /******************************************************************************* */
-  const CreateOrdine = async (e) => {
+  const CreateOrdine = async (e) => {   //aggiunta Ordine
     e.preventDefault(); 
     var debRes=0;
     var id=0;
     var indiri;
     var telefo;
     var iva;
-    var idOrdine=1;
+    var idOrdine="1";
 
     console.log(status)
 
@@ -253,7 +259,7 @@ const contEffect = async () => {
     const dataInizialeFormatted = moment(dataOrd, "YYYY-MM-DD").format("DD-MM-YYYY");
 
 //va a  prendere d1, tramite nome del cliente e anche il suo id
-    const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));  
+    const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  
     const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         debRes=doc.data().deb1 ;
@@ -262,10 +268,10 @@ const contEffect = async () => {
         setDebitoRes(debRes);
 
     //andiamo a  prendere l'indirizzo e il tel, tramite nome del cliente, viene richiamata quando si crea la nota
-        const p = query(collection(db, "clin"), where("nomeC", "==", nomeC));  
+        const p = query(collection(db, "clin"), where("idCliente", "==", idCliente));  
         const querySnapshotp = await getDocs(p);
         querySnapshotp.forEach((doc) => {
-          indiri= doc.data().indirizzo;
+          indiri= doc.data().via;
           telefo= doc.data().cellulare;
           iva = doc.data().partitaIva;
           });
@@ -279,10 +285,13 @@ const contEffect = async () => {
     if (!querySnapshotd.empty) {
       // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
       querySnapshotd.forEach((doc) => {
-        idOrdine = doc.data().idO + 1;
+        idOrdine = doc.data().idOrdine.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
+        let idOrdInt = parseInt(idOrdine) + 1 //fa la converisione in intero. e fa la somma
+        idOrdine = idOrdInt.toString()  // lo riconverte in stringa
       });
     }
 
+    idOrdine= "O" + idOrdine
 
     var bol= true
     todos.map(async (nice) => {    //controllo per verificare che questo cliente non è già presente la sua nota
@@ -301,8 +310,9 @@ const contEffect = async () => {
     if(bol == true) {
     handleContAdd();
     await addDoc(collection(db, "addNota"), {
-      idO: idOrdine,
+      idOrdine,
       cont,
+      idCliente,
       nomeC,
       quota: 0,
       completa : status,
@@ -417,8 +427,8 @@ const contEffect = async () => {
                 defaultValue={0}
                 onChange={handleChangeDataSelect}>
               <MenuItem value={"0"}>In Lavorazione</MenuItem>
-              <MenuItem value={"1"}>Completato</MenuItem>
-              <MenuItem value={"3"}>Coseganto</MenuItem>
+              <MenuItem value={"1"}>Evaso</MenuItem>
+              <MenuItem value={"2"}>Coseganto</MenuItem>
                 </Select>
           </FormControl>
         </div>

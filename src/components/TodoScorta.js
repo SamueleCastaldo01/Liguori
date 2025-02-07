@@ -4,11 +4,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from '@mui/icons-material/Search';
 import { ToastContainer, toast, Slide } from 'react-toastify';
-import { supa, guid, tutti, dipen } from '../components/utenti';
+import { supa, guid, tutti, dipen, primary, rosso } from '../components/utenti';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 
-export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa, flagDelete, handleReparto}) {
+export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa, flagDelete, handleReparto, handleActiveEdit}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -20,7 +20,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
   const [newIdProdotto, setIdProdotto] = React.useState(todo.idProdotto);
   const [newQuantita, setQuantita] = React.useState(todo.quantita);
   const [newSottoScorta, setNewSottoScorta] = React.useState(todo.sottoScorta);
-  const [newPa, setNewPa] = React.useState(todo.pa);
+  const [newPa, setNewPa] = React.useState(todo.prezzoIndi);
   const [newQuantitaOrdinabile, setnewQuantitaOrdinabile] = React.useState(todo.quantitaOrdinabile);
   const [aggiungi, setAggiungi] = React.useState("");
 
@@ -97,19 +97,19 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 {/*********************idProdotto************************************************************************ */}
 <div className="col-1 diviCol" >
     <h5
-      style={{ textDecoration: todo.completed && "line-through"  }}
+      style={{ textDecoration: todo.completed && "line-through", color: primary  }}
         type="text"
-        className="inpTab">{ todo.idProdotto}</h5>
+        className="inpTab"><b>{ todo.idProdotto}</b></h5>
 
     </div>
 {/*********************PRODOTTO********************************************************** */}
    {sup == true && 
-    <div className="col-4 diviCol" onClick={()=> { handlePopUp(todo) }}>
+    <div className="col-3 diviCol" onClick={()=> { handleActiveEdit(todo) }}>
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
         type="text"
         className="inpTab"
-        >{ newNomeP }</h4>
+        >{ todo.nomeP }</h4>
     </div>
     }
     
@@ -123,9 +123,23 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     </div>
   }
 
+ {/********************Categoria*********************************************************** */}
+ {sup ===true && ( 
+  <div className="col-2 diviCol" >
+  {todo.reparto == 1 &&
+    <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
+        > Reparto Femminile </h4> }
+          {todo.reparto == 2 &&
+    <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
+        > Reparto Maschile </h4> }
+      {todo.reparto == 3 &&
+    <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
+        > Reparto Attrezzature </h4> }
+    </div>
+    )}
 {/********************QUANTITA'*********************************************************** */}
 {sup ===true && ( 
-<div className="col-1 diviCol" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px", width:"80px"}}>
     {ta ===true && ( 
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
@@ -138,7 +152,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
  )}
 
  {dip ===true && ( 
-<div className="col-2 diviCol" style={{padding: "0px", position:"relative", right:"2%"}}>
+<div className="col-2 diviCol" style={{padding: "0px", position:"relative", width:"80px"}}>
     {ta ===true && ( 
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
@@ -150,17 +164,10 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 </div>
  )}
  {/********************PR'*********************************************************** */}
-{sup ===true && ( 
-  <div className="col-1 diviCol" style={{padding: "0px"}}>
-    <input
-        type="text"
-        onBlur={handleSubm}
-        value={ newPa }
-        className="inpNumb"
-        onChange={handleChangePa}
-      />
-     </div>
-    )}
+<div className="col-1 diviCol" style={{ textAlign: "left", padding: "0px" }}>
+<div className='col'><h3 className='inpTab'>€{Number(todo.prezzoIndi).toFixed(2).replace('.', ',')}</h3></div>
+
+    </div>
   {/********************SOTTOSCORTA'*********************************************************** */}
 {sup ===true && ( 
   <div className="col-1 diviCol" style={{padding: "0px"}}>
@@ -189,7 +196,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     )}
 {/**********************AGGIUNGI************************************************************* */}
 {sup ===true && ( 
-<div className="col-1 diviCol1" style={{padding: "0px"}}>
+<div className="col-1 diviCol" style={{padding: "0px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
          min="1"
@@ -212,7 +219,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 </div>
 )}
 {/***************************BUTTON aggiungi e rimuovi******************************************************** */}
-    { FlagStampa==false &&
+    { (FlagStampa==false && flagDelete== false) &&
     <div className="col diviCol" style={{padding:"0px", paddingRight: "15px"}}>
       <button 
       className="butAddProd me-1"
@@ -246,9 +253,10 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
      */ }
         
         {sup ===true && FlagStampa==false && (   
-        <button className="button-delete" type="button"  
+        <button className="button-delete" type="button"   style={{ color: rosso }}
               onClick={() => {
                     localStorage.setItem("IdProd", todo.id);
+                    localStorage.setItem("IdProdP", todo.idProdotto);
                     localStorage.setItem("NomeProd", todo.nomeP);
                     displayMsg();
                     toast.clearWaitingQueue(); 

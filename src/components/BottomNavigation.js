@@ -84,6 +84,7 @@ return (
                  label="Scaletta" 
                  icon={<FormatListBulletedIcon color={location.pathname === '/scalettadatadip' ? 'primary' : 'inherit'} />}
                  /> }
+                 {/**** 
               {sup ==true   && 
                 <BottomNavigationAction
                 component={Link}
@@ -92,6 +93,7 @@ return (
                  label="Scaletta" 
                  icon={<FormatListBulletedIcon color={(location.pathname === '/scalettadata' || location.pathname === '/scaletta')  ? 'primary' : 'inherit'} />}
                  /> }
+                 */}
               {gui ==true  && 
                 <BottomNavigationAction
                 component={Link}
@@ -113,7 +115,7 @@ return (
                 component={Link}
                 className="linq"
                 to="/scorta"
-                 label="Scorta"  
+                 label="Prodotti"  
                  icon={<InventoryIcon color={(location.pathname === '/scorta' || location.pathname === '/scortatinte') ? 'primary' : 'inherit'} />}
                  /> }
               {sup ==true  &&
@@ -121,7 +123,7 @@ return (
                  component={Link}
                  className="linq"
                 to="/ordineclientidata"
-                 label="Ordine" 
+                 label="Ordine Clienti" 
                  icon={<ShoppingCartIcon color={(location.pathname === '/ordineclientidata' || location.pathname === '/addnota' || location.pathname === '/nota' ) ? 'primary' : 'inherit'} />}
                  />}
               {dip == true &&

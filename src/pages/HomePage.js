@@ -514,16 +514,16 @@ const handleVendite = async () => {
         </div>
     </div>
     <motion.div
-        initial= {{opacity: 0}}
-        animate= {{opacity: 1}}
-        transition={{ duration: 0.7 }}>
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
 
 {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
-          {!matches ? <h1 className='title mt-3'>Dashboard</h1> : <div style={{marginBottom:"60px"}}></div>} 
+    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Dashboard</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
       <ToggleButtonGroup
       color="primary"
@@ -531,11 +531,15 @@ const handleVendite = async () => {
       exclusive
       onChange={handleChangeTogg}
       aria-label="Platform"
-    > 
+    > {/********* 
       <ToggleButton  onClick={() => {setPopupActive(!popupActive); setActiveCalender(false); setPopupActiveInOrdine(false)}} size='small' color='secondary' value="scaletteChiu">Scalette Chiuse</ToggleButton>
       <ToggleButton onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
+    */}
     </ToggleButtonGroup>
 
+    <div>
+      <img src="/dashLiguori.jpg" alt="Logo"  style={{width: "100%"}}/> {/* Utilizza il percorso relativo alla radice del tuo progetto */}
+    </div>
 
 <div className='containerGrafici'>
 {/***************GRAFICO ORDINI********************************************* */}

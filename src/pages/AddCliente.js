@@ -11,9 +11,8 @@ import { notifyErrorCliEm, notifyUpdateCli, notifyErrorCliList } from '../compon
 import CloseIcon from '@mui/icons-material/Close';
 import TodoClient from '../components/TodoClient';
 import Button from '@mui/material/Button';
-import { supa } from '../components/utenti';
-import { guid } from '../components/utenti';
-import { tutti } from '../components/utenti';
+import { Modal } from 'react-bootstrap';
+import { supa, guid, tutti, primary, rosso } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
@@ -25,7 +24,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAygsHvhG251qZ7-N9oR8A-q1ls9yhNkOQ';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyA2327mULUbMv_7eW1baIeXRwbnfYLYBWo';
 
 
 function AddCliente( {getCliId} ) {
@@ -34,10 +33,21 @@ function AddCliente( {getCliId} ) {
   const [todosDebi, setTodosDebi] = React.useState([]);
   const [crono, setCrono] = React.useState([]);
 
+  const [idClinEdit, setIdClinEdit] = React.useState([]);
+
+  const [idCliente, setIdCliente] = React.useState("");
   const [indirizzo, setIndirizzo] = React.useState("");
+  const [via, setVia] = React.useState("");
+  const [stato, setStato] = React.useState("");
   const [indirizzoLink, setIndirizzoLink] = React.useState("");
   const [nomeC, setNomeC] = React.useState("");
+  const [nome, setNome] = React.useState("");
+  const [cognome, setCognome] = React.useState("");
   const [partitaIva, setPartitaIva] = React.useState("");
+  const [indirizzoEmail, setIndirizzoEmail] = React.useState("");
+  const [citta, setCitta] = React.useState("");
+  const [cap, setCap] = React.useState("");
+  const [numeroCivico, setNumeroCivico] = React.useState("");
   const [cellulare, setCellulare] = React.useState("");
 
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
@@ -60,6 +70,7 @@ function AddCliente( {getCliId} ) {
   const [TotdebitoTot, setTotDebitoTot] = React.useState("");
 
   const [popupActive, setPopupActive] = useState(false);
+  const [popupActiveEdit, setPopupActiveEdit] = useState(false);
   const [flagAnaCli, setFlagAnaCli] = useState(true);   
   const [flagDebiCli, setFlagDebiCli] = useState(false);
   const [flagDelete, setFlagDelete] = useState(false);  
@@ -91,7 +102,7 @@ function AddCliente( {getCliId} ) {
     )
 
       const Remove = () => {
-          handleDelete(localStorage.getItem("IDscal"), localStorage.getItem("NomeCliProd") );
+          handleDelete(localStorage.getItem("IDscal"), localStorage.getItem("IdCliProd") );
           toast.clearWaitingQueue(); 
                }
 
@@ -154,7 +165,7 @@ React.useEffect(() => {
                   //cronologia debito
   React.useEffect(() => {
     const collectionRef = collection(db, "cronologiaDeb");
-    const q = query(collectionRef, orderBy("createdAt", "desc"));
+    const q = query(collectionRef, limit(50), orderBy("createdAt", "desc"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -190,13 +201,14 @@ React.useEffect(() => {
   };
  //******************************************************************************* */
     //funzione che permette il caricamento automatico dell'aggiunta del prodotto personalizzato
- const handleProdClien = async () => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  const q = query(collection(db, "prodotto"));  //prendo tutti i prodotti che si trovano in scorta
+ const handleProdClien = async (nomeCompleto, idCliente) => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
+  const q = query(collection(db, "prodotto"));  //prendo tutti i prodotti che si trovano in scorta, per poi assegnarli per ogni cliente
   const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (doc) => {
       console.log(doc.id, " => ", doc.data().nomeP, doc.data().prezzoIndi);
-      await addDoc(collection(db, "prodottoClin"), {
-        author: { name: nomeC, id: "bho" },
+      await addDoc(collection(db, "prodottoClin"), {    //va ad aggiunger i prodotti per ogni cliente
+        author: { name: nomeCompleto, idCliente: idCliente },
+        idProdotto:doc.data().idProdotto,
         nomeP: doc.data().nomeP,
         prezzoUnitario: doc.data().prezzoIndi
       })
@@ -205,18 +217,20 @@ React.useEffect(() => {
   //******************************************************************************* */
  const handleSubmit = async (e, id) => {   //creazione cliente
     e.preventDefault();
-    var idCliente=1;  //id del cliente
+    var idCliente="1";  //id del cliente
     var bol= true
 
-    if(!nomeC) {            //controllo sul nome
+    if(!nome) {            //controllo sul nome
       notifyErrorCliEm();
       toast.clearWaitingQueue(); 
       return 
     }
-    const q = query(collection(db, "clin"), where("nomeC", "==", nomeC));  //controllo che non sia duplicato nel database
+
+    var nomNice= nome+" "+cognome
+    const q = query(collection(db, "clin"), where("nomeC", "==", nomNice));  //controllo che non sia duplicato nel database
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-    if (doc.data().nomeC == nomeC) {
+    if (doc.data().nomeC == nomNice) {
         notifyErrorCliList()
          toast.clearWaitingQueue(); 
         bol=false
@@ -224,21 +238,39 @@ React.useEffect(() => {
     });
 
     //vado a prendere l'id dell'ultimo cliente, in modo tale da aggiungere il nuovo id al nuovo ordine
-    const d = query(collection(db, "clin"), orderBy("idCliente", "desc"), limit(1));  
+    const d = query(collection(db, "clin"), orderBy("createdAt", "desc"), limit(1));  
     const querySnapshotd = await getDocs(d);
     // Controlla se ci sono risultati nella query
     if (!querySnapshotd.empty) {
       // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
       querySnapshotd.forEach((doc) => {
-        idCliente = doc.data().idCliente + 1;
+        idCliente = doc.data().idCliente.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
+        console.log(idCliente)
+        let idClinInt = parseInt(idCliente) + 1 //fa la converisione in intero. e fa la somma
+        console.log(idClinInt)
+        idCliente = idClinInt.toString()  // lo riconverte in stringa
+        console.log()
+
       });
     }
 
+    idCliente= "C" + idCliente
+
     if(bol == true) {
-      handleProdClien();
+    let  nomeCompleto = nome + " " + cognome
+      handleProdClien(nomeCompleto, idCliente);
       await addDoc(collection(db, "clin"), {
+        createdAt: serverTimestamp(),
         idCliente,
-        nomeC,
+        nome,
+        cognome,
+        stato,
+        numeroCivico,
+        via,
+        citta,
+        cap,
+        indirizzoEmail,
+        nomeC: nomeCompleto,
         indirizzo,
         indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo,
         partitaIva,
@@ -246,25 +278,65 @@ React.useEffect(() => {
       });
       await addDoc(collection(db, "debito"), {   //quando si crea il cliente viene creata anche la trupla debito del cliente
         idCliente,
-        nomeC,
+        nomeC: nomeCompleto,
         deb1,
         deb2,
         deb3,
         deb4,
         debitoTot,
       });
-      setNomeC("");
-      setIndirizzo("");
-      setIndirizzoLink("");
-      setPartitaIva("");
-      setCellulare("");
+      handlerSetClear()
     }
   };
 //****************************************************************************************** */
-  const handleEdit = async ( todo, nome, iv, cel) => {
-    await updateDoc(doc(db, "clin", todo.id), { nomeC: nome, partitaIva:iv, cellulare:cel});
+  const handlerSetClear = async ( ) => {
+    setNomeC("");
+    setNome("");
+    setCognome("");
+    setStato("");
+    setVia("");
+    setNumeroCivico("");
+    setCitta("");
+    setCap("");
+    setIndirizzoEmail("");
+    setIndirizzo("");
+    setIndirizzoLink("");
+    setPartitaIva("");
+    setCellulare("");
+  };
+
+//****************************************************************************************** */
+const handleActiveEdit = async (todo) => {
+  setIdClinEdit(todo.id)
+  setIndirizzo(todo.indirizzo)
+  setPopupActiveEdit(true)
+  setNomeC("");
+  setNome(todo.nome);
+  setCognome(todo.cognome);
+  setStato(todo.stato);
+  setVia(todo.via);
+  setNumeroCivico(todo.numeroCivico);
+  setCitta(todo.citta);
+  setCap(todo.cap);
+  setIndirizzoEmail(todo.indirizzoEmail);
+  setIdCliente(todo.idCliente)
+  setPartitaIva(todo.partitaIva);
+  setCellulare(todo.cellulare);
+};
+  const handleEdit = async () => { //va ad aggiornare le info del cliente, e va a cambiare anche il nome alla tabella debito
+    console.log(idCliente)
+    await updateDoc(doc(db, "clin", idClinEdit), {nomeC:nome+" "+cognome, nome: nome, cognome:cognome, stato:stato, indirizzo:indirizzo, indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo, numeroCivico:numeroCivico, citta:citta, cap:cap, indirizzoEmail:indirizzoEmail, partitaIva:partitaIva, cellulare:cellulare});
+    
+    const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  //vado a trovare il deb1 vecchio tramite query
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (hi) => {
+      await updateDoc(doc(db, "debito", hi.id), {nomeC:nome+" "+cognome});
+    });
+    handlerSetClear();
+    setPopupActiveEdit(false)
     toast.clearWaitingQueue(); 
   };
+
 //****************************************************************************************** */
 const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni cliente, questa operazione è costosa in scrittura, e anche la somma per colonne
   var sommaTot=0;
@@ -298,7 +370,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 
   const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {  //edit debito
     var debV
-    const q = query(collection(db, "debito"), where("nomeC", "==", todo.nomeC));  //vado a trovare il deb1 vecchio tramite query
+    const q = query(collection(db, "debito"), where("idCliente", "==", todo.idCliente));  //vado a trovare il deb1 vecchio tramite query
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       debV= doc.data().deb1;
@@ -327,20 +399,26 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
   const handleDelete = async (id, nomeCli) => { //per cancellare un cliente dal db
     const colDoc = doc(db, "clin", id); 
      
-  //elimina tutti i dati di prodottoClin con lo stesso nome del Cliente     elimina tutti gli articoli di quel cliente
-    const q = query(collection(db, "prodottoClin"), where("author.name", "==", localStorage.getItem("NomeCliProd")));
+  //elimina tutti i dati di prodottoClin con lo stesso id del Cliente     elimina tutti gli articoli di quel cliente
+    const q = query(collection(db, "prodottoClin"), where("author.idCliente", "==", localStorage.getItem("IdCliProd")));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (hi) => {
   // doc.data() is never undefined for query doc snapshots
-    console.log(hi.id, " => ", hi.data().nomeC, hi.data().dataScal);
     await deleteDoc(doc(db, "prodottoClin", hi.id)); 
     });
   //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
-    const p = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
+    const p = query(collection(db, "debito"), where("idCliente", "==", localStorage.getItem("IdCliProd")));
     const querySnapshotP = await getDocs(p);
     querySnapshotP.forEach(async (hi) => {
     await deleteDoc(doc(db, "debito", hi.id));    //elimina il documento che ha lo stesso nome
     });
+
+    //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
+      const s = query(collection(db, "cronologiaDeb"), where("idCliente", "==", localStorage.getItem("IdCliProd")));
+      const querySnapshotS = await getDocs(s);
+      querySnapshotS.forEach(async (hi) => {
+      await deleteDoc(doc(db, "cronologiaDeb", hi.id));    //elimina il documento che ha lo stesso nome
+      });
     //infine elimina il cliente
     await deleteDoc(colDoc); 
   };
@@ -360,18 +438,88 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       </div>
 
     <motion.div 
-        initial= {{opacity: 0}}
-        animate= {{opacity: 1}}
-        transition={{ duration: 0.7 }}>
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
 
 {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
       onClick={() => {navigate(-1)}}>
-      <ArrowBackIcon id="i" /></button> 
+      <ArrowBackIcon color='primary' id="i" /></button> 
     }
 
-  {!matches ? <h1 className='title mt-3'>Anagrafica Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
+  {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Anagrafica Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
+
+    {/******Aggiungi Cliente  modal***************************************************************************** */}
+    <div className=''>
+    <Modal  size="lg" show={popupActive || popupActiveEdit} onHide={()=> {/*setPopupActive(false); setPopupActiveEdit(false); handlerSetClear();*/}} style={{ marginTop: "50px", zIndex: "1050"}}>
+      <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); setPopupActiveEdit(false); handlerSetClear()}}>
+              <CloseIcon id="i" /></button> </div>
+    {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Cliente </h4>}
+    {popupActiveEdit && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Modifica Cliente </h4>}
+          <Modal.Body style={{  }}>
+      <div className='row mt-4' >
+        <div className='col'>
+            <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Nome" variant="outlined" autoComplete='off' value={nome} 
+              onChange={(e) => setNome(e.target.value)}/>
+        </div>
+        <div className='col'>
+          <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Cognome" variant="outlined" autoComplete='off' value={cognome} 
+              onChange={(e) => setCognome(e.target.value)}/>
+        </div>
+      </div>
+      <div className='row mt-4 mb-4' style={{ paddingBottom: "-50px" }}><div >
+            <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic"  label="Partita IVA" variant="outlined" autoComplete='off' value={partitaIva} 
+            onChange={(e) => setPartitaIva(e.target.value)}/>
+      </div></div>
+
+    
+            <div className='pac-container' style={{ position: "absolute", top: "200px" }}>
+                <Input style={{ width: "765px" }}
+                  fullWidth 
+                  className='inpCli' 
+                  color="primary" 
+                  placeholder='Indirizzo Google Maps'
+                  inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
+                    <Autocomplete
+                      apiKey={GOOGLE_MAPS_API_KEY}
+                      {...props}
+                      onPlaceSelected={(place) => {
+                        setIndirizzo(place.formatted_address)
+                        console.log(place);
+                      }}
+                      options={{
+                        types: ["address"],
+                        componentRestrictions: { country: "it" },
+                      }}
+                      defaultValue={indirizzo}
+                    />
+                  )}
+                />
+          </div>
+   
+
+          <div className='row mt-4' style={{ paddingTop: "60px"  }}><div >
+            <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" type='email' label="Indirizzo email" variant="outlined" autoComplete='off' value={indirizzoEmail} 
+            onChange={(e) => setIndirizzoEmail(e.target.value)}/>
+        </div></div>
+          <div className='row mt-4' >
+            <div className='col'>
+              <TextField className='' style={{width:"100%"}} color='secondary' type='number' id="filled-basic" label="Telefono" variant="outlined" autoComplete='off' value={cellulare} 
+              onChange={(e) => setCellulare(e.target.value)}/>
+            </div>
+            <div className='col'>
+              {popupActive && <Button onClick={handleSubmit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Cliente </Button>}
+              {popupActiveEdit && <Button onClick={handleEdit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Cliente </Button>}  
+            </div>
+          </div> 
+          </Modal.Body>
+      </Modal>
+      </div>
+
+{/********************Bottoni Menu************************************************************************/}
+      <div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}>
       <ToggleButtonGroup
       color="primary"
       value={alignment}
@@ -379,135 +527,22 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {sup == true &&<Button onClick={() => { setPopupActive(true) }} size="small" variant="contained">Aggiungi Cliente</Button>}
-      <ToggleButton size="small" onClick={handleButtonAna} color='secondary' value="scorta">Anagrafiche Clienti</ToggleButton>
-      <ToggleButton onClick={handleButtonDebito} color='secondary' value="scortatinte">Debito Clienti</ToggleButton>
-      <ToggleButton onClick={handleButtonCronoDeb} color='secondary' value="cronologia">Cronologia Debito</ToggleButton> 
-      {sup == true && <Button size="small" onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+    {sup == true &&<Button variant='contained'   style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { setPopupActive(true) }} >Aggiungi Cliente</Button>}
+      <Button   style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} size="small" onClick={handleButtonAna} variant="contained" value="scorta">Anagrafiche Clienti</Button>
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }}  onClick={handleButtonDebito} variant="contained" value="scortatinte">Debito Clienti</Button>
+      <Button  style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }} onClick={handleButtonCronoDeb} variant="contained" value="cronologia">Cronologia Debito</Button> 
+      {sup == true && <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}   color='error' size="small" onClick={() => {setFlagDelete(!flagDelete)}}  variant="contained">elimina</Button> }
     </ToggleButtonGroup>
+</div>
 
-
-    {sup ===true && (
-        <>    
- 
-{/** inserimento cliente **************************************************************************/}
-{popupActive &&
-      <div> 
-      <form className='formAC'>
-      <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
-              <CloseIcon id="i" />
-              </button> </div>
-      <div className="input_container">
-      <TextField className='inpCli mt-2 me-2' label="Nuovo Cliente" variant="outlined"  autoComplete='off' value={nomeC} 
-        onChange={(e) => setNomeC(e.target.value)}/>
-    <div className='mt-3' >
-          <Input
-          fullWidth
-          className='inpCli'
-            color="primary"
-            variant="outlined"
-            inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
-              <Autocomplete
-                apiKey={GOOGLE_MAPS_API_KEY}
-                {...props}
-                onPlaceSelected={(place) => {
-                  setIndirizzo(place.formatted_address)
-                  console.log(place);
-                  }}
-                options={{
-                types: ["address"],
-                componentRestrictions: { country: "it" },
-                }}
-                defaultValue={indirizzo}
-              />
-            )}
-          />
-        </div>
-      <TextField className='inpCli mt-2 ' type="number" label="Partita IVA" variant="outlined" autoComplete='off' value={partitaIva} 
-        onChange={(e) => setPartitaIva(e.target.value)}/>
-      <TextField className='inpCli mt-2 me-2' type="tel" label="Cellulare" variant="outlined" autoComplete='off' value={cellulare} 
-        onChange={(e) => setCellulare(e.target.value)}/>
-
-      </div>
-      <div className="btn_container">
-      <Button type='submit' onClick={handleSubmit}  variant="outlined" >Aggiungi</Button>
-      </div>
-    </form>
-    </div>
-  } 
-    </>
-    )}
-
-
-{/******Aggiungi Prodotto*********** */}
-{popupActive && <div className="popup" style={{ paddingLeft: "300px" }}>
-        <div className="popup-inner rounded-4" style={{ backgroundColor: "white", maxWidth: "600px", width:"100%", padding:"0px" }}>
-        <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
-              <CloseIcon id="i" />
-              </button> </div>
-      <h4 className='title'> Aggiungi Cliente </h4>
-      <form style={{ paddingLeft: "20px", paddingRight:"0px" }} onSubmit={handleSubmit}>
-        <div className='row mt-3' style={{ width:"101.7%" }}>
-        <div className='row'>
-          <div className='col' style={{ textAlign: "left" }}>
-            <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Nome" variant="outlined" autoComplete='off' value={nomeC} 
-              onChange={(e) => setNomeC(e.target.value)}/>
-          </div>
-          <div className='col' style={{ textAlign: "left" }}>
-          <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Cognome" variant="outlined" autoComplete='off' value={nomeC} 
-              onChange={(e) => setNomeC(e.target.value)}/>
-          </div>
-        </div>
-
-        <div className='row mt-4'><div >
-        <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Partita IVA/Codice Fiscale/Codice Univoco" variant="outlined" autoComplete='off' value={nomeC} 
-            onChange={(e) => setNomeC(e.target.value)}/>
-        </div></div>
-        <div className='row mt-4'>
-          <div className='col'>
-          <Input
-          fullWidth
-          className='inpCli'
-            color="primary"
-            variant="outlined"
-            inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
-              <Autocomplete
-                apiKey={GOOGLE_MAPS_API_KEY}
-                {...props}
-                onPlaceSelected={(place) => {
-                  setIndirizzo(place.formatted_address)
-                  console.log(place);
-                  }}
-                options={{
-                types: ["address"],
-                componentRestrictions: { country: "it" },
-                }}
-                defaultValue={indirizzo}
-              />
-            )}
-          />
-          </div>
-          <div className='col'>
-          <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Numero Civico" variant="outlined" autoComplete='off' value={nomeC} 
-            onChange={(e) => setNomeC(e.target.value)}/>
-          </div>
-        </div>
-        </div>
-        <div className="btn_container">
-        <Button className='mt-5 mb-3' type='submit' variant="outlined" >Aggiungi Cliente </Button>
-        </div>
-    </form>
-             
-        </div>
-      </div> }
-
-{/********************tabella Anagrafiche************************************************************************/}
+{/********************tabella Anagrafica Clienti************************************************************************/}
 {flagAnaCli &&
-<div className='todo_containerCli mt-5'>
+<div className='todo_containerCli'>
 <div className='row' > 
 <div className='col-7'>
 <p className='colTextTitle'>Anagrafica Clienti </p>
 </div>
+
 <div className='col'>
 <TextField
       inputRef={inputRef}
@@ -526,16 +561,22 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 </div>
 </div>
 <div className='row' style={{marginRight: "5px"}}>
-<div className='col-1' >
+<div className='col-1' style={{ width: "90px" }}>
 <p className='coltext' >Id Cliente</p>
 </div>
 <div className='col-3' >
 <p className='coltext' >Cliente</p>
 </div>
-<div className='col-5' style={{padding: "0px"}}>
+<div className='col-2' style={{ width:"260px" }}>
+<p className='coltext' >email</p>
+</div>
+<div className='col-2'  style={{ width:"120px" }}>
+<p className='coltext' >Telefono</p>
+</div>
+<div className='col-3' style={{padding: "0px", width: "295px"}}>
 <p className='coltext' >indirizzo</p>
 </div>
-<div className='col-2' style={{padding: "0px"}}>
+<div className='col-1' style={{padding: "0px"}}>
 <p className='coltext' >Part. IVA</p>
 </div>
     <hr style={{margin: "0"}}/>
@@ -559,6 +600,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
     <TodoClient
       key={todo.id}
       todo={todo}
+      handleActiveEdit={handleActiveEdit}
       handleDelete={handleDelete}
       handleEdit={handleEdit}
       displayMsg={displayMsg}
@@ -573,7 +615,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
   }
 {/********************tabella Debito***********************************************************************************************/}
 {flagDebiCli &&
-<div className='todo_containerDebCli mt-5'>
+<div className='todo_containerDebCli'>
 <div className='row' > 
 <div className='col-7'>
 <p className='colTextTitle'> Debito Clienti </p>
@@ -584,7 +626,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       className="inputSearch"
       onChange={event => {setSearchTermDeb(event.target.value)}}
       type="text"
-      placeholder="Ricerca Cliente"
+      placeholder="Ricerca Cliente, Id Cliente"
       InputProps={{
       startAdornment: (
       <InputAdornment position="start">
@@ -623,19 +665,19 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 <p className='inpTab' ></p>
 </div>
 <div className='col diviCol' style={{padding: "0px"}}>
-<p className='inpTab' >{Totdeb1}</p>
+<p className='inpTab' >€{Number(Totdeb1).toFixed(2).replace('.', ',')}</p>
 </div>
 <div className='col diviCol' style={{padding: "0px"}}>
-<p className='inpTab' >{Totdeb2}</p>
+<p className='inpTab' >€{Number(Totdeb2).toFixed(2).replace('.', ',')}</p>
 </div>
 <div className='col diviCol' style={{padding: "0px"}}>
-<p className='inpTab' >{Totdeb3}</p>
+<p className='inpTab' >€{Number(Totdeb3).toFixed(2).replace('.', ',')}</p>
 </div>
 <div className='col diviCol' style={{padding: "0px"}}>
-<p className='inpTab' >{Totdeb4}</p>
+<p className='inpTab' >€{Number(Totdeb4).toFixed(2).replace('.', ',')}</p>
 </div>
 <div className='col diviCol' style={{padding: "0px"}}>
-<p className='inpTab' >{TotdebitoTot}</p>
+<p className='inpTab' >€{Number(TotdebitoTot).toFixed(2).replace('.', ',')}</p>
 </div>
 <hr style={{margin: "0"}}/>
 </div>
@@ -674,7 +716,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 {todosDebi.filter((val)=> {
         if(searchTermDeb === ""){
           return val
-      } else if (val.nomeC.toLowerCase().includes(searchTermDeb.toLowerCase()) ) {
+      } else if (val.nomeC.toLowerCase().includes(searchTermDeb.toLowerCase()) || val.idCliente.toLowerCase().includes(searchTermDeb.toLowerCase()) ) {
         return val
                 }
             }).map((todo) => (
@@ -696,7 +738,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
   }
 {/* tabella cronologiaDebito*******************************************************************************************************************/}
 {popupActiveCrono &&
-  <div className='todo_containerCli mt-3'>
+  <div className='todo_containerCli'>
   <div className='row'> 
   <div className='col'>
   <p className='colTextTitle'> Cronologia Debito</p>
@@ -707,7 +749,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       className="inputSearch"
       onChange={event => {setSearchTermCrono(event.target.value)}}
       type="text"
-      placeholder="Ricerca Cliente"
+      placeholder="Ricerca Cliente, Id Cliente"
       InputProps={{
       startAdornment: (
       <InputAdornment position="start">
@@ -731,7 +773,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
   {crono.filter((val)=> {
         if(searchTermCrono === ""){
           return val
-      } else if (val.nomeC.toLowerCase().includes(searchTermCrono.toLowerCase()) ) {
+      } else if (val.nomeC.toLowerCase().includes(searchTermCrono.toLowerCase()) || val.idCliente.toLowerCase().includes(searchTermDeb.toLowerCase()) ) {
         return val
                 }
             }).map((col) => (
@@ -741,8 +783,8 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.idCliente} </p> </div>
       <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeC.substr(0, 18)} </p> </div>
       <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore.substr(0, 10)}...</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.debv}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.deb1}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.debv).toFixed(2).replace('.', ',')}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.deb1).toFixed(2).replace('.', ',')}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     </div>
@@ -757,3 +799,29 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 export default AddCliente;
 
 //questo file sta combinato insieme a todoClient
+
+
+/**  Per google maps
+ * import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
+ * 
+ * 
+<Input
+fullWidth className='inpCli' color="primary" placeholder='Indirizzo Google Maps'
+  inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
+    <Autocomplete
+      apiKey={GOOGLE_MAPS_API_KEY}
+      {...props}
+      onPlaceSelected={(place) => {
+        setIndirizzo(place.formatted_address)
+        console.log(place);
+        }}
+      options={{
+      types: ["address"],
+      componentRestrictions: { country: "it" },
+      }}
+      defaultValue={indirizzo}
+    />
+  )}
+/>
+
+*/
