@@ -456,9 +456,9 @@ function handlePopUp(image, nota) {
 }
   </div>
    <motion.div
-           initial= {{opacity: 0}}
-        animate= {{opacity: 1}}
-        transition={{ duration: 0.7 }}>
+           initial= {{x: "-100vw"}}
+           animate= {{x: 0}}
+           transition={{ duration: 0.4 }}>
 
 {!matches && 
   <button className="backArrowPage" style={{float: "left"}}

@@ -628,7 +628,7 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
     > 
     {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Prodotto</Button>}
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  variant="contained"  onClick={handleSpeedScorta}  value="scorta">Scorta</Button>
-      {/**<Button onClick={() => {navigate("/scortatinte")}}  value="scortatinte">Scorta Tinte</Button> */}
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={() => {navigate("/scortatinte")}}  value="scortatinte">Scorta Tinte</Button>
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}   variant="contained" onClick={handleSpeedCronologia}  value="cronologia">Cronologia Qta</Button> 
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  variant="contained" onClick={handleSpeedCronologiaPa}  value="cronologiaPa">Cronologia PR</Button> 
       {sup == true && <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}   onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
