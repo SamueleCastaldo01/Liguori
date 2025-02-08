@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs, serverTimestamp, limit} from 'firebase/firestore';
+import React, { useEffect, useState, useRef } from 'react'
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, Timestamp, query, where, orderBy, getDocs, serverTimestamp, writeBatch, limit} from 'firebase/firestore';
 import moment from 'moment/moment';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useReactToPrint } from 'react-to-print';
 import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -34,15 +35,21 @@ import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ScaletData from './ScaletData';
 
 export const AutoProdCli = [];
 //stati: 0= in lavorazione;  1=evaso; 2=Consegnato; 4 per i filtri mi fa vedere tutti gli stati
 
-function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
+function Scaletta({ getOrdId, getNotaId, TodayData }) {
     const[colle, setColle] = useState([]); 
     const [todosClienti, setTodosClienti] = React.useState([]);
     const colleCollectionRef = collection(db, "addNota");
+    const componentRef = useRef();
+    const [flagStampa, setFlagStampa] = useState(false); 
+    
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -51,14 +58,19 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     //dati per l'input dell'ordine
     const [idCliente, setIdCliente] = React.useState("");
     const [idOrdine, setIdOrdine] = React.useState("");
-    const dataInizialeFormatted = moment(TodayData, "DD/MM/YYYY").format("YYYY-MM-DD");
-    const [dataOrd, setDataOrd] = useState(dataInizialeFormatted);
+    const dataInizialeFormatted = moment(TodayData, "DD/MM/YYYY").format("DD-MM-YYYY");
+    const [scalettaDataSele, setScalettaDataSele] = useState(dataInizialeFormatted);
+    const [valueDateOrd, setValueDateOrd] = useState(1);
     const [status, setStatus] = React.useState("0");
     const [nomeC, setNomeC] = React.useState("");
     const [debitoRes, setDebitoRes] = React.useState("");
     const [indirizzo, setIndirizzo] = React.useState("");
     const [telefono, setTelefono] = React.useState("");
     const [cont, setCont] = React.useState(1);
+
+    const [sum, setSum]  = React.useState("");
+    const [sumQ, setSumQ] =React.useState("");
+      const [scaletta, setScaletta] = React.useState([]);
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte
@@ -70,13 +82,12 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     const YesterDayMilli = yesterday.getTime();  //fa la conversione in milli
     const [day, setday] = React.useState("");
     const [flagDelete, setFlagDelete] = useState(false); 
-    const [flagBlock, setFlagBlock] = useState(false); 
 
     const [Progress, setProgress] = React.useState(false);
     const [popupActive, setPopupActive] = useState(false);  
 
     const [nome, setData] = useState("");
-    const [stato, setStato] = useState("4"); 
+    const [stato, setStato] = useState("1"); 
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è un dispositivo più piccolo del value
 
     moment.locale("it");
@@ -91,9 +102,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
 //funzioni per il menu per elimianre la trupla
     const handleMenu = (event) => {
       setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {  //chiude il menu
-      setAnchorEl(null);
     };
 
   // vado a prendere i prodotti per singolo cliente
@@ -114,53 +122,183 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
         setAlignment(event.target.value);
       };
 
-    //Per input aggiunta ordine
-      const handleChangeDataSelect1 = (event) => {
-        console.log(event.target.value)
-        setStatus(event.target.value);      //prende il valore del select
-      };
-
-      function handleInputChange(event, value) {
-        setNomeC(value)
-        todosClienti.map((cli) => {
-          if(cli.nomeC== value) {
-            setIdCliente(cli.idCliente)
-          } 
-        })
-      }
-  //_________________________________________________________________________________________________________________
-         const handleChangeDataSelect = (event) => {
-          var ok= event.target.value
-          console.log(ok);
-          today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo (per ridurre e i vari giorni)
-          today.setHours(0, 0, 0, 0);   //mette la data a 00:00
-          todayMilli = today.getTime()   //lo converte in millisecondi
-
-          const collectionRef = collection(db, "addNota");
-          const q = query(collectionRef, where("dataMilli", ">", todayMilli));
-      
-          const unsub = onSnapshot(q, (querySnapshot) => {
-            let todosArray = [];
-            querySnapshot.forEach((doc) => {
-              todosArray.push({ ...doc.data(), id: doc.id });
+//Funzioni per aggiungere alla scaletta-----------------------------------------------------------------
+      const SomAsc = async () => {  //qui fa sia la somma degli asc  della quota, tramite query
+        console.log("entrato nella somma")
+        var somma=0;
+        var sommaQ=0;
+        var sommaSommaTot=0;
+        var id ="";
+        const q = query(collection(db, "Scaletta"), where("dataScal", "==", TodayData));  //query per fare la somma
+        const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            somma =+doc.data().numAsc + somma;
+            sommaQ=+doc.data().quota +sommaQ;
+            sommaSommaTot= +doc.data().sommaTotale +sommaSommaTot;
             });
-            todosArray.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate()); // Ordine crescente
-            setColle(todosArray);
-            setProgress(true);
-          });
+            var somTrunc = sommaQ.toFixed(2);  //conversione della quota
+            var somTruncTot = sommaSommaTot.toFixed(2);  //conversione della sommaTotale
+        const p = query(collection(db, "scalDat"), where("data", "==", TodayData));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
+        const querySnapshotp = await getDocs(p);
+              querySnapshotp.forEach(async (hi) => {
+                id= hi.id
+                });
+            await updateDoc(doc(db, "scalDat", id), { totalQuota: somTrunc, totalAsc:somma, totalSommaTotale:somTruncTot  });
+            setSumQ(somTrunc);
+            setSum(somma);
+      }
 
+      const caricaOrdiniScaletta = (data) => {
+        const collectionRef = collection(db, "addNota");
+        const q = query(
+            collectionRef,
+            where("scalettaData", "==", data),
+            where("scaletta", "==", true)
+        );
+    
+        const unsub = onSnapshot(q, (querySnapshot) => {
+            let todosArray = [];
+    
+            querySnapshot.forEach((doc) => {
+                todosArray.push({ ...doc.data(), id: doc.id });
+            });
+    
+            todosArray.sort((a, b) => a.scalettaOrdine - b.scalettaOrdine);
+            todosArray.sort((a, b) => {
+                if (a.scalettaOrdine === b.scalettaOrdine) {
+                    return a.createdAt.toDate() - b.createdAt.toDate();
+                }
+                return 0;
+            });
+    
+            setScaletta(todosArray);
+            setProgress(true);
+        });
+    };
+    
+
+        //aggiunge una nota alla scaletta
+        const handleDateChange = async (id) => {
+            try {
+              // 🔍 1️⃣ Trova il valore massimo di scalettaOrdine per la data selezionata
+              const collectionRef = collection(db, "addNota");
+              const q = query(
+                collectionRef,
+                where("scalettaData", "==", scalettaDataSele),
+                where("scaletta", "==", true),
+                orderBy("scalettaOrdine", "desc"),
+                limit(1) // Prendi solo il più alto
+              );
+          
+              const querySnapshot = await getDocs(q);
+              let newOrder = 1; // Se non ci sono documenti, parte da 1
+          
+              if (!querySnapshot.empty) {
+                const highestOrder = querySnapshot.docs[0].data().scalettaOrdine;
+                newOrder = highestOrder + 1; // Incrementa di 1
+              }
+          
+              // 📝 2️⃣ Aggiorna il documento specifico con il nuovo ordine
+              const notaRef = doc(db, "addNota", id);
+              await updateDoc(notaRef, {
+                scaletta: true,
+                scalettaData: scalettaDataSele,
+                scalettaOrdine: newOrder,
+              });
+          
+              // 📌 3️⃣ Ricarica la lista dopo l'aggiornamento
+              caricaOrdiniScaletta(scalettaDataSele);
+              handleChangeDataSelect(valueDateOrd);
+          
+              console.log(`Documento aggiornato con successo! Nuovo ordine: ${newOrder}`);
+            } catch (error) {
+              console.error("Errore nell'aggiornamento:", error);
+            }
+          };
+
+          //-----------------------------------------------------------------------------------
+          //rimuovi un nota alla scaletta
+          const handleRemoveFromScaletta = async (id, scalettaOrdine) => {
+            try {
+                const dbRef = collection(db, "addNota");
+        
+                // 🔍 1️⃣ Trova tutti quelli con scalettaData uguale e scalettaOrdine maggiore di quello eliminato
+                const q = query(
+                    dbRef,
+                    where("scalettaData", "==", scalettaDataSele),
+                    where("scaletta", "==", true),
+                    where("scalettaOrdine", ">", scalettaOrdine), // Solo quelli dopo
+                    orderBy("scalettaOrdine", "asc") // Ordine crescente per aggiornarli uno per uno
+                );
+        
+                const querySnapshot = await getDocs(q);
+                const batch = writeBatch(db);
+        
+                // 🔄 2️⃣ Scaliamo di -1 tutti quelli dopo
+                querySnapshot.forEach((docSnap) => {
+                    const notaRef = doc(db, "addNota", docSnap.id);
+                    batch.update(notaRef, { scalettaOrdine: docSnap.data().scalettaOrdine - 1 });
+                });
+        
+                // 🗑 3️⃣ Rimuovi l'elemento dalla scaletta
+                const notaRef = doc(db, "addNota", id);
+                batch.update(notaRef, {
+                    scaletta: false,
+                    scalettaData: "",
+                    scalettaOrdine: null
+                });
+        
+                // 🚀 4️⃣ Esegui tutte le modifiche in un'unica operazione
+                await batch.commit();
+        
+                // 🔄 5️⃣ Ricarica la lista aggiornata
+                caricaOrdiniScaletta(scalettaDataSele);
+                console.log("Elemento rimosso e ordine aggiornato!");
+            } catch (error) {
+                console.error("Errore durante la rimozione:", error);
+            }
+        };
+        //****************************************************************************************** */
+         //stampa
+         const handlePrint = useReactToPrint({
+          content: () => componentRef.current,
+          documentTitle: 'emp-data',
+          onAfterPrint: () => setFlagStampa(false)
+        })
+        
+        const print = async () => {
+          setFlagStampa(true);
+          setTimeout(function(){
+            handlePrint();
+          },1);
+        }
+        
+        function HandleSpeedAddScalClien() {
+          setPopupActive(true);
+        }
+  //_________________________________________________________________________________________________________________
+        const handleChangeDataSelect = (val) => {
+        setValueDateOrd(val);
+        console.log(val);
+        today.setDate(today.getDate() - val);   //fa la differenza rispetto al valore del select sottraendo (per ridurre e i vari giorni)
+        today.setHours(0, 0, 0, 0);   //mette la data a 00:00
+        todayMilli = today.getTime()   //lo converte in millisecondi
+
+        const collectionRef = collection(db, "addNota");
+        const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("scaletta", "==", false));
+    
+        const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        todosArray.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate()); // Ordine crescente
+        setColle(todosArray);
+        setProgress(true);
+        });
         };
 
-  //_________________________________________________________________________________________________________________
-  const handleChangeStatoSelect = (event) => {
-    setStato(event.target.value)
-  };
 
-   //_________________________________________________________________________________________________________________
-    const setClear = () => {
-      setData("");
-      toast.dismiss();
-      toast.clearWaitingQueue();}
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
     const Msg = () => (
@@ -225,7 +363,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     //********************************************************************************** */
   React.useEffect(() => {
     const collectionRef = collection(db, "addNota");
-    const q = query(collectionRef, where("dataMilli", ">", todayMilli));
+    const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("scaletta", "==", false));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -238,6 +376,11 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     });
     return () => unsub();
   }, [todayMilli]);
+
+
+  useEffect(() => {
+    caricaOrdiniScaletta(dataInizialeFormatted);
+    }, []);
 
     //********************************************************************************** */
   React.useEffect(() => {
@@ -270,120 +413,11 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
 
 
   /********************************************************************************************************* */
-  const CreateOrdine = async (e) => {   //aggiunta Ordine
-    e.preventDefault(); 
-    var debRes=0;
-    var id=0;
-    var indiri;
-    var telefo;
-    var iva;
-    var idOrdine="1";
+  const handleChangeDataScaletta = (e) => {
+    setScalettaDataSele(moment(e.target.value).format("DD-MM-YYYY"));
+    caricaOrdiniScaletta(moment(e.target.value).format("DD-MM-YYYY"));
+    };
 
-
-    const dateObject = new Date(dataOrd); //conversione da stringa a data per ottenere la data in millisecondi
-    const dataInizialeFormatted = moment(dataOrd, "YYYY-MM-DD").format("DD-MM-YYYY");
-
-//va a  prendere d1, tramite nome del cliente e anche il suo id
-    const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  
-    const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        debRes=doc.data().deb1 ;
-        id= doc.id;
-        });
-        setDebitoRes(debRes);
-
-    //andiamo a  prendere l'indirizzo e il tel, tramite nome del cliente, viene richiamata quando si crea la nota
-        const p = query(collection(db, "clin"), where("idCliente", "==", idCliente));  
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach((doc) => {
-          indiri= doc.data().indirizzo;
-          telefo= doc.data().cellulare;
-          iva = doc.data().partitaIva;
-          });
-          setIndirizzo(indiri);
-          setTelefono(telefo);
-
-    //vado a prendere l'id dell'ultimo ordine, in modo tale da aggiungere il nuovo id al nuovo ordine
-    const d = query(collection(db, "addNota"), orderBy("createdAt", "desc"), limit(1));  
-    const querySnapshotd = await getDocs(d);
-    // Controlla se ci sono risultati nella query
-    if (!querySnapshotd.empty) {
-      // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
-      querySnapshotd.forEach((doc) => {
-        idOrdine = doc.data().idOrdine.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
-        let idOrdInt = parseInt(idOrdine) + 1 //fa la converisione in intero. e fa la somma
-        idOrdine = idOrdInt.toString()  // lo riconverte in stringa
-      });
-    }
-
-    idOrdine= "O" + idOrdine
-
-    var bol= true
-        //andiamo a fare il controllo, per verificare se questo ordine è già presente nel nostro database
-        const s = query(collection(db, "addNota"), where("idCliente", "==", idCliente));  
-        const querySnapshots = await getDocs(s);
-        querySnapshots.forEach((doc) => {
-          if (nomeC == doc.data().nomeC && dataInizialeFormatted ==doc.data().data) {   //va a prendere la trupla di questo cliente di questa data
-            notifyErrorCli()
-            toast.clearWaitingQueue(); 
-            bol=false
-        }
-          });
-
-    if(!nomeC) {
-      notifyErrorCliEm();
-      toast.clearWaitingQueue(); 
-      return
-    }
-    if(bol == true) {
-    await addDoc(collection(db, "addNota"), {
-      idOrdine,
-      cont,
-      idCliente,
-      nomeC,
-      quota: 0,
-      completa : status,
-      data: dataInizialeFormatted,
-      NumCartoni:"0",
-      dataMilli: dateObject.getTime(),
-      NumBuste:"0",
-      sommaTotale:0,
-      altezza: "1123px",
-      debitoTotale:0,
-      createdAt: serverTimestamp(),
-      idDebito:  id,
-      debitoRes: debRes,
-      indirizzo: indiri,
-      tel: telefo,
-      scaletta: false,
-      scalettaData: "",
-      scalettaDataMilli: 0,
-      scalettaOrdine: 0,
-      partitaIva: iva
-    });
-    setNomeC("");
-    setPopupActive(false);
-    }
-  };
-  //_________________________________________________________________________________________________________________
-
-    const deleteCol = async (id, dat) => { //cancella tutto dalla data fino ai prodotti che fanno parte della lista
-        const colDoc = doc(db, "ordDat", id); 
-        const q = query(collection(db, "addNota"), where("data", "==", dat));
-        const querySnapshot = await getDocs(q);
-
-        querySnapshot.forEach(async (hi) => {
-          const p = query(collection(db, "Nota"), where("dataC", "==", dat), where("nomeC", "==", hi.data().nomeC));
-          const querySnapshotp = await getDocs(p);
-          querySnapshotp.forEach(async (hip) => {
-            await deleteDoc(doc(db, "Nota", hip.id));  //1 elimina tutti i prodotti nella lista
-          })
-
-        await deleteDoc(doc(db, "addNota", hi.id));  //2 elimina tutti i dati di addNota della stessa data
-        });
-        
-        await deleteDoc(colDoc); //3 infine elimina la data
-    }
 
   //___________________________________________________________________________________________________
         const handleDelete = async () => {
@@ -398,7 +432,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
           });
           //infine elimina l'ordine
           await deleteDoc(colDoc);
-          handleClose() //chiude il menu elimina ordine
         };
   //__________________________________________________________________________________________________________________________________________________
     const bloccaNota = async (id, dat, numNot, dtMilli, TotQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
@@ -459,7 +492,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
       <div className='col-2'>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> Ordine Clienti </p>
+      <p className='navText'> Scaletta </p>
       </div>
       </div>
 
@@ -474,7 +507,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
-    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Ordine Clienti</h1> : <div style={{marginBottom:"60px"}}></div>} 
+    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
    <div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}> 
     <ToggleButtonGroup
@@ -484,19 +517,18 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
       onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { setPopupActive(true); }}  variant="contained">Aggiungi Ordine</Button>
-    <Button color='error'  style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}  onClick={() => {setFlagDelete(!flagDelete)  }}  variant="contained">Elimina</Button>
     {/*{sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}  */}
     </ToggleButtonGroup>
     </div>
 
 
 
-{/*************************TABELLA ORDINI CLIENTI DATA************************************************************************** */}
-          <div className='todo_container' style={{width: "1250px"}}>
+{/*************************TABELLA ORDINI CLIENTI ordini evasi************************************************************************** */}
+        
+          <div className='todo_container' style={{width: "800px"}}>
               <div className='row'>
                       <div className='col colTextTitle'>
-                       Ordine Clienti
+                       Ordini Evasi
                       </div>
                       <div className='col'>
                           Barra di Ricerca
@@ -508,7 +540,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                          labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         defaultValue={0}
-                        onChange={handleChangeDataSelect}>
+                        onChange={(e) => handleChangeDataSelect(e.target.value)}>
                         <MenuItem value={0}>Oggi</MenuItem>
                         <MenuItem value={7}>Ultimi 7 giorni</MenuItem>
                         <MenuItem value={30}>Ultimi 30 giorni</MenuItem>
@@ -518,19 +550,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                         </FormControl>
                         </div>
                         <div className='col'>
-                        <FormControl >
-                        <InputLabel id="demo-simple-select-label"></InputLabel>
-                        <Select sx={{height:39, marginLeft:-1, width: 150}}
-                         labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        defaultValue={"4"}
-                        onChange={handleChangeStatoSelect}>
-                        <MenuItem value={"4"}>Tutti</MenuItem>
-                        <MenuItem value={"0"}>In Lavorazione</MenuItem>
-                        <MenuItem value={"1"}>Evaso</MenuItem>
-                        <MenuItem value={"2"}>Conseganto</MenuItem>
-                        </Select>
-                        </FormControl>
+
                         </div>
                     </div>
                     <div className='row' style={{ height: "25px", marginTop: "7px" }}>
@@ -539,9 +559,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                       <div className='col-1 coltext'style={{ width: "125px" }} >Data</div>
                       <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
                       <div className='col-1 coltext' style={{ width:"110px" }}>€Totale</div>
-                      <div className='col-1 coltext' style={{ width:"110px" }}>€Guadagno</div>
-                      <div className='col-1 coltext'style={{ width:"100px" }}>N. Cartoni</div>
-                      <div className='col-1 coltext'style={{ width:"100px" }}>N. Buste</div>
                     </div>
 
                     {Progress == false && 
@@ -590,19 +607,10 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                         </div>
                       )}
                       <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.sommaTotale).toFixed(2).replace('.', ',')}</h3></div>
-                      <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.quota).toFixed(2).replace('.', ',')}</h3></div>
-                      <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' >{ col.NumCartoni }</h3></div>
-                      <div className='col-1' style={{ width:"100px", }}><h3 className='inpTab' >{ col.NumBuste }</h3></div>
-
-                    {flagDelete ?
-                      <div className='col-1' style={{padding:"0px", marginTop:"-8px", width: "20px"}}>
-                  <button className="button-delete" style={{color: rosso, marginLeft: "-70px"}} onClick={()=> {console.log(col.id); iddo=col.id; displayMsg();}}>  <DeleteIcon id="i" /> </button>
-                  </div> :
-                  <div className='col-1'>
-                  
-                  </div> }
-
-
+                     <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
+                        <button onClick={() => {handleDateChange(col.id)}} style={{color: "green", marginLeft: "0px"}} className="button-delete"><PlaylistAddIcon/></button>
+                     </div>
+                      
 
                         {/*
                         { flagBlock &&
@@ -635,52 +643,121 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
         {/**Fine tabella */} 
 
 
+{/*************************TABELLA Per la scaletta************************************************************************** */}
+<div className='d-flex flex-column justify-content-start' style={{marginTop: "100px"}}>
+        <h2 className='title'>Scaletta</h2>
+          <div className='todo_container' style={{width: "800px"}}>
+              <div className='row'>
+                      <div className='col-1 colTextTitle'>
+                       Scaletta
+                      </div>
+                      <div className='col-4'>
+                          Barra di Ricerca
+                      </div>
+                      <div className='col-7 d-flex align-items-center gap-1'>
+                        <p className='mb-0'>Seleziona una data:  </p>
+                      <input
+                        type="date"
+                        value={moment(scalettaDataSele, "DD-MM-YYYY").format("YYYY-MM-DD")} // Converti per l'input
+                        onChange={(e) => handleChangeDataScaletta(e)} // Salva in formato gg-mm-yyyy
+                        />
+                        </div>
+                    </div>
+                    <div className='row' style={{ height: "25px", marginTop: "7px" }}>
+                      <div className='col-1 coltext' style={{ width:"100px" }}>N</div>
+                      <div className='col-4 coltext'>Cliente</div>
+                      <div className='col-1 coltext'style={{ width: "125px" }} >Data Crea.</div>
+                      <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
+                      <div className='col-1 coltext' style={{ width:"110px" }}>€Totale</div>
+                    </div>
 
-{/******Aggiungi Prodotto  modal***************************************************************************** */}
-<Modal  size="lg" show={popupActive} onHide={()=> { setPopupActive(false) }} style={{ marginTop: "50px" }}>
-      <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false);  }}>
-              <CloseIcon id="i" /></button> </div>
-    {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Ordine </h4>}
-          <Modal.Body>
-          <div className='row mt-4' >
-          <div className='col'>
-        <TextField color="secondary" className='mt-2' style={{ width: "100%" }} type='date' label="Data di Creazione"
-              placeholder="DD/MM/YYYY" value={dataOrd} onChange={(e) => setDataOrd(e.target.value)} />
-        </div>
-          <div className='col'>
-            <FormControl style={{ marginTop: "7.4px" }}>
-                <InputLabel id="demo-simple-select-label" color="secondary">Stato</InputLabel>
-                  <Select sx={{height:57,  width: "400px"}}
-                  label="Stato"
-                  color='secondary'
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    defaultValue={0}
-                    onChange={handleChangeDataSelect1}>
-                  <MenuItem value={"0"}>In Lavorazione</MenuItem>
-                  <MenuItem value={"1"}>Evaso</MenuItem>
-                  <MenuItem value={"2"}>Coseganto</MenuItem>
-                    </Select>
-              </FormControl>
-          </div>
-          </div>
-      <div className='row mt-4 mb-4'>
-        <Autocomplete
-            value={nomeC}
-            options={todosClienti.map(cliente => cliente.nomeC)}
-            onInputChange={handleInputChange}
-            componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-            renderInput={(params) => <TextField color='secondary' {...params} label="Cliente" />}
-          />
+                    {Progress == false && 
+                    <div style={{marginTop: "14px"}}>
+                      <CircularProgress />
+                    </div>
+                    }
+                {scaletta.map((col) => (
+                  <div key={col.id}>
+                  {(col.completa == stato  || stato == "4") && 
+                    <>
+                    <div className="diviCol1" > 
+                      <div className="row d-flex algin-items-center">
+                      <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' style={{color: primary}} ><b>{ col.scalettaOrdine }</b></h3></div>
+                      <div className='col-4'><h3 className='inpTab' onClick={()=> {
+                        getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
+                        navigate("/nota")
+                        auto(col.idCliente);
+                        AutoProdCli.length = 0
+                        }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
 
-      </div>
-       {popupActive && <Button onClick={CreateOrdine} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Ordine </Button>}
-          </Modal.Body>
-      </Modal>
+
+                      <div className="col-1" style={{ width: "125px" }}> <h3 className='inpTab' >{ col.data }</h3></div>
+                      {col.completa == 0 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><PendingIcon className='inpTab' style={{ color: rosso }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: rosso }}>In Lavorazione</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      {col.completa == 1 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><LocalShippingIcon className='inpTab' style={{ color: "orange" }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: "orange" }}>Evaso</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      {col.completa == 2 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><CheckCircleIcon className='inpTab' style={{ color: "green" }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: "green" }}>Consegnato</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.sommaTotale).toFixed(2).replace('.', ',')}</h3></div>
+                    
+                      <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
+                        <button onClick={() => {handleRemoveFromScaletta(col.id, col.scalettaOrdine)}} style={{color: "red", marginLeft: "0px"}} className="button-delete"><PlaylistRemoveIcon/></button>
+                     </div>
+
+
+
+                        {/*
+                        { flagBlock &&
+                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
+                        <button
+                         className="button-delete"
+                         onClick={() => {
+                            localStorage.setItem("ordDataEli", col.data);
+                            localStorage.setItem("ordId", col.id);
+                            localStorage.setItem("ordNumeroNote", col.numeroNote);
+                            localStorage.setItem("ordDataMilli", col.dataMilli);
+                            localStorage.setItem("ordDataTotQuot", col.totalQuota);
+                            displayMsgBlock();
+                            toast.clearWaitingQueue(); 
+                            }}>
+                          <LockIcon id="i" />
+                        </button>            
+                        </div>
+                        }
+                     */ }
+                      </div>
+                    </div>
+                    <hr style={{margin: "0"}}/>
+
+                  </>
+                  }
+                  </div>
+                  ))}
+              </div>
+            </div>
+        {/**Fine tabella */} 
 
     
         </motion.div>
            </>
       )
 }
-export default OrdineCliData;
+export default Scaletta;

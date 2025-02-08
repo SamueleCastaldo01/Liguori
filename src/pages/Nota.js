@@ -452,10 +452,10 @@ const print = async () => {
     {Completa ==0 && 
     <>
     <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
-    {/*****<Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button> */}
-    {/****** 
-      <ToggleButton onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
-      <ToggleButton onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}} color='secondary' value="scortatinte1">In Sospeso</ToggleButton> */}
+    <Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button>
+
+      <Button onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}}  variant="contained"  value="scortatinte">In Ordine</Button>
+      <Button onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}}  variant="contained"  value="scortatinte1">In Sospeso</Button>
     </>}
     <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }} onClick={print} size="small" variant="contained">Stampa</Button>
      {Completa== 0 ? 
@@ -471,7 +471,7 @@ const print = async () => {
 
 {/**********tabella in ordine********************** */}
 {flagInOrdine == true && 
-<div className='todo_containerInOrdine mt-5' style={{paddingTop: "0px"}}>
+<div className='todo_containerInOrdine mt-5 mb-5' style={{paddingTop: "0px"}}>
 <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setFlagInOrdine(false); }}>
               <CloseIcon id="i" />
               </button> </div>
@@ -527,7 +527,7 @@ const print = async () => {
 
 {/**********tabella in sospeso********************** */}
 {flagInSospeso== true && 
-<div className='todo_containerInOrdine mt-5' style={{paddingTop:"0px"}}>
+<div className='todo_containerInOrdine mt-5 mb-5' style={{paddingTop:"0px"}}>
 <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setFlagInSospeso(false); }}>
               <CloseIcon id="i" />
               </button> </div>

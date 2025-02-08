@@ -531,19 +531,19 @@ const handleChangeAge = (event) => {
                 }}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
-              > {/** 
+              > 
                 <MenuItem onClick={handleChangeEvi}>Evidenzia</MenuItem>
                 <MenuItem onClick={handleChangeEt}>ET</MenuItem>
-                <MenuItem onClick={handleChangeNo}>(NO)</MenuItem> **/} 
+                <MenuItem onClick={handleChangeNo}>(NO)</MenuItem> 
                 <MenuItem onClick={handleChangeMeno}>(- )</MenuItem>
 
-              {/*<MenuItem onClick={handleChangeInterro}>?</MenuItem>
+                <MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeX}>X</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
                 <MenuItem onClick={handleChangeSospe}>-</MenuItem>
                 <MenuItem onClick={handleChangeInOmaggio}>In Omaggio</MenuItem>
                 <MenuItem onClick={handleChangeGP}>G. P.</MenuItem>
-                <MenuItem onClick={handleChangeRem2}>Rimuovi2</MenuItem> */}
+                <MenuItem onClick={handleChangeRem2}>Rimuovi2</MenuItem>
                 <MenuItem onClick={() => {
                 localStorage.setItem("flagRemove", 0);
                 localStorage.setItem("IDNOTa", todo.id);

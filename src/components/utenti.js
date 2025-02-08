@@ -1,4 +1,4 @@
-var s1="jqFDoaKNRlh5YuqgyfnwW0EN9wc2"  //sono io
+var s1="T5SnwhoqoLeAFlpVzAmCW4Pt3qm1"  //sono io
 var s6="9uXrTRBIasMGV1AEqhhfEI7CmRN2"  //Cesario
 var s7="MwUDv28kFlhWq5MmmNTfurSKRLE3"  //Hola
 var s2="bBOeGRw4vHPHnRxn8ccZast5haY2"   //Nando Liguori

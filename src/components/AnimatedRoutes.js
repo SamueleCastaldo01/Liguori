@@ -35,6 +35,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation} from "react-
 import { guid, supa, tutti, dipen } from '../components/utenti';
 import moment from 'moment/moment';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Scaletta from '../pages/Scaletta';
 
 function AnimatedRoutes() {
 
@@ -262,6 +263,7 @@ function AnimatedRoutes() {
     <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
     <Route path="/preventivodata" element={<PreventivoData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordineclientidata" element={<OrdineCliData TodayData={todayC} getOrdId={getOrderIdHandler} getNotaId={getNotadHandler}/>} />
+    <Route path="/scaletta" element={<Scaletta TodayData={todayC} getOrdId={getOrderIdHandler} getNotaId={getNotadHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
     <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
     <Route path="/stampamassiva" element={<StampaMassiva notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />

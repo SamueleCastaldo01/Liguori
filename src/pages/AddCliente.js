@@ -286,6 +286,7 @@ React.useEffect(() => {
         debitoTot,
       });
       handlerSetClear()
+      setPopupActive(false);
     }
   };
 //****************************************************************************************** */
@@ -380,6 +381,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       handleCronologia(todo, dd1, debV)
     }
     toast.clearWaitingQueue(); 
+    setPopupActiveEdit(false);
   };
   //----------------------------------------------------------------------------------------------
   const handleCronologia = async (todo, dd1, debV) => {

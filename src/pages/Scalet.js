@@ -17,9 +17,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import InputAdornment from '@mui/material/InputAdornment';
 import { AutoComp } from './ScaletData';
 import { supa, guid, tutti } from '../components/utenti';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
 import PrintIcon from '@mui/icons-material/Print';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -38,6 +35,7 @@ function Scalet({ dateEli }) {
 
   const [sum, setSum]  = React.useState("");
   const [sumQ, setSumQ] =React.useState("");
+  
 
   const [popupActive, setPopupActive] = useState(false);  
   const [flagStampa, setFlagStampa] = useState(false); 

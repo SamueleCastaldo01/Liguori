@@ -81,23 +81,23 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
 {/*********************idCliente************************************************************************ */}
   <div className="col-1 diviCol" style={{ width: "90px" }}>
     <h5
-      style={{ textDecoration: todo.completed && "line-through", color: primary  }}
+      style={{ textDecoration: todo.completed && "line-through", color: primary, textDecoration: 'underline'  }}
         type="text"
+        onClick={() => {handleActiveEdit(todo)}}
         className="inpTab"><b>{todo.idCliente}</b></h5>
-
+        
     </div>
 {/*********************NomeC************************************************************************ */}
     <div className="col-3 diviCol" >
     <h5
-      style={{ textDecoration: todo.completed && "line-through"  }}
+      style={{ textDecoration: todo.completed && "line-through" , textDecoration: 'underline' }}
         type="text"
         className="inpTab"
-        onClick={() => { /*-
+        onClick={() => { 
             getCliId(todo.id, todo.nomeC)
             navigate("/dashclienti");
             auto();
-            AutoCompProd.length = 0 */
-            handleActiveEdit(todo)
+            AutoCompProd.length = 0;
                             }}
         >{ todo.nomeC}</h5>
 

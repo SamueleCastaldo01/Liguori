@@ -5,12 +5,12 @@ import { getAuth, GoogleAuthProvider, createUserWithEmailAndPassword, signInWith
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCHQ-ddvKW_dqukH0lRsmAssOqb5EeCIGo",
-  authDomain: "liguorisrl-686ef.firebaseapp.com",
-  projectId: "liguorisrl-686ef",
-  storageBucket: "liguorisrl-686ef.appspot.com",
-  messagingSenderId: "1096732542750",
-  appId: "1:1096732542750:web:3109613f063279fa1c2b0f"
+  apiKey: "AIzaSyAboBq_ZV4MEPbzrPGqvejSQ53QZHRlGA0",
+  authDomain: "liguorisrl-38c83.firebaseapp.com",
+  projectId: "liguorisrl-38c83",
+  storageBucket: "liguorisrl-38c83.firebasestorage.app",
+  messagingSenderId: "510918580607",
+  appId: "1:510918580607:web:f688375f1fa121606a224a"
 };
 
 
