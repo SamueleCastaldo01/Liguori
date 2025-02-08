@@ -601,12 +601,12 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 {/*************************TABELLA ORDINI CLIENTI ordini evasi************************************************************************** */}
     <div className='row'>
     <div className='col'>
-    <div className='todo_container' style={{width: "500px", maxHeight:"320px"}}>
+    <div className='todo_container' style={{width: "420px", maxHeight:"320px"}}>
               <div className='row'>
-                      <div className='col colTextTitle' style={{color: "orange"}}>
+                      <div className='col-7 colTextTitle' style={{color: "orange"}}>
                        Ordini Evasi
                       </div>
-                      <div className='col'>
+                      <div className='col-5'>
                         <FormControl >
                         <InputLabel id="demo-simple-select-label"></InputLabel>
                         <Select sx={{height:39, marginLeft:-1, width: 150}}
@@ -664,9 +664,9 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 
 
 {/*************************TABELLA Per la scaletta************************************************************************** */}
-    <div className='col'>
+    <div className='col mt-lg-0 mt-sm-5'>
     <div className='d-flex flex-column justify-content-start'>
-          <div className='todo_container' style={{width: "500px", maxHeight:"320px"}}>
+          <div className='todo_container' style={{width: "450px", maxHeight:"320px"}}>
               <div className='row'>
                       <div className='col-3 colTextTitle' style={{color: primary}}>
                        Scaletta
