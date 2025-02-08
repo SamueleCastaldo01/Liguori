@@ -588,6 +588,16 @@ export default function MiniDrawer( {signUserOut} ) {
                   <ListItemText primary="Ordine Clienti" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>
             </ListItem>
+            <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scaletta")}}>
+                <ListItemButton sx={{ pl: 4 }}
+                    selected={selectedItem === "ordineclientidata"}
+                  onClick={(event) => handleListItemClick(event, 4)}>
+                  <ListItemIcon sx={{ minWidth: 0,mr: open ? 3 : 'auto'}}>
+                    <FormatListNumberedIcon sx={{ color: "white" }}/>
+                  </ListItemIcon>
+                  <ListItemText primary="Scaletta" sx={{ opacity: open ? 1 : 0 }} />
+                </ListItemButton>
+            </ListItem>
           {/***** 
             <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/ordinefornitoridata")}}>
                 <ListItemButton sx={{ pl: 4 }}

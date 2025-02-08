@@ -525,7 +525,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 
 {/*************************TABELLA ORDINI CLIENTI ordini evasi************************************************************************** */}
         
-          <div className='todo_container' style={{width: "800px"}}>
+          <div className='todo_container' style={{width: "800px", maxHeight:"300px"}}>
               <div className='row'>
                       <div className='col colTextTitle'>
                        Ordini Evasi
@@ -558,7 +558,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <div className='col-4 coltext'>Cliente</div>
                       <div className='col-1 coltext'style={{ width: "125px" }} >Data</div>
                       <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
-                      <div className='col-1 coltext' style={{ width:"110px" }}>€Totale</div>
                     </div>
 
                     {Progress == false && 
@@ -566,6 +565,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <CircularProgress />
                     </div>
                     }
+                <div style={{overflowY: "auto"}}>
                 {colle.map((col) => (
                   <div key={col.id}>
                   {(col.completa == stato  || stato == "4") && 
@@ -606,7 +606,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                           </div>
                         </div>
                       )}
-                      <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.sommaTotale).toFixed(2).replace('.', ',')}</h3></div>
                      <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
                         <button onClick={() => {handleDateChange(col.id)}} style={{color: "green", marginLeft: "0px"}} className="button-delete"><PlaylistAddIcon/></button>
                      </div>
@@ -639,6 +638,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                   }
                   </div>
                   ))}
+                </div>
               </div>
         {/**Fine tabella */} 
 
@@ -646,7 +646,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 {/*************************TABELLA Per la scaletta************************************************************************** */}
 <div className='d-flex flex-column justify-content-start' style={{marginTop: "100px"}}>
         <h2 className='title'>Scaletta</h2>
-          <div className='todo_container' style={{width: "800px"}}>
+          <div className='todo_container' style={{width: "800px", maxHeight:"300px"}}>
               <div className='row'>
                       <div className='col-1 colTextTitle'>
                        Scaletta
@@ -668,7 +668,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <div className='col-4 coltext'>Cliente</div>
                       <div className='col-1 coltext'style={{ width: "125px" }} >Data Crea.</div>
                       <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
-                      <div className='col-1 coltext' style={{ width:"110px" }}>€Totale</div>
                     </div>
 
                     {Progress == false && 
@@ -676,6 +675,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <CircularProgress />
                     </div>
                     }
+                <div style={{ overflowY: "auto"}}>
                 {scaletta.map((col) => (
                   <div key={col.id}>
                   {(col.completa == stato  || stato == "4") && 
@@ -715,9 +715,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                             <div className='col'><h3 className='inpTab' style={{ color: "green" }}>Consegnato</h3></div>
                           </div>
                         </div>
-                      )}
-                      <div className='col-1' style={{ width:"110px" }}><h3 className='inpTab'>€{Number(col.sommaTotale).toFixed(2).replace('.', ',')}</h3></div>
-                    
+                      )}                    
                       <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
                         <button onClick={() => {handleRemoveFromScaletta(col.id, col.scalettaOrdine)}} style={{color: "red", marginLeft: "0px"}} className="button-delete"><PlaylistRemoveIcon/></button>
                      </div>
@@ -751,6 +749,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                   }
                   </div>
                   ))}
+                </div>
               </div>
             </div>
         {/**Fine tabella */} 
