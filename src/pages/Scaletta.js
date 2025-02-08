@@ -33,11 +33,13 @@ import LockIcon from '@mui/icons-material/Lock';
 import { Opacity, Timer3 } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ScaletData from './ScaletData';
 
 export const AutoProdCli = [];
@@ -258,6 +260,79 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                 console.error("Errore durante la rimozione:", error);
             }
         };
+
+
+        //sposta l'elemneto sopra nella scaletta--------------------------------------------------
+        const moveUp = async (id, scalettaOrdine) => {
+            if (scalettaOrdine === 1) return; // 🔹 Se è già il primo, non fare nulla
+        
+            try {
+                const batch = writeBatch(db);
+        
+                // 📌 1️⃣ Trova l'elemento che sta subito sopra
+                const q = query(
+                    collection(db, "addNota"),
+                    where("scalettaData", "==", scalettaDataSele),
+                    where("scaletta", "==", true),
+                    where("scalettaOrdine", "==", scalettaOrdine - 1) // 🔍 Trova quello sopra
+                );
+                const querySnapshot = await getDocs(q);
+        
+                if (querySnapshot.empty) return; // Se non esiste, esci
+        
+                const docAbove = querySnapshot.docs[0]; // Documento sopra
+                const docAboveRef = doc(db, "addNota", docAbove.id);
+                const currentDocRef = doc(db, "addNota", id);
+        
+                // 🔄 2️⃣ Scambia i valori di scalettaOrdine
+                batch.update(currentDocRef, { scalettaOrdine: scalettaOrdine - 1 });
+                batch.update(docAboveRef, { scalettaOrdine: scalettaOrdine });
+        
+                // 🚀 3️⃣ Esegui il batch
+                await batch.commit();
+        
+                console.log("Elemento spostato in alto!");
+                caricaOrdiniScaletta(scalettaDataSele); // 🔄 Ricarica la lista aggiornata
+            } catch (error) {
+                console.error("Errore nello spostamento in alto:", error);
+            }
+        };
+
+        //sposta l'elemento sotto nella scaletta-------------------------------------------------
+        const moveDown = async (id, scalettaOrdine) => {
+            try {
+                const batch = writeBatch(db);
+        
+                // 📌 1️⃣ Trova l'elemento che sta subito sotto
+                const q = query(
+                    collection(db, "addNota"),
+                    where("scalettaData", "==", scalettaDataSele),
+                    where("scaletta", "==", true),
+                    where("scalettaOrdine", "==", scalettaOrdine + 1) // 🔍 Trova quello sotto
+                );
+                const querySnapshot = await getDocs(q);
+        
+                if (querySnapshot.empty) return; // Se non esiste, esci
+        
+                const docBelow = querySnapshot.docs[0]; // Documento sotto
+                const docBelowRef = doc(db, "addNota", docBelow.id);
+                const currentDocRef = doc(db, "addNota", id);
+        
+                // 🔄 2️⃣ Scambia i valori di scalettaOrdine
+                batch.update(currentDocRef, { scalettaOrdine: scalettaOrdine + 1 });
+                batch.update(docBelowRef, { scalettaOrdine: scalettaOrdine });
+        
+                // 🚀 3️⃣ Esegui il batch
+                await batch.commit();
+        
+                console.log("Elemento spostato in basso!");
+                caricaOrdiniScaletta(scalettaDataSele); // 🔄 Ricarica la lista aggiornata
+            } catch (error) {
+                console.error("Errore nello spostamento in basso:", error);
+            }
+        };
+        
+        
         //****************************************************************************************** */
          //stampa
          const handlePrint = useReactToPrint({
@@ -524,14 +599,12 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 
 
 {/*************************TABELLA ORDINI CLIENTI ordini evasi************************************************************************** */}
-        
-          <div className='todo_container' style={{width: "800px", maxHeight:"300px"}}>
+    <div className='row'>
+    <div className='col'>
+    <div className='todo_container' style={{width: "500px", maxHeight:"320px"}}>
               <div className='row'>
-                      <div className='col colTextTitle'>
+                      <div className='col colTextTitle' style={{color: "orange"}}>
                        Ordini Evasi
-                      </div>
-                      <div className='col'>
-                          Barra di Ricerca
                       </div>
                       <div className='col'>
                         <FormControl >
@@ -555,9 +628,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                     </div>
                     <div className='row' style={{ height: "25px", marginTop: "7px" }}>
                       <div className='col-1 coltext' style={{ width:"100px" }}>id Ordine</div>
-                      <div className='col-4 coltext'>Cliente</div>
-                      <div className='col-1 coltext'style={{ width: "125px" }} >Data</div>
-                      <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
+                      <div className='col-6 coltext'>Cliente</div>
                     </div>
 
                     {Progress == false && 
@@ -565,96 +636,42 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <CircularProgress />
                     </div>
                     }
-                <div style={{overflowY: "auto"}}>
+                <div style={{overflowY: "auto", overflowX: "hidden"}}>
                 {colle.map((col) => (
                   <div key={col.id}>
-                  {(col.completa == stato  || stato == "4") && 
-                    <>
                     <div className="diviCol1" > 
-                      <div className="row d-flex algin-items-center">
+                      <div className="row">
                       <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' style={{color: primary}} ><b>{ col.idOrdine }</b></h3></div>
-                      <div className='col-4'><h3 className='inpTab' onClick={()=> {
+                      <div className='col-7'><h3 className='inpTab' onClick={()=> {
                         getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
                         navigate("/nota")
                         auto(col.idCliente);
                         AutoProdCli.length = 0
                         }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
-
-
-                      <div className="col-1" style={{ width: "125px" }}> <h3 className='inpTab' >{ col.data }</h3></div>
-                      {col.completa == 0 && (
-                        <div className="col-2" style={{ width: "160px" }}>
-                          <div className='row'>
-                            <div className='col-1'><PendingIcon className='inpTab' style={{ color: rosso }} /></div>
-                            <div className='col'><h3 className='inpTab' style={{ color: rosso }}>In Lavorazione</h3></div>
-                          </div>
-                        </div>
-                      )}
-                      {col.completa == 1 && (
-                        <div className="col-2" style={{ width: "160px" }}>
-                          <div className='row'>
-                            <div className='col-1'><LocalShippingIcon className='inpTab' style={{ color: "orange" }} /></div>
-                            <div className='col'><h3 className='inpTab' style={{ color: "orange" }}>Evaso</h3></div>
-                          </div>
-                        </div>
-                      )}
-                      {col.completa == 2 && (
-                        <div className="col-2" style={{ width: "160px" }}>
-                          <div className='row'>
-                            <div className='col-1'><CheckCircleIcon className='inpTab' style={{ color: "green" }} /></div>
-                            <div className='col'><h3 className='inpTab' style={{ color: "green" }}>Consegnato</h3></div>
-                          </div>
-                        </div>
-                      )}
                      <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
                         <button onClick={() => {handleDateChange(col.id)}} style={{color: "green", marginLeft: "0px"}} className="button-delete"><PlaylistAddIcon/></button>
                      </div>
-                      
-
-                        {/*
-                        { flagBlock &&
-                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
-                        <button
-                         className="button-delete"
-                         onClick={() => {
-                            localStorage.setItem("ordDataEli", col.data);
-                            localStorage.setItem("ordId", col.id);
-                            localStorage.setItem("ordNumeroNote", col.numeroNote);
-                            localStorage.setItem("ordDataMilli", col.dataMilli);
-                            localStorage.setItem("ordDataTotQuot", col.totalQuota);
-                            displayMsgBlock();
-                            toast.clearWaitingQueue(); 
-                            }}>
-                          <LockIcon id="i" />
-                        </button>            
-                        </div>
-                        }
-                     */ }
                       </div>
                     </div>
-                    <hr style={{margin: "0"}}/>
-
-                  </>
-                  }
+                    <hr style={{margin: "0"}}/> 
                   </div>
                   ))}
                 </div>
               </div>
         {/**Fine tabella */} 
+    </div>
+   
 
 
 {/*************************TABELLA Per la scaletta************************************************************************** */}
-<div className='d-flex flex-column justify-content-start' style={{marginTop: "100px"}}>
-        <h2 className='title'>Scaletta</h2>
-          <div className='todo_container' style={{width: "800px", maxHeight:"300px"}}>
+    <div className='col'>
+    <div className='d-flex flex-column justify-content-start'>
+          <div className='todo_container' style={{width: "500px", maxHeight:"320px"}}>
               <div className='row'>
-                      <div className='col-1 colTextTitle'>
+                      <div className='col-3 colTextTitle' style={{color: primary}}>
                        Scaletta
                       </div>
-                      <div className='col-4'>
-                          Barra di Ricerca
-                      </div>
-                      <div className='col-7 d-flex align-items-center gap-1'>
+                      <div className='col-9 d-flex align-items-center gap-1'>
                         <p className='mb-0'>Seleziona una data:  </p>
                       <input
                         type="date"
@@ -664,10 +681,8 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                         </div>
                     </div>
                     <div className='row' style={{ height: "25px", marginTop: "7px" }}>
-                      <div className='col-1 coltext' style={{ width:"100px" }}>N</div>
-                      <div className='col-4 coltext'>Cliente</div>
-                      <div className='col-1 coltext'style={{ width: "125px" }} >Data Crea.</div>
-                      <div className='col-1 coltext' style={{ width: "160px" }}>Stato</div>
+                      <div className='col-1 coltext' style={{ width:"100px" }}>N.</div>
+                      <div className='col-6 coltext'>Cliente</div>
                     </div>
 
                     {Progress == false && 
@@ -675,7 +690,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <CircularProgress />
                     </div>
                     }
-                <div style={{ overflowY: "auto"}}>
+                <div style={{ overflowY: "auto", overflowX: "hidden"}}>
                 {scaletta.map((col) => (
                   <div key={col.id}>
                   {(col.completa == stato  || stato == "4") && 
@@ -683,64 +698,21 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                     <div className="diviCol1" > 
                       <div className="row d-flex algin-items-center">
                       <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' style={{color: primary}} ><b>{ col.scalettaOrdine }</b></h3></div>
-                      <div className='col-4'><h3 className='inpTab' onClick={()=> {
+                      <div className='col-6'><h3 className='inpTab' onClick={()=> {
                         getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
                         navigate("/nota")
                         auto(col.idCliente);
                         AutoProdCli.length = 0
                         }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
-
-
-                      <div className="col-1" style={{ width: "125px" }}> <h3 className='inpTab' >{ col.data }</h3></div>
-                      {col.completa == 0 && (
-                        <div className="col-2" style={{ width: "160px" }}>
-                          <div className='row'>
-                            <div className='col-1'><PendingIcon className='inpTab' style={{ color: rosso }} /></div>
-                            <div className='col'><h3 className='inpTab' style={{ color: rosso }}>In Lavorazione</h3></div>
-                          </div>
-                        </div>
-                      )}
-                      {col.completa == 1 && (
-                        <div className="col-2" style={{ width: "160px" }}>
-                          <div className='row'>
-                            <div className='col-1'><LocalShippingIcon className='inpTab' style={{ color: "orange" }} /></div>
-                            <div className='col'><h3 className='inpTab' style={{ color: "orange" }}>Evaso</h3></div>
-                          </div>
-                        </div>
-                      )}
-                      {col.completa == 2 && (
-                        <div className="col-2" style={{ width: "160px" }}>
-                          <div className='row'>
-                            <div className='col-1'><CheckCircleIcon className='inpTab' style={{ color: "green" }} /></div>
-                            <div className='col'><h3 className='inpTab' style={{ color: "green" }}>Consegnato</h3></div>
-                          </div>
-                        </div>
-                      )}                    
-                      <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
+                            <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
+                        <button onClick={() => {moveUp(col.id, col.scalettaOrdine)}} style={{color: "green", marginLeft: "0px"}} className="button-delete"><ArrowUpwardIcon/></button>
+                     </div>
+                     <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
+                        <button onClick={() => {moveDown(col.id, col.scalettaOrdine)}} style={{color: "blue", marginLeft: "0px"}} className="button-delete"><ArrowDownwardIcon/></button>
+                     </div>
+                      <div className='col-1 ms-4' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
                         <button onClick={() => {handleRemoveFromScaletta(col.id, col.scalettaOrdine)}} style={{color: "red", marginLeft: "0px"}} className="button-delete"><PlaylistRemoveIcon/></button>
                      </div>
-
-
-
-                        {/*
-                        { flagBlock &&
-                        <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
-                        <button
-                         className="button-delete"
-                         onClick={() => {
-                            localStorage.setItem("ordDataEli", col.data);
-                            localStorage.setItem("ordId", col.id);
-                            localStorage.setItem("ordNumeroNote", col.numeroNote);
-                            localStorage.setItem("ordDataMilli", col.dataMilli);
-                            localStorage.setItem("ordDataTotQuot", col.totalQuota);
-                            displayMsgBlock();
-                            toast.clearWaitingQueue(); 
-                            }}>
-                          <LockIcon id="i" />
-                        </button>            
-                        </div>
-                        }
-                     */ }
                       </div>
                     </div>
                     <hr style={{margin: "0"}}/>
@@ -753,6 +725,10 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
               </div>
             </div>
         {/**Fine tabella */} 
+    </div>
+    
+    </div>    
+          
 
     
         </motion.div>
