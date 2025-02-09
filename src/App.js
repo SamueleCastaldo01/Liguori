@@ -13,13 +13,6 @@ import BottomNavi from './components/BottomNavigation';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation} from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import MuiBottomNavigationAction from "@mui/material/BottomNavigationAction";
-import { BottomNavigation } from '@mui/material';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import ContactPageIcon from '@mui/icons-material/ContactPage';
-import PersonIcon from '@mui/icons-material/Person';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import AdUnitsIcon from '@mui/icons-material/AdUnits';
 import MiniDrawer from './components/MiniDrawer';
 import Box from '@mui/material/Box';
 import moment from 'moment/moment';
@@ -38,6 +31,13 @@ const elimDb = async () => {
   }); 
  }  
  */
+
+ const Background = () => {
+  const location = useLocation();
+  return (
+    <div className={location.pathname !== "/notadip" ? "background-imagePage" : ""}></div>
+  );
+};
 
 function App() {
 
@@ -99,7 +99,7 @@ function App() {
 }
   
     <Box className='backPage' component="main" sx={{ flexGrow: 1, p: 3, textAlign: "center", padding: matches ? "0px" : "24px", paddingTop: "24px" }}>
-    <div className="background-imagePage"></div>
+    <Background />
     <div><ToastContainer limit={1} /></div>
 
   <div style={{marginTop: !matches && "50px"}}>

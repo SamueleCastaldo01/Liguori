@@ -515,6 +515,7 @@ width: 110%;
 .todo_containerDebCli,
 .todo_containerProdCli,
 .todo_containerOrdCli,
+.todo_containerNoteDip,
 .todo_containerFor,
 .todo_container,
 .todo_containerCli,
@@ -557,9 +558,14 @@ width: 110%;
   padding-right: 0px;
 }
 
+.todo_containerNoteDip{
+  height: 80vh;
+}
+
 .scrollCrono,
 .scrollScaletDatDip,
 .scrollOrdCli,
+.scrollOrdDip,
 .scroll {
   max-height: 480px;
   overflow-y: scroll;
@@ -582,6 +588,10 @@ width: 110%;
 
 .todo_container {
   width: 1200px;
+}
+
+.scrollOrdCli {
+  max-height: none;
 }
 
 .todo_containerInOrdine,

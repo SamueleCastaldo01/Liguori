@@ -168,14 +168,14 @@ const contEffect = async () => {  //fa il conteggio
       <div className='row' style={{marginTop: "40px"}}>
         <div className='col' style={{padding: "0px"}}>
     {/***********tabella note********************************************************************************** */}
-        <div  className='todo_containerOrdCli w-100' >
+        <div  className='todo_containerNoteDip w-100' >
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}} >
         <p className='colTextTitle'> Ordine Clienti</p>
         { !switChchecked ? <p className='textOrdRed'> Ordini da evadere</p> : <p className='textOrd'> Ordini evasi</p> }
         
-        <div style={{height: "25px"}}>
-         <Switch sx={{ position: "relative", right: "58px", bottom: "15px" }}
+        <div style={{height: "25px"}} className='d-flex justify-content-start'>
+         <Switch sx={{ position: "relative", bottom: "15px"}}
           checked={switChchecked}
           onChange={handleChangeSwitch}
           inputProps={{ 'aria-label': 'controlled' }}/>
@@ -213,7 +213,7 @@ const contEffect = async () => {  //fa il conteggio
         </div>
         
       </div>
-      <div className="scrollOrdCli">
+      <div className="scrollOrdDip">
       {Progress == false && 
         <div style={{marginTop: "14px"}}>
           <CircularProgress />

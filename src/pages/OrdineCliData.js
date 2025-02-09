@@ -192,36 +192,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
         className: "rounded-4"
         })}
 
-//_________________________________________________________________________________________________________________
-     //confirmation notification to remove the collection
-    const MsgBlock = () => (
-      <div style={{fontSize: "16px"}}>
-        <p style={{marginBottom: "0px"}}>Sicuro di voler bloccare</p>
-        <p style={{marginBottom: "0px"}}>(non sarà più annullabile)</p>
-        <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={block}>Si</button>
-        <button className='buttonClose mt-2 rounded-4'>No</button>
-      </div>
-    )
-
-      const block = () => {
-        bloccaNota(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli"), localStorage.getItem("ordNumeroNote"), localStorage.getItem("ordDataMilli"), localStorage.getItem("ordDataTotQuot"));
-          toast.clearWaitingQueue(); 
-               }
-
-    const displayMsgBlock = () => {
-      toast.warn(<MsgBlock/>, {
-        position: "top-center",
-        autoClose: false,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        transition: Slide,
-        theme: "dark",
-        className: "rounded-4"
-        })}
-
     //********************************************************************************** */
   React.useEffect(() => {
     const collectionRef = collection(db, "addNota");
@@ -270,101 +240,119 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
 
 
   /********************************************************************************************************* */
-  const CreateOrdine = async (e) => {   //aggiunta Ordine
+  //funzione per aggiungere un ordine
+  const CreateOrdine = async (e) => {   
     e.preventDefault(); 
-    var debRes=0;
-    var id=0;
+    var debRes = 0;
+    var id = 0;
     var indiri;
     var telefo;
     var iva;
-    var idOrdine="1";
-
-
-    const dateObject = new Date(dataOrd); //conversione da stringa a data per ottenere la data in millisecondi
+    var idOrdine = "1";
+    var contValue = 1; // Valore di default se non ci sono ordini per quella data
+  
+    const dateObject = new Date(dataOrd);
     const dataInizialeFormatted = moment(dataOrd, "YYYY-MM-DD").format("DD-MM-YYYY");
-
-//va a  prendere d1, tramite nome del cliente e anche il suo id
+  
+    // 🔍 1️⃣ Trova il valore massimo di cont per la data selezionata
+    const contQuery = query(
+      collection(db, "addNota"),
+      where("data", "==", dataInizialeFormatted),
+      orderBy("cont", "desc"),
+      limit(1)
+    );
+    const contSnapshot = await getDocs(contQuery);
+    
+    if (!contSnapshot.empty) {
+      contValue = contSnapshot.docs[0].data().cont + 1; // Incrementa il valore più alto di cont
+    }
+  
+    // 🔍 2️⃣ Trova debito del cliente
     const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  
     const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        debRes=doc.data().deb1 ;
-        id= doc.id;
-        });
-        setDebitoRes(debRes);
-
-    //andiamo a  prendere l'indirizzo e il tel, tramite nome del cliente, viene richiamata quando si crea la nota
-        const p = query(collection(db, "clin"), where("idCliente", "==", idCliente));  
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach((doc) => {
-          indiri= doc.data().indirizzo;
-          telefo= doc.data().cellulare;
-          iva = doc.data().partitaIva;
-          });
-          setIndirizzo(indiri);
-          setTelefono(telefo);
-
-    //vado a prendere l'id dell'ultimo ordine, in modo tale da aggiungere il nuovo id al nuovo ordine
+    querySnapshot.forEach((doc) => {
+      debRes = doc.data().deb1;
+      id = doc.id;
+    });
+    setDebitoRes(debRes);
+  
+    // 🔍 3️⃣ Prendi indirizzo, telefono e partita IVA
+    const p = query(collection(db, "clin"), where("idCliente", "==", idCliente));  
+    const querySnapshotp = await getDocs(p);
+    querySnapshotp.forEach((doc) => {
+      indiri = doc.data().indirizzo;
+      telefo = doc.data().cellulare;
+      iva = doc.data().partitaIva;
+    });
+    setIndirizzo(indiri);
+    setTelefono(telefo);
+  
+    // 🔍 4️⃣ Trova l'ultimo idOrdine e incrementalo
     const d = query(collection(db, "addNota"), orderBy("createdAt", "desc"), limit(1));  
     const querySnapshotd = await getDocs(d);
-    // Controlla se ci sono risultati nella query
+    
     if (!querySnapshotd.empty) {
-      // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
       querySnapshotd.forEach((doc) => {
-        idOrdine = doc.data().idOrdine.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
-        let idOrdInt = parseInt(idOrdine) + 1 //fa la converisione in intero. e fa la somma
-        idOrdine = idOrdInt.toString()  // lo riconverte in stringa
+        idOrdine = doc.data().idOrdine.substring(1);
+        let idOrdInt = parseInt(idOrdine) + 1;
+        idOrdine = idOrdInt.toString();
       });
     }
-
-    idOrdine= "O" + idOrdine
-
-    var bol= true
-        //andiamo a fare il controllo, per verificare se questo ordine è già presente nel nostro database
-        const s = query(collection(db, "addNota"), where("idCliente", "==", idCliente));  
-        const querySnapshots = await getDocs(s);
-        querySnapshots.forEach((doc) => {
-          if (nomeC == doc.data().nomeC && dataInizialeFormatted ==doc.data().data) {   //va a prendere la trupla di questo cliente di questa data
-            notifyErrorCli()
-            toast.clearWaitingQueue(); 
-            bol=false
-        }
-          });
-
-    if(!nomeC) {
+  
+    idOrdine = "O" + idOrdine;
+  
+    var bol = true;
+  
+    // 🔍 5️⃣ Controllo se esiste già un ordine per quel cliente nella stessa data
+    const s = query(collection(db, "addNota"), where("idCliente", "==", idCliente));  
+    const querySnapshots = await getDocs(s);
+    querySnapshots.forEach((doc) => {
+      if (nomeC == doc.data().nomeC && dataInizialeFormatted == doc.data().data) {  
+        notifyErrorCli();
+        toast.clearWaitingQueue(); 
+        bol = false;
+      }
+    });
+  
+    if (!nomeC) {
       notifyErrorCliEm();
       toast.clearWaitingQueue(); 
-      return
+      return;
     }
-    if(bol == true) {
-    await addDoc(collection(db, "addNota"), {
-      idOrdine,
-      cont,
-      idCliente,
-      nomeC,
-      quota: 0,
-      completa : status,
-      data: dataInizialeFormatted,
-      NumCartoni:"0",
-      dataMilli: dateObject.getTime(),
-      NumBuste:"0",
-      sommaTotale:0,
-      altezza: "1123px",
-      debitoTotale:0,
-      createdAt: serverTimestamp(),
-      idDebito:  id,
-      debitoRes: debRes,
-      indirizzo: indiri,
-      tel: telefo,
-      scaletta: false,
-      scalettaData: "",
-      scalettaDataMilli: 0,
-      scalettaOrdine: 0,
-      partitaIva: iva
-    });
-    setNomeC("");
-    setPopupActive(false);
+  
+    // 📌 6️⃣ Se tutto va bene, aggiungi il nuovo ordine con il cont aggiornato
+    if (bol == true) {
+      await addDoc(collection(db, "addNota"), {
+        idOrdine,
+        cont: contValue, // 👉 Assegniamo il cont aggiornato
+        idCliente,
+        nomeC,
+        quota: 0,
+        completa: status,
+        data: dataInizialeFormatted,
+        NumCartoni: "0",
+        dataMilli: dateObject.getTime(),
+        NumBuste: "0",
+        sommaTotale: 0,
+        altezza: "1123px",
+        debitoTotale: 0,
+        createdAt: serverTimestamp(),
+        idDebito: id,
+        debitoRes: debRes,
+        indirizzo: indiri,
+        tel: telefo,
+        scaletta: false,
+        scalettaData: "",
+        scalettaDataMilli: 0,
+        scalettaOrdine: 0,
+        partitaIva: iva
+      });
+  
+      setNomeC("");
+      setPopupActive(false);
     }
   };
+  
   //_________________________________________________________________________________________________________________
 
     const deleteCol = async (id, dat) => { //cancella tutto dalla data fino ai prodotti che fanno parte della lista
@@ -401,51 +389,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
           handleClose() //chiude il menu elimina ordine
         };
   //__________________________________________________________________________________________________________________________________________________
-    const bloccaNota = async (id, dat, numNot, dtMilli, TotQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
-      const colDoc = doc(db, "ordDat", id); 
-      const q = query(collection(db, "addNota"), where("data", "==", dat));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach(async (hi) => {
-        const p = query(collection(db, "Nota"), where("dataC", "==", dat), where("nomeC", "==", hi.data().nomeC));
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach(async (hip) => {
-          await addDoc(collection(db, "NotaBloccata"), {   //vado prima a salvare questi dati su un db, e poi li cancello
-            dataC: hip.data().dataC,
-            qtProdotto: hip.data().qtProdotto,
-            nomeC: hip.data().nomeC,
-            prodottoC: hip.data().prodottoC,
-            prezzoUniProd: hip.data().prezzoUniProd,
-            prezzoTotProd: hip.data().prezzoTotProd,
-            simbolo: hip.data().simbolo,
-            flagTinte: hip.data().flagTinte,
-            t1: hip.data().t1,
-            t2: hip.data().t2,
-            t3: hip.data().t3,
-            t4: hip.data().t4,
-            t5: hip.data().t5,
-          });
-          await deleteDoc(doc(db, "Nota", hip.id));  //1 elimina tutti i prodotti nella lista nota, cosi libero memoria e farò meno query
-        })
-        await addDoc(collection(db, "addNotaBloccata"), {   //vado prima a salvare questi dati su un db, e poi li cancello
-          data: hi.data().data,
-          nomeC: hi.data().nomeC,
-          dataMilli: hi.data().dataMilli,
-          debitoRes: hi.data().debitoRes,
-          debitoTotale: hi.data().debitoTotale,
-          sommaTotale: hi.data().sommaTotale,
-          quota: hi.data().quota,
-        });
-      await deleteDoc(doc(db, "addNota", hi.id));  //2 elimina tutti i dati di addNota della stessa data
-      });
-      await addDoc(collection(db, "ordDatBloccata"), {   //mette il numero di note in questo db
-        data: dat,
-        dataMilli: dtMilli,
-        numeroNote: numNot,
-        totalQuota: TotQuot,
-      });
-      await deleteDoc(colDoc); //3 infine elimina la data
-  }
+   
 
 
 //*************************************************************** */

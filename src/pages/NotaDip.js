@@ -265,13 +265,20 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
   }
 
   //************************************************************************************************* */
-  const handleNumeroDiNote = async () => {   //funzione che mi permette di prendere il numero di note di quelle data
-    const q = query(collection(db, "ordDat"), where("data", "==", notaDipDataC));  
-    const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        setNumeroPagineNota(doc.data().numeroNote);
-      })
-  } 
+  //permette di prendere il numero delle note di quella giornata
+  const handleNumeroDiNote = async () => {
+    try {
+      const q = query(collection(db, "addNota"), where("data", "==", notaDipDataC));  
+      const querySnapshot = await getDocs(q);
+      
+      const numeroNote = querySnapshot.size; // Conta il numero di documenti trovati
+      setNumeroPagineNota(numeroNote);
+      
+      console.log("Numero di note:", numeroNote);
+    } catch (error) {
+      console.error("Errore nel conteggio delle note:", error);
+    }
+  };
   
   const handleAddContPage = async () => {
     setTimeout(function(){
@@ -324,9 +331,7 @@ const print = async () => {
 
 {/*************DDT****************************************** */}
     <motion.div
-    initial= {{x: "-100vw"}}
-    animate= {{x: 0}}
-    transition={{ duration: 0.4 }}>
+   >
   <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
