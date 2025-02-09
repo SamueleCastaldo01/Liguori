@@ -60,7 +60,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
     //dati per l'input dell'ordine
     const [idCliente, setIdCliente] = React.useState("");
     const [idOrdine, setIdOrdine] = React.useState("");
-    const dataInizialeFormatted = moment(TodayData, "DD/MM/YYYY").format("DD-MM-YYYY");
+    const dataInizialeFormatted = moment(TodayData, "DD/MM/YYYY").add(1, 'days').format("DD-MM-YYYY");
     const [scalettaDataSele, setScalettaDataSele] = useState(dataInizialeFormatted);
     const [valueDateOrd, setValueDateOrd] = useState(1);
     const [status, setStatus] = React.useState("0");

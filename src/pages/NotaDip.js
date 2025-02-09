@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import Fade from '@mui/material/Fade';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes, notifyErrorNumCartoni} from '../components/Notify';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
+import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
 
 
@@ -322,6 +323,10 @@ const print = async () => {
       </div>
 
 {/*************DDT****************************************** */}
+    <motion.div
+    initial= {{x: "-100vw"}}
+    animate= {{x: 0}}
+    transition={{ duration: 0.4 }}>
   <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
@@ -457,8 +462,8 @@ const print = async () => {
         </div> }
 
 <div style={{marginTop:"15vh"}}></div>
-
     </div>
+    </motion.div>
     </>
       )
 }

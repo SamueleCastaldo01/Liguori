@@ -159,13 +159,16 @@ const contEffect = async () => {  //fa il conteggio
       </div>
 
 
-      <motion.div>
-      <div className='container' style={{padding: "20px"}}>
+      <motion.div
+       initial= {{x: "-100vw"}}
+       animate= {{x: 0}}
+       transition={{ duration: 0.4 }}>
+      <div className='container m-0' style={{padding: "20px"}}>
   {/**************tabelle********************************************************************************************************/}
       <div className='row' style={{marginTop: "40px"}}>
         <div className='col' style={{padding: "0px"}}>
     {/***********tabella note********************************************************************************** */}
-        <div  className='todo_containerOrdCli'>
+        <div  className='todo_containerOrdCli w-100' >
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}} >
         <p className='colTextTitle'> Ordine Clienti</p>
