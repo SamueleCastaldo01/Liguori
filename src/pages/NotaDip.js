@@ -332,7 +332,7 @@ const print = async () => {
 {/*************DDT****************************************** */}
     <motion.div
    >
-  <div className='container' style={{paddingLeft: "24px", paddingRight: "24px"}}>
+  <div className='container' style={{padding: "0px"}}>
     {todosAddNot.map((todo) => (
     <div key={todo.id}>
     {todo.data == notaDipDataC && todo.cont == contPage &&  (
@@ -356,7 +356,7 @@ const print = async () => {
   </div>
 
 {/** tabella dei prodotti solo la lista */}
-  <div className="scrollNota">
+  <div className="scrollNota ps-3 pe-3" style={{overflowY: "auto", overflowX: "hidden", height: "60vh"}}>
   {Progress == false && 
   <div style={{marginTop: "14px"}}>
     <CircularProgress />
