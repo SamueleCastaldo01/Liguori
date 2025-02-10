@@ -11,14 +11,8 @@ import { notifyError, notifyErrorDat } from '../components/Notify';
 import Calendar from 'react-calendar';
 import Button from '@mui/material/Button';
 import { Modal } from 'react-bootstrap';
-import Autocomplete from '@mui/material/Autocomplete';
 import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
 import 'moment/locale/it'
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PendingIcon from '@mui/icons-material/Pending';
-import CloseIcon from '@mui/icons-material/Close';
 import { supa, guid, tutti, primary, rosso } from '../components/utenti';
 import MiniDrawer from '../components/MiniDrawer';
 import Box from '@mui/material/Box';
@@ -28,10 +22,6 @@ import FormControl from '@mui/material/FormControl';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import LockIcon from '@mui/icons-material/Lock';
-import { Opacity, Timer3 } from '@mui/icons-material';
-import IconButton from '@mui/material/IconButton';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { motion } from 'framer-motion';
@@ -174,6 +164,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
             });
     
             setScaletta(todosArray);
+            console.log(todosArray)
             setProgress(true);
         });
     };
@@ -693,7 +684,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                 <div style={{ overflowY: "auto", overflowX: "hidden"}}>
                 {scaletta.map((col) => (
                   <div key={col.id}>
-                  {(col.completa == stato  || stato == "4") && 
                     <>
                     <div className="diviCol1" > 
                       <div className="row d-flex algin-items-center">
@@ -718,7 +708,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                     <hr style={{margin: "0"}}/>
 
                   </>
-                  }
+                 
                   </div>
                   ))}
                 </div>
