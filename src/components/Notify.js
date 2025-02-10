@@ -225,6 +225,21 @@ export function notifyUpdateProd () {
         });
 }
 //_____________________________________________________________________________________
+export function notifySuccess (testo) {
+    toast.success(testo, {
+        position: "bottom-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        transition: Slide,
+        progress: undefined,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+//_____________________________________________________________________________________
 export function notifyUpdateDebRes () {
     toast.success("Debito Residuo aggiornato", {
         position: "top-center",

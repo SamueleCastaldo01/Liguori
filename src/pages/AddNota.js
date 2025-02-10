@@ -325,6 +325,7 @@ const contEffect = async () => {
       debitoTotale:0,
       createdAt: serverTimestamp(),
       idDebito:  id,
+      note: "",
       debitoRes: debRes,
       indirizzo: indiri,
       tel: telefo,

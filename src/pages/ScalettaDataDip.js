@@ -20,12 +20,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Height } from '@mui/icons-material';
-import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
@@ -36,73 +33,67 @@ function Row(props) {
     const {dataSc} = props;
     const {quot} = props;
     const {noti} = props;
-    const {quotVec} = props;
-    const {idnote} = props;
     const {nomeC} = props;
     const [open, setOpen] = React.useState(false);
     const [Quota, setQuota] = React.useState(quot);
     const [nomC, setnomC] = React.useState(nomeC);
-    const [QuotaVec, setQuotaVec] = React.useState(quotVec);
     const [nota, setNota] = React.useState(noti);
 
-    const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, tramite query
-        var somma=0;
-        var sommaQ=0;
-        var sommaSommaTot=0;
-        var id="";
-        const q = query(collection(db, "Scaletta"), where("dataScal", "==", dataSc));  //query per fare la somma quota e ASC
-        const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            somma =+doc.data().numAsc + somma;
-            sommaQ=+doc.data().quota +sommaQ;
-            sommaSommaTot= +doc.data().sommaTotale +sommaSommaTot;
+    function notifySuccess (testo) {
+        toast.success(testo, {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            transition: Slide,
+            progress: undefined,
+            theme: "dark",
+            className: "rounded-4"
             });
-            var somTrunc = sommaQ.toFixed(2);  //conversione della quota
-            var somTruncTot = sommaSommaTot.toFixed(2);  //conversione della sommaTotale
-        const p = query(collection(db, "scalDat"), where("data", "==", dataSc));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
-        const querySnapshotp = await getDocs(p);
-              querySnapshotp.forEach(async (hi) => {
-               id = hi.id;
-                });
-        await updateDoc(doc(db, "scalDat", id), { totalQuota: somTrunc, totalAsc:somma, totalSommaTotale:somTruncTot });
+    }
+
+    const SomAsc = async () => {  //qui fa sia la somma degli asc che della quota, tramite query
+
       }
 //******************************************************************************************************************** */
-    const handleEditQuota = async (id, quo, quoV) => {  //handler quando cambio la quota, aggiorna sia add nota, che mi serve per gli ordini chiusi
-      var qui =quo;
-      var quotDiff = +quo- (+quoV);
-      var debTot;
-      if (Quota != qui) {
-        const q = query(collection(db, "debito"), where("nomeC", "==", nomC));  //serve per aggiornare il debito 1
-        const querySnapshot = await getDocs(q);
-            querySnapshot.forEach(async (hi) => {
+const handleEditQuota = async (id, sommaTotale, quotaV) => {  
+  var debTot;
+  var diffPrice;
+  var ripDebito;
 
-            debTot = (+hi.data().deb1 +(+quotDiff)) -(+Quota);   //qui va ad ggiornare il debito1 con la quota va a fare la differenza
-            var debTrunc = debTot.toFixed(2);   //va a troncare il risultato del debito, per non avere problemi di visualizzazione
+      diffPrice = (+sommaTotale) - (+Quota);  // Prima volta, prende la differenza con sommaTotale
 
-            if(debTrunc<0) {
-              qui= (+debTrunc *(-1))  //converte il numero negativo in positivo, per poi fare la sottrazione andando ad aggiornare la quota vecchia
-              debTrunc="0.00"  //poi si azzera per aggiornare 
-            }
-            else { qui="0" }
-            await updateDoc(doc(db, "debito", hi.id), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
-            });
 
-            await updateDoc(doc(db, "Scaletta", id), { quota:Quota, quotaV:qui});   //Aggiorna la quota nella scaletta
-            SomAsc();  //somma della quota totale che viene messata nella scalettaDat
-            await updateDoc(doc(db, "addNota", idnote), { quota:Quota});  //aggiorna addNota, questa quota mi serve perché poi va nella dashClienti (ordini chiusi)
-            notiUpdateScalet();
-            toast.clearWaitingQueue(); 
-      }
-      };
+  // Query per trovare il documento del debito
+  const q = query(collection(db, "debito"), where("nomeC", "==", nomC));  
+  const querySnapshot = await getDocs(q);
+  
+  querySnapshot.forEach(async (hi) => {
+    if(quotaV != 0) {  //se la quota vecchia ci sta, allora devo andare a ristabilire il debito
+      var n1 = +sommaTotale - (+quotaV);
+      ripDebito = (+hi.data().deb1) - (+n1);  // Ripristina il debito con la vecchia quota
+      debTot = +ripDebito + (+diffPrice);  
+    } else {
+      debTot = +hi.data().deb1 + (+diffPrice); // Aggiorna il debito con la differenza
+    }
+      var debTrunc = debTot.toFixed(2);  // Tronca a 2 decimali per evitare problemi
+
+      await updateDoc(doc(db, "debito", hi.id), { deb1: debTrunc });  // Aggiorna il debito nel DB
+  });
+
+  await updateDoc(doc(db, "addNota", id), { quota: Quota });  // Aggiorna la quota nella scaletta
+};
+
     
     const handleEditNota = async (id) => {
-        await updateDoc(doc(db, "Scaletta", id), { note:nota});
-        toast.clearWaitingQueue(); 
+        await updateDoc(doc(db, "addNota", id), { note:nota});
+        notifySuccess("Nota aggiornata");
       };
   
     return (
       <React.Fragment>
-      {row.dataScal  === dataSc  &&  (
         <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
           <TableCell>
             <IconButton
@@ -123,7 +114,6 @@ function Row(props) {
       setQuota(event.target.value);}}
     /></TableCell>
         </TableRow>
-       )}
         <TableRow>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
             <Collapse in={open} timeout="auto" unmountOnExit>
@@ -137,13 +127,10 @@ function Row(props) {
                   <TableBody>
                       <TableRow >
                         <TableCell style={{padding: "0px"}}> <textarea value={nota}  style={{ padding: "0px", width:"220px", border:"none"}} 
-      onChange={(event) => {
-      setNota(event.target.value);}}></textarea></TableCell>
-                      <TableCell><button onClick={()=> {handleEditNota(row.id); handleEditQuota(row.id, row.quota, row.quotaV)}}>conferma</button></TableCell>
+                        onChange={(event) => {
+                        setNota(event.target.value);}}></textarea></TableCell>
+                      <TableCell><button onClick={()=> {handleEditNota(row.id); handleEditQuota(row.id, row.sommaTotale, row.quota)}}>conferma</button></TableCell>
                       </TableRow>
-
-
-
                   </TableBody>
                 </Table>
               </Box>
@@ -160,13 +147,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
     const [todosDataAuto, setTodosDataAuto] = React.useState([]);
 
 
-    const [nomeC, setNomeC] = React.useState("");
-    const [cont, setCont] = React.useState(1);
-    const [flagDelete, setFlagDelete] = useState(false); 
-
     const [dataSc, setDataSc] = React.useState(notaDat);
-
-    const [popupActive, setPopupActive] = useState(true);  
   
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))   //confronto con uid corrente
@@ -181,11 +162,15 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
     function handleInputChange(event, value) {
         setDataSc(value)
     }
+
+      const handleChangeDataScaletta = (e) => {
+        setDataSc(moment(e.target.value).format("DD-MM-YYYY"));
+        };
   
   //********************************************************************************** */  
     React.useEffect(() => {
-      const collectionRef = collection(db, "Scaletta");
-      const q = query(collectionRef, orderBy("createdAt"));
+      const collectionRef = collection(db, "addNota");
+      const q = query(collectionRef, where("scalettaData", "==", dataSc), orderBy("scalettaOrdine", "asc"));
   
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
@@ -196,7 +181,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
       });
       localStorage.removeItem("OrdId");
       return () => unsub();
-    }, []);
+    }, [dataSc]);
 
     React.useEffect(() => {  //effect per l'autocompleate, vado a prendermi le date della scaletta
         const collectionRef = collection(db, "scalDat");
@@ -223,51 +208,22 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
       return ( 
       <>  
     {/**************NAVBAR MOBILE*************************************** */}
-    <div className='navMobile row'>
+    <div className='navMobile row d-flex align-items-center'>
     <div className='col-2'></div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> ScalettaDip </p>
+      <p className='navText'>Liguori Srl </p>
       </div>
       <div className='col' style={{paddingRight: "20px"} }>
-      <Autocomplete
-      sx={{width: "180px", float: "right", marginTop:"5px"}}
-        className='AutoScalDdat'
-        freeSolo
-      value={dataSc}
-      options={todosDataAuto.map((option) => option.data)}
-      onInputChange={handleInputChange}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField  {...params} sx={{
-        "& .MuiInputBase-root": { height: "50px" },
-        "& .MuiButtonBase-root.MuiAutocomplete-clearIndicator": {  
-            color: "white",
-         },
-         '& .MuiOutlinedInput-root': {
-      '& fieldset': {
-        borderColor: 'white',
-      },
-      '&:hover fieldset': {
-        borderColor: 'white',
-      },
-      '&.Mui-focused fieldset': {
-        borderColor: 'white',
-      },
-    },
-    fieldset: {
-              border: "1px solid white",
-              borderRadius: "16px",
-              boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
-            },
-            input: {
-                color: "#EFEFEF",
-                position: "relative",
-                bottom: "2.5px"
-            }
-          }} />}/> {/* fine autocomplete */}
+      <input
+        type="date"
+        value={moment(dataSc, "DD-MM-YYYY").format("YYYY-MM-DD")} // Converti per l'input
+        onChange={(e) => handleChangeDataScaletta(e)} // Salva in formato gg-mm-yyyy
+      />
       </div>
       </div>
 
 <div  style={{padding: "0px"}}>
+  <ToastContainer/>
  {/********************Tabella con MUI***************************************** */}
  <TableContainer sx={ {marginTop: "40px", height: "42rem", bgcolor: "#EFEFEF", borderRadius: "10px", boxShadow: "rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;"}} component={Paper}>
       <Table stickyHeader sx={{ minWidth: 200  }} aria-label="simple table">
@@ -286,7 +242,7 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
         </TableHead>
         <TableBody>
           {todos.map((row) => (
-            <Row key={row.id} row={row} dataSc={dataSc} quot={row.quota} noti={row.note} idnote={row.idNota} quotVec={row.quotaV} nomeC={row.nomeC}/>
+            <Row key={row.id} row={row} quot={row.quota} noti={row.note} idnote={row.idNota} quotVec={row.quota} nomeC={row.nomeC}/>
           ))}
         </TableBody>
       </Table>
