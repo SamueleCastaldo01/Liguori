@@ -210,7 +210,7 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
                     <div className='row' style={{ height: "25px", marginTop: "7px" }}>
                       <div className='col-1 coltext ' style={{ width:"100px" }}><p className='ps-2'>N.</p></div>
                       <div className='col-3 coltext'>Cliente</div>
-                      <div className='col-1 coltext' style={{ width:"110px" }}>€Totale</div>
+                      <div className='col-1 coltext' style={{ width:"110px" }}>€Prezzo</div>
                       <div className='col-1 coltext' style={{ width:"110px" }}>€Quota</div>
                       <div className='col-1 coltext'style={{ width:"100px" }}>Note</div>
                     </div>

@@ -122,8 +122,8 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
         })}
 //********************************************************************************** */
   React.useEffect(() => {   //mi serve per la tabella ordini chiusi
-    const collectionRef = collection(db, "addNotaBloccata");
-    const q = query(collectionRef, orderBy("data", "desc"));
+    const collectionRef = collection(db, "addNota");
+    const q = query(collectionRef, where("completa", "==", "2"), orderBy("data", "desc"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -146,7 +146,7 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
     SommaTot()
   }, [todosOrdChiu, day]);
 //********************************************************************************** */
-  React.useEffect(() => {   //mi serve per creare l'arrai dataProdotto;
+  React.useEffect(() => {   //mi serve per creare l'array dataProdotto;
     const collectionRef = collection(db, "NotaBloccata");  //va a prendere le note bloccate
     const q = query(collectionRef, where("nomeC", "==", nomeCli));
 
