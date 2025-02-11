@@ -36,6 +36,7 @@ import { guid, supa, tutti, dipen } from '../components/utenti';
 import moment from 'moment/moment';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Scaletta from '../pages/Scaletta';
+import ScalettaReview from '../pages/ScalettaReview';
 
 function AnimatedRoutes() {
 
@@ -260,6 +261,7 @@ function AnimatedRoutes() {
     <Route path="/listafornitori" element={<AddFornitori getFornId={getFornIdHandler}/>} />
     <Route path="/scorta" element={<Scorta />} />
     <Route path="/scortatinte" element={<ScortaTinte />} />
+    <Route path="/scalettareview" element={<ScalettaReview notaDat={todayC} getColId={getColIdHandler} getNotaId={getNotadHandler}/>} />
     <Route path="/scalettadata" element={<ScaletData getColId={getColIdHandler}/>} />
     <Route path="/preventivodata" element={<PreventivoData getOrdId={getOrderIdHandler}/>} />
     <Route path="/ordineclientidata" element={<OrdineCliData TodayData={todayC} getOrdId={getOrderIdHandler} getNotaId={getNotadHandler}/>} />

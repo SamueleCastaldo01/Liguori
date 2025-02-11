@@ -36,6 +36,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
 import InvertColorsIcon from '@mui/icons-material/InvertColors';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { useNavigate } from 'react-router-dom';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
@@ -589,6 +590,16 @@ export default function MiniDrawer( {signUserOut} ) {
                 </ListItemButton>
             </ListItem>
             <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scaletta")}}>
+                <ListItemButton sx={{ pl: 4 }}
+                    selected={selectedItem === "ordineclientidata"}
+                  onClick={(event) => handleListItemClick(event, 4)}>
+                  <PlaylistAddIcon sx={{ minWidth: 0,mr: open ? 3 : 'auto'}}>
+                    <FormatListNumberedIcon sx={{ color: "white" }}/>
+                  </PlaylistAddIcon>
+                  <ListItemText primary="Aggiungi Scaletta" sx={{ opacity: open ? 1 : 0 }} />
+                </ListItemButton>
+            </ListItem>
+            <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scalettareview")}}>
                 <ListItemButton sx={{ pl: 4 }}
                     selected={selectedItem === "ordineclientidata"}
                   onClick={(event) => handleListItemClick(event, 4)}>

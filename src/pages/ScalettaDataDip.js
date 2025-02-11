@@ -83,7 +83,7 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
       await updateDoc(doc(db, "debito", hi.id), { deb1: debTrunc });  // Aggiorna il debito nel DB
   });
 
-  await updateDoc(doc(db, "addNota", id), { quota: Quota });  // Aggiorna la quota nella scaletta
+  await updateDoc(doc(db, "addNota", id), { quota: Quota, completa: "2" });  // Aggiorna la quota nella scaletta
 };
 
     
@@ -104,7 +104,7 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </TableCell>
-          <TableCell component="th" scope="row">
+          <TableCell style={{backgroundColor: row.completa=="2" ? "#0d730d" : "transparent"}} component="th" scope="row">
             {row.nomeC}
           </TableCell>
           <TableCell align="right">{row.sommaTotale}</TableCell>

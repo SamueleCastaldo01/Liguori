@@ -694,7 +694,7 @@ const print = async () => {
     <h6>Debito Totale: €{parseFloat(debitoTot).toFixed(2).replace('.', ',')}</h6>
     {flagStampa == false && <>
   {Completa==0 ?  <Button variant='contained' color='success' onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</Button> :
-    <Button variant='contained' color='error' onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</Button>
+    <Button disabled={Completa === "2"}  variant='contained' color='error' onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</Button>
      }
   </>}
 

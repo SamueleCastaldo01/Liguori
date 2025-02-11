@@ -558,7 +558,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
       <div className='col-2'>
       </div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> Scaletta </p>
+      <p className='navText'>Scaletta </p>
       </div>
       </div>
 
@@ -573,7 +573,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
-    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
+    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Aggiungi Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
    <div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}> 
     <ToggleButtonGroup
