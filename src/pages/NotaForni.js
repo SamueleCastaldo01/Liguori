@@ -103,28 +103,32 @@ const SomAsc = async () => {
     }
 //********************************************************************************** */
   
-     React.useEffect(() => {
-        const collectionRef = collection(db, "notaForni");
-        const q = query(collectionRef, orderBy("createdAt"));
-        const unsub = onSnapshot(q, (querySnapshot) => {
-          let todosArray = [];
-          querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
-          setTodos(todosArray);
-          setProgress(true);
+    const caricaNotaForni = () => {
+      const collectionRef = collection(db, "notaForni");
+      const q = query(collectionRef, where("nomeF", "==", nomeForni), where("data", "==", data), orderBy("createdAt"));
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
         });
-        cliEffect();
-        SomAsc();
-        localStorage.removeItem("NotaForniId");
-        return () => unsub();
+        setTodos(todosArray);
+        setProgress(true);
+      });
+      cliEffect();
+      SomAsc();
+      localStorage.removeItem("NotaForniId");
+      return () => unsub();
+    }
+
+     React.useEffect(() => {
+        caricaNotaForni()
       }, []);
 
 
     //prodotti fornitori, questa viene attiva una sola volta
       React.useEffect(() => {
         const collectionRef = collection(db, "prodottoForn");
-        const q = query(collectionRef);
+        const q = query(collectionRef, where("author.name", "==", nomeForni));
     
         const unsub = onSnapshot(q, (querySnapshot) => {
           let todosArray = [];
@@ -144,6 +148,7 @@ const createCate = async () => {
     quantita: 1,
     createdAt: serverTimestamp(),
   });
+  caricaNotaForni();
 };
 //_________________________________________________________________________________________________________________
 const handleEdit = async ( todo, qt, prod) => {
@@ -157,18 +162,15 @@ const handleEdit = async ( todo, qt, prod) => {
 const handleRefresh = async ( ) => {
   var flagPresNota = false
   const collectionRef = collection(db, "prodotto");
-  //ci sono due cicli dentro un cicolo.    Il primo serve per vedere se ci sono i gli stessi prodotti presenti nella nota, il secondo serve per prendere i valori dei prodotti
+  //ci sono due cicli dentro un ciclo.    Il primo serve per vedere se ci sono i gli stessi prodotti presenti nella nota, il secondo serve per prendere i valori dei prodotti
 todosNota.map( async (todo) => {    //ciclo princiale sui prodotti del fornitore
   todos.map((tdPrdNot) => {  //primo ciclo per vedere i prodotti presenti nella nota
-    console.log("tutti i prodotti"+ todo.nomeP)
     if (todo.nomeP == tdPrdNot.nomeP && todo.author.name == nome) {  //se trova questo prodotto nella nota, allora il flag cambia e non va ad inserire il prodotto nella nota
       flagPresNota = true 
-      console.log("truee")
-      console.log(todo.nomeP)
     }
   } )
  if(flagPresNota == false) {  //qui inizia il seconodo ciclo nel ciclo
-  if(todo.author.name == nome ) { //vado a prendere solo i prodotti dei quel fornitore che sto andando a inserire
+  if(todo.author.name == nome ) { //vado a prendere solo i prodotti di quel fornitore che sto andando a inserire
     const q = query(collectionRef, where("nomeP", "==", todo.nomeP));  // va a prendere lo stesso prodotto, vado a prendere i dati di quel prodotto
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (hi) => {   //questo è il ciclo for della query, dove vado nella scorta
@@ -192,6 +194,7 @@ const handleDelete = async (id) => {
   const colDoc = doc(db, "notaForni", id); 
   //infine elimina la data
   await deleteDoc(colDoc); 
+  caricaNotaForni()
 };
 //_________________________________________________________________________________________________________________
   //stampa
