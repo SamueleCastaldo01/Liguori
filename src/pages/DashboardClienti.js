@@ -32,10 +32,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
 
 export const dataProdotto = [];  //in questo caso viene salvato il valore anche quando cambio pagina
+export const AutoProdCli = [];
 
-function DashClienti({ clientId, nomeCli, getNotaDash }) {
+function DashClienti({ clientId, nomeCli, getNotaDash, getNotaId }) {
 
-  const [todos, setTodos] = React.useState([]);
   const [todosOrdChiu, setTodosOrdChiu] = React.useState([]);
   const [todosNotaBlock, setTodosNotaBlock] = React.useState([]);
   const [todosProdotto, setTodosProdotto] = React.useState([]);
@@ -43,6 +43,7 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
   const timeElapsed = Date.now();  //prende la data attuale in millisecondi
   const today = new Date(timeElapsed);    //converte
   const [day, setday] = React.useState("");
+  let todayMilli = today.getTime()
 
   const [Progress, setProgress] = React.useState(false);
 
@@ -55,7 +56,6 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
   const componentRef = useRef();  //serve per la stampa
   let navigate = useNavigate();
 
-  const [flagTabellaProdotti, setFlagTabellaProdotti] = useState(false);  
   const [FlagStampa, setFlagStampa] = useState(false);
 
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
@@ -66,8 +66,7 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
-    const [searchTerm, setSearchTerm] = useState("");  //search
-    const inputRef= useRef();
+
 
 
     function handleInputChange(event, value) {
@@ -91,63 +90,29 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
       })
   }
 
-//_________________________________________________________________________________________________________________
-     //messaggio di conferma per cancellare la trupla
-     const Msg = () => (
-      <div style={{fontSize: "16px"}}>
-        <p style={{marginBottom: "0px"}}>Sicuro di voler eliminare</p>
-        <p style={{marginBottom: "0px"}}>(perderai tutti i dati)</p>
-        <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={Remove}>Si</button>
-        <button className='buttonClose mt-2 rounded-4'>No</button>
-      </div>
-    )
+      const auto = async (idCliente) => {  //array per i prodotti dei clienti
+        const q = query(collection(db, "prodottoClin"), where("author.idCliente", "==", idCliente));
+        const querySnapshot = await  getDocs(q);
+        querySnapshot.forEach((doc) => {
+  
+        let car = { label: doc.data().nomeP,
+                    id: doc.id,
+                    prezzoUni: doc.data().prezzoUnitario }
+        AutoProdCli.push(car);
+        });
+        }
 
-      const Remove = () => {
-          handleDelete(localStorage.getItem("IdProdClin") );
-          toast.clearWaitingQueue(); 
-               }
-
-    const displayMsg = () => {
-      toast.warn(<Msg/>, {
-        position: "top-center",
-        autoClose: false,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        transition: Slide,
-        theme: "dark",
-        className: "rounded-4"
-        })}
 //********************************************************************************** */
   React.useEffect(() => {   //mi serve per la tabella ordini chiusi
-    const collectionRef = collection(db, "addNota");
-    const q = query(collectionRef, where("completa", "==", "2"), orderBy("data", "desc"));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-      setTodosOrdChiu(todosArray);
-      setProgress(true);
-      today.setDate(today.getDate() - 31);   //fa la differenza rispetto al valore del select sottraendo, il risultato sarà in millisecondi
-      localStorage.setItem("bho4", today.getTime())
-    });
-    return () => unsub();
+    handleChangeDataSelect(31)
   }, []);
-
-  React.useEffect(() => {   //mi serve per la tabella ordini chiusi
-    SommaTot()
-  }, [todosOrdChiu, day]);
 
   React.useEffect(() => {   //mi serve per la tabella ordini chiusi
     SommaTot()
   }, [todosOrdChiu, day]);
 //********************************************************************************** */
   React.useEffect(() => {   //mi serve per creare l'array dataProdotto;
-    const collectionRef = collection(db, "NotaBloccata");  //va a prendere le note bloccate
+    const collectionRef = collection(db, "Nota");  //va a prendere le note bloccate
     const q = query(collectionRef, where("nomeC", "==", nomeCli));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
@@ -158,10 +123,10 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
       setTodosNotaBlock(todosArray);
     });
     return () => unsub();
-  }, [flagRicercaProd == true]);
+  }, [flagRicercaProd]);
 
 
-  React.useEffect(() => {   //mi serve per l'autocomplete della ricerca per prodotti
+  React.useEffect(() => {   //prende i prodotti per metterli nel autocomplete
     const collectionRef = collection(db, "prodotto");
     const q = query(collectionRef, orderBy("nomeP"));
 
@@ -173,14 +138,28 @@ function DashClienti({ clientId, nomeCli, getNotaDash }) {
       setTodosProdotto(todosArray);
     });
     return () => unsub();
-  }, [flagRicercaProd == true]);
+  }, [flagRicercaProd]);
     //**************************************************************************** */
 
-    const handleChangeDataSelect = (event) => {
-      setday(event.target.value);      //prende il valore del select
-      var ok= event.target.value
-      today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
-       localStorage.setItem("bho4", today.getTime())
+    const handleChangeDataSelect = (ok) => {
+      console.log(ok);
+      today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo (per ridurre e i vari giorni)
+      today.setHours(0, 0, 0, 0);   //mette la data a 00:00
+      todayMilli = today.getTime()   //lo converte in millisecondi
+
+      const collectionRef = collection(db, "addNota");
+      const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("completa", "==", "2"));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        todosArray.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate()); // Ordine crescente
+        setTodosOrdChiu(todosArray);
+        setProgress(true);
+      });
+
     };
 
     const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
@@ -212,11 +191,6 @@ const print = async () => {
     handlePrint();
   },1);
 }
-  //**************************************************************************** */
-    const handleDelete = async (id) => {
-      await deleteDoc(doc(db, "prodottoClin", id));
-    };
-
 //*************************************************************************** */
 //      INTERFACCIA
 //*********************************************************************************** */
@@ -253,8 +227,11 @@ const print = async () => {
         <h4 className='mt-3'>Nome Cliente: {nomeCli} </h4>
 
       <div>
+        {/*
         <span><button >Debito </button></span>
         <span><button onClick={() => {setFlagRicercaProd(!flagRicercaProd)}}>Ricerca per prodotto </button></span>
+        */}
+      
       </div>
 
   {flagRicercaProd == true &&
@@ -282,7 +259,7 @@ const print = async () => {
             labelId="demo-simple-select-label"
             id="demo-simple-select"
             defaultValue={31}
-            onChange={handleChangeDataSelect}>
+            onChange={(e) => handleChangeDataSelect(e.target.value)}>
               <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
               <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
               <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
@@ -332,10 +309,12 @@ const print = async () => {
     <div key={todo.id}>
     {dtPrd.dataProd == todo.data && todo.nomeC == nomeCli && todo.dataMilli >= localStorage.getItem("bho4") && 
     <div className='row' style={{padding: "0px"}}   
-                  onClick={() => {
-                  getNotaDash(todo.id, todo.nomeC, todo.data)
-                  navigate('/notadashcliente/'+todo.nomeC+"/"+todo.data);
-                         }}>
+          onClick={()=> {
+            getNotaId(todo.idCliente, todo.id, todo.cont, todo.nomeC, todo.data, todo.data, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
+            navigate("/nota")
+            auto(todo.idCliente);
+            AutoProdCli.length = 0
+                                }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
       <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
       <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
@@ -356,10 +335,12 @@ const print = async () => {
     <div key={todo.id}>
     { todo.nomeC == nomeCli && todo.dataMilli >= localStorage.getItem("bho4") && 
     <div className='row' style={{padding: "0px"}}   
-                  onClick={() => {
-                  getNotaDash(todo.id, todo.nomeC, todo.data)
-                  navigate('/notadashcliente/'+todo.nomeC+"/"+todo.data);
-                         }}>
+                  onClick={()=> {
+                      getNotaId(todo.idCliente, todo.id, todo.cont, todo.nomeC, todo.data, todo.data, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
+                      navigate("/nota")
+                      auto(todo.idCliente);
+                      AutoProdCli.length = 0
+                                          }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
       <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
       <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>

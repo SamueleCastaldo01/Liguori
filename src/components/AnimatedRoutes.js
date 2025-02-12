@@ -278,7 +278,7 @@ function AnimatedRoutes() {
     </Route>
   
       <Route element={<PrivateDashCli clientId={clientId}/>}>
-      <Route path="/dashclienti" element={<DashClienti clientId={clientId} nomeCli={nomeCli} getNotaDash={getNotaDashHandler}/>} />
+      <Route path="/dashclienti" element={<DashClienti clientId={clientId} nomeCli={nomeCli} getNotaDash={getNotaDashHandler} getNotaId={getNotadHandler}/>} />
       </Route>
   
       <Route element={<PrivateDashForn fornId={fornId}/>}>

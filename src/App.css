@@ -597,12 +597,12 @@ width: 110%;
 .todo_containerInOrdine,
 .todo_containerDebCli,
 .todo_containerScalet,
-.todo_containerScorta,
 .todo_containerCli,
 .todo_containerCronoo {
   width: auto;
   min-width: 1000px;
 }
+
 
 .todo_containerCronoo {
   height: 470px;

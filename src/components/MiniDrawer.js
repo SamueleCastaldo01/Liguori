@@ -506,7 +506,6 @@ export default function MiniDrawer( {signUserOut} ) {
                   <ListItemText primary="Prodotti" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>
           </ListItem>
-        {/** 
           <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scortatinte")}}>
               <ListItemButton sx={{ pl: 4 }}
           selected={selectedItem === "scortatinte"}
@@ -517,7 +516,6 @@ export default function MiniDrawer( {signUserOut} ) {
                 <ListItemText primary="Tinte" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
           </ListItem>
-          */}
         </List>
       </Collapse>
       </div>

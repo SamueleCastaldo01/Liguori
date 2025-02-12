@@ -309,7 +309,9 @@ const handleChangeAge = (event) => {
 
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
-{((sup ===true  && Completa== "1" && todo.simbolo != "(NO)") || (sup ===true  && Completa== "0")) &&(   //non fa visualizzare i prodotti no, quando confermi la nota
+{((sup === true  && Completa == "1" && todo.simbolo != "(NO)") || 
+  (sup === true  && Completa == "0") ||
+  (sup === true  && Completa == "2")) &&(   //non fa visualizzare i prodotti no, quando confermi la nota
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
     <div className="col-1" style={{padding:"0px",
@@ -329,7 +331,7 @@ const handleChangeAge = (event) => {
     </>
     )}
 
-    {sup ===true && Completa == 1 &&   
+    {sup ===true && (Completa == 1 || Completa == 2) &&   
       <>
       {todo.simbolo== "1" ?
     <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{+todo.qtProdotto-(+todo.meno)}</span></h3> :
@@ -373,7 +375,7 @@ const handleChangeAge = (event) => {
     </>
     )}
    {/*****PRD completati************** */}
-    {sup ===true && todo.flagTinte===false && Completa == 1 &&( 
+    {sup ===true && todo.flagTinte===false && (Completa == 1 || Completa == 2 ) &&( 
       <>
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " "  && "#FFFF00"}}>{todo.prodottoC}
       </span>
@@ -447,7 +449,7 @@ const handleChangeAge = (event) => {
        }
       </>
     )}
-    {sup ===true && todo.flagTinte===true && Completa == 1 &&(
+    {sup ===true && todo.flagTinte===true && (Completa == 1 || Completa == 2) &&(
       <>
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} 
       {todo.t1 && <> <span className="inpTabNota" style={{ marginLeft: "35px", textAlign:"center", padding:"0px"}}> {todo.t1} </span>   </> }
@@ -478,7 +480,7 @@ const handleChangeAge = (event) => {
       <h3 className="inpTabNota" style={{ textAlign: "center"}}> {todo.simbolo2} </h3>
     )}
 
-    {sup && Completa === 1 && ( 
+    {sup && (Completa == 1 || Completa == 2) && ( 
   <>
     {todo.simbolo2 === "-" || todo.simbolo2 === "In Omaggio" || todo.simbolo2 === "G. P." ?  
       <h3 className="inpTabNota" style={{ marginLeft: "20px"}}> {todo.simbolo2} </h3>  :

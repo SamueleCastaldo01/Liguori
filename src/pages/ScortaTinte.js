@@ -11,11 +11,12 @@ import { useNavigate } from "react-router-dom";
 import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Modal } from 'react-bootstrap';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TodoScorta from '../components/TodoScorta';
 import Button from '@mui/material/Button';
-import { supa, guid, tutti, dipen } from '../components/utenti';
+import { supa, guid, tutti, dipen, primary } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem';
@@ -27,6 +28,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { color, motion } from 'framer-motion';
+import TodoScortaTinte from '../components/TodoScortaTinte';
 
 function ScortaTinte() {
 
@@ -58,6 +60,7 @@ function ScortaTinte() {
   const [alignment, setAlignment] = React.useState('scorta');
 
   const [popupActiveCrono, setPopupActiveCrono] = useState(false);  
+  const [popupActiveScortaEdit, setPopupActiveScortaEdit] = useState(false); 
   const [FlagEdit, setFlagEdit] = useState("0");
   const [flagTinte, setflagTinte] = useState("TECH");
   const [PrdDisp, setPrdDisp] = useState(-1);
@@ -65,6 +68,7 @@ function ScortaTinte() {
   const [open, setOpen] = React.useState(false); //serve per lo speedDial
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const handleCloseMod = () =>{ setPopupActive(false); setPopupActiveScortaEdit(false)};
 
   const [FlagStampa, setFlagStampa] = useState(false);
   const [flagDelete, setFlagDelete] = useState(false); 
@@ -364,6 +368,7 @@ function handlePopUp(image, nota) {
       }
       setNomeP("");
       setFlagEdit(+FlagEdit+1);
+      setPopupActive(false);
   };
 
    //******************************************************************************************************** */
@@ -466,9 +471,10 @@ function handlePopUp(image, nota) {
       <ArrowBackIcon id="i" /></button> 
     }
 
-{!matches ? <h1 className='title mt-3'> Scorta Tinte </h1> : <div style={{marginBottom:"60px"}}></div>} 
+{/**************TITLE*************************************** */}
+{!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Scorte Tinte</h1> : <div style={{marginBottom:"60px"}}></div>}
       
-
+<div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}>
       <ToggleButtonGroup
       color="primary"
       value={alignment}
@@ -476,53 +482,57 @@ function handlePopUp(image, nota) {
       onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {sup == true &&<Button onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Tinta</Button>}
-      <ToggleButton  onClick={() => {navigate("/scorta")}} color='secondary' value="scortatinte">Scorta</ToggleButton>
-      <ToggleButton onClick={handleSpeedScorta} color='secondary' value="scorta">Scorta Tinte</ToggleButton>
-      <ToggleButton onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</ToggleButton> 
+    {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Tinta</Button>}
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  onClick={() => {navigate("/scorta")}} color='secondary' value="scortatinte">Scorta</Button>
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={handleSpeedScorta} color='secondary' value="scorta">Scorta Tinte</Button>
+      <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</Button> 
       {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
     </ToggleButtonGroup>
-
+</div>
     {sup ===true && (
         <>    
 {/** Aggiungi Tinte **************************************************************************/}
-{popupActive &&
-      <div> 
-      <form className='formScortTinte' onSubmit={handleSubmit}>
-      <div className='divClose'>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); }}>
-              <CloseIcon id="i" />
-              </button> </div>
-      <div className="input_container">
-      <TextField className='inp mt-2' id="filled-basic" label="Nuance" variant="outlined" autoComplete='off' value={nomeP} 
-        onChange={(e) => setNomeP(e.target.value)}/>
-          <FormControl >
-        <InputLabel id="demo-simple-select-label"></InputLabel>
-        <Select sx={{height:39, marginLeft:-1, width: 200, marginTop: "10px"}}
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          defaultValue={"TECH"}
-          onChange={handleChangeBrand}
-        >
-          <MenuItem value={"TECH"}>TECH</MenuItem>
-          <MenuItem value={"KF"}>KF</MenuItem>
-          <MenuItem value={"KR"}>KR</MenuItem>
-          <MenuItem value={"KG"}>KG</MenuItem>
-          <MenuItem value={"K10"}>K10</MenuItem>
-          <MenuItem value={"CB"}>CB</MenuItem>
-          <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
-          <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
-          <MenuItem value={"VIBRANCE"}>VIBRANCE</MenuItem>
-          <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
-          <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
-        </Select>
-      </FormControl>
+{/******Aggiungi Prodotto  modal***************************************************************************** */}
+<Modal  size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod} style={{ marginTop: "50px" }}>
+      <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); setPopupActiveScortaEdit(false); }}>
+              <CloseIcon id="i" /></button> </div>
+    {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Tinta </h4>}
+    {popupActiveScortaEdit && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Modifica Tinta </h4>}
+          <Modal.Body>
+      <div className='row mt-4 mb-4 d-flex align-content-center' >
+      <div className='col-8'>
+      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Nuance" variant="outlined" autoComplete='off' value={nomeP} 
+          onChange={(e) => setNomeP(e.target.value)}/>
       </div>
-      <div className="btn_container">
-      <Button  type='submit' variant="outlined" >Aggiungi Tinta </Button>
+      <div className='col-4'> 
+        <FormControl >
+          <InputLabel id="demo-simple-select-label"></InputLabel>
+          <Select sx={{height:60, marginLeft:-1, width: 200, marginTop: "0px"}}
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            defaultValue={"TECH"}
+            onChange={handleChangeBrand}
+          >
+            <MenuItem value={"TECH"}>TECH</MenuItem>
+            <MenuItem value={"KF"}>KF</MenuItem>
+            <MenuItem value={"KR"}>KR</MenuItem>
+            <MenuItem value={"KG"}>KG</MenuItem>
+            <MenuItem value={"K10"}>K10</MenuItem>
+            <MenuItem value={"CB"}>CB</MenuItem>
+            <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
+            <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
+            <MenuItem value={"VIBRANCE"}>VIBRANCE</MenuItem>
+            <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
+            <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
+          </Select>
+        </FormControl>
       </div>
-    </form>
-    </div>
-  } 
+      </div>
+       {popupActive && <Button onClick={handleSubmit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Tinta </Button>}
+       {popupActiveScortaEdit && <Button onClick={""} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Tinta </Button>}   
+          </Modal.Body>
+  </Modal>
+ 
     </>
     )}
 
@@ -531,7 +541,7 @@ function handlePopUp(image, nota) {
 <>
 {sup == true  && <div style={{marginTop: "50px"}}></div>}
 {sup == false  && <div style={{marginTop: "20px"}}></div>}
-<div ref={componentRef} className='todo_containerScorta' style={{width: dip == true && "100%"}}>
+<div ref={componentRef} className='todo_containerScorta' style={{width: dip == true ? "100%" : "700px"}}>
 <div className='row' > 
 <div className='col-4' style={{width: "100px"}}>
 <p className='colTextTitle'>Tinte</p>
@@ -612,25 +622,22 @@ function handlePopUp(image, nota) {
 </div>
 
 <div className='row' style={{marginRight: "5px"}}>
-<div className='col-5' >
+<div className='col-2' >
 <p className='coltext'>Nuance</p>
 </div>
 
 {sup == true && 
 <>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col-2' style={{padding: "0px"}}>
   <p className='coltext'>Qt</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col-2' style={{padding: "0px"}}>
   <p className='coltext'>Ss</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Pa(€)</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col-2' style={{padding: "0px"}}>
   <p className='coltext'>Qo</p>
 </div>
-<div className='col-1' style={{padding: "0px"}}>
+<div className='col-2' style={{padding: "0px"}}>
   <p className='coltext'>Agg</p>
 </div>
 </>}
@@ -664,7 +671,7 @@ function handlePopUp(image, nota) {
             }).map((todo) => (
     <div key={todo.id}>
     { flagTinte == todo.brand && todo.quantita> PrdDisp && (
-    <TodoScorta
+    <TodoScortaTinte
       key={todo.id}
       todo={todo}
       handleDelete={handleDelete}
