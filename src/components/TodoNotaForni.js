@@ -51,7 +51,7 @@ export default function TodoNotaForni({ todo, handleDelete, handleEdit, displayM
 //INTERFACCIA ***************************************************************************************************************
 //*************************************************************************************************************************** */
   return (
-    <div className="prova">
+    <div style={{backgroundColor: "white"}} className="prova">
 
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>

@@ -33,6 +33,7 @@ function OrdineForniData({ getOrdFornId }) {
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte
+    let todayMilli = today.getTime()
     const [day, setday] = React.useState("");
     const [flagDelete, setFlagDelete] = useState(false); 
 
@@ -67,13 +68,30 @@ function OrdineForniData({ getOrdFornId }) {
       });
       }
   //_________________________________________________________________________________________________________________
-         const handleChangeDataSelect = (event) => {
-          setday(event.target.value);      //prende il valore del select
-          var ok= event.target.value
-          console.log({ok})
-          today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo
-           localStorage.setItem("bho4", today.getTime())
-        };
+
+      const handleChangeDataSelect = (ok) => {
+        console.log("entrato");
+      
+        today.setDate(today.getDate() - ok);   // Riduce la data di 'ok' giorni
+        today.setHours(0, 0, 0, 0);            // Imposta l'orario a 00:00
+        todayMilli = today.getTime();          // Converte in millisecondi
+      
+        const collectionRef = collection(db, "ordFornDat");
+        const q = query(collectionRef, where("dataMilli", ">", todayMilli));
+      
+        const unsub = onSnapshot(q, (querySnapshot) => {
+          let todosArray = [];
+          querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+          });
+      
+          // Ordina dal più recente al meno recente (decrescente)
+          todosArray.sort((a, b) => b.dataMilli - a.dataMilli);
+      
+          setColle(todosArray);
+        });
+      };
+  
 
    //_________________________________________________________________________________________________________________
     const setClear = () => {
@@ -112,20 +130,7 @@ function OrdineForniData({ getOrdFornId }) {
 
     //********************************************************************************** */
   React.useEffect(() => {
-    const collectionRef = collection(db, "ordFornDat");
-    const q = query(collectionRef, orderBy("nome", "desc"));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-      setColle(todosArray);
-      today.setDate(today.getDate() - 8);   //fa la differenza rispetto al valore del select sottraendo
-      localStorage.setItem("bho4", today.getTime())
-    });
-    return () => unsub();
-
+    handleChangeDataSelect(8)
   }, []);
   //_________________________________________________________________________________________________________________
 
@@ -210,13 +215,13 @@ function OrdineForniData({ getOrdFornId }) {
       <Calendar onChange={setData} value={nome} />
       </div>
       <div className="btn_container">
-      <Button type='submit' variant="outlined">Aggiungi la data</Button>
+      <Button className='text-white' type='submit' variant="contained">Aggiungi la data</Button>
       </div>
     </form>
   </div> }
 {!popupActive &&
   <div className="btn_container mt-5"> 
-  <Button  onClick={() => { setPopupActive(true); }}  variant="outlined">Aggiungi una data</Button>
+  <Button className='text-white'  onClick={() => { setPopupActive(true); }}  variant="contained">Aggiungi una data</Button>
   </div>
   }
   </>
@@ -247,7 +252,7 @@ function OrdineForniData({ getOrdFornId }) {
                          labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         defaultValue={8}
-                        onChange={handleChangeDataSelect}>
+                        onChange={(e) => handleChangeDataSelect(e.target.value)}>
                         <MenuItem value={8}>Ultimi 7 giorni</MenuItem>
                         <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
                         <MenuItem value={91}>Ultimi 90 giorni</MenuItem>

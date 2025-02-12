@@ -51,6 +51,7 @@ import { useState, useEffect } from 'react';
 import DraftsIcon from '@mui/icons-material/Drafts';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import Person4Icon from '@mui/icons-material/Person4';
 import Collapse from '@mui/material/Collapse';
 import { useLocation } from 'react-router-dom'; 
 import TodoClient from './TodoClient';
@@ -539,9 +540,21 @@ export default function MiniDrawer( {signUserOut} ) {
           selected={selectedItem === "listafornitori"}
           onClick={(event) => handleListItemClick(event, 3)}>
                 <ListItemIcon sx={{minWidth: 0, mr: open ? 3 : 'auto'}}>
-                  <InvertColorsIcon sx={{ color: "white" }}/>
+                  <Person4Icon sx={{ color: "white" }}/>
                 </ListItemIcon>
                 <ListItemText primary="Anagrafica Fornitori" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+          </ListItem>
+        </List>
+        <List component="div" disablePadding>
+        <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/ordinefornitoridata")}}>
+              <ListItemButton sx={{ pl: 4 }}
+          selected={selectedItem === "listafornitori"}
+          onClick={(event) => handleListItemClick(event, 3)}>
+                <ListItemIcon sx={{minWidth: 0, mr: open ? 3 : 'auto'}}>
+                  <NoteAltIcon sx={{ color: "white" }}/>
+                </ListItemIcon>
+                <ListItemText primary="Ordine Fornitori" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
           </ListItem>
         </List>

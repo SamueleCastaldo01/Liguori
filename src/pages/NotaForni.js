@@ -17,6 +17,8 @@ import { WhatsappShareButton, WhatsappIcon, EmailShareButton, EmailIcon } from '
 import { useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
+import { motion } from 'framer-motion';
+
 
 
 
@@ -211,7 +213,10 @@ const print = async () => {
 //************************************************************** */
     return (  
         <>
-
+   <motion.div className=''
+        initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
 {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
       onClick={() => {navigate(-1)}}>
@@ -240,7 +245,7 @@ const print = async () => {
     </>
 }
     
-    <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
+    <div ref={componentRef} className="foglioA4 mt-3" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px", backgroundColor: "white"}}>
     <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
             <h3 className='mb-4'>{nome} </h3>
@@ -290,6 +295,7 @@ const print = async () => {
   </div>
 
     </div>
+    </motion.div>
     </>
       )
 }

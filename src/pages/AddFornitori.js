@@ -406,17 +406,18 @@ const handleActiveEdit = async (todo) => {
             }).map((todo) => (
     <div key={todo.id}>
     <div className='row '>
-        <div className='col-1' >
+        <div className='col-1' onClick={() => {
+            handleActiveEdit(todo)
+        }}>
         <h4 className='inpTab' style={{ color:primary }}><b>{todo.idFornitore}</b></h4>
         </div>
         <div className='col-2' style={{ width:"250px" }}>
-            <h4 className='inpTab'   onClick={() => { /** 
+            <h4 className='inpTab'   onClick={() => { 
             getFornId(todo.id, todo.nomeF)
             navigate("/dashfornitore");
             auto();
-            AutoCompScorta.length = 0*/
-            handleActiveEdit(todo)
-                            }}> {todo.nomeF} </h4>
+            AutoCompScorta.length = 0
+              }}> {todo.nomeF} </h4>
         </div>
         <div className='col-2' style={{ width:"250px" }}>
           <h4 className='inpTab'> {todo.indirizzoEmail}</h4>

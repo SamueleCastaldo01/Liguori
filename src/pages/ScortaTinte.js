@@ -384,10 +384,11 @@ function handlePopUp(image, nota) {
 };
 //****************************************************************************************** */
   const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
+    console.log(SotSco)
     if(todo.pa != pap) {    //la trupla viene inserita solo se pa viene cambiato
       handleCronologiaPa(todo, pap)
     }
-    await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd, pa:pap});
+    await updateDoc(doc(db, "scortaTinte", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd});
     setFlagEdit(+FlagEdit+1);
     toast.clearWaitingQueue(); 
   };

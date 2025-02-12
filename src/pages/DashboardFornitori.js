@@ -21,6 +21,8 @@ import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TodoProdForn from '../components/todoProdForn';
+import { motion } from 'framer-motion';
+
 
 function DashFornitori({ fornId, nomeForn }) {
 
@@ -76,9 +78,9 @@ function DashFornitori({ fornId, nomeForn }) {
         className: "rounded-4"
         })}
 //********************************************************************************** */
-  React.useEffect(() => {
+  const caricaProdottiForn = () => {
     const collectionRef = collection(db, "prodottoForn");
-    const q = query(collectionRef, orderBy("nomeP"));
+    const q = query(collectionRef, where("author.name", "==", nomeForn), orderBy("nomeP"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
@@ -88,7 +90,10 @@ function DashFornitori({ fornId, nomeForn }) {
       setTodos(todosArray);
     });
     return () => unsub();
+  }
 
+  React.useEffect(() => {
+    caricaProdottiForn()
   }, []);
     //**************************************************************************** */
     const handleDelete = async (id) => {
@@ -127,6 +132,7 @@ function DashFornitori({ fornId, nomeForn }) {
       author: { name: nomeForn, id: fornId }
     });
     setNomeP("");
+    caricaProdottiForn();
   }
 };
 //*************************************************************************** */
@@ -135,6 +141,10 @@ function DashFornitori({ fornId, nomeForn }) {
 
       return ( 
       <>  
+    <motion.div
+          initial= {{x: "-100vw"}}
+        animate= {{x: 0}}
+        transition={{ duration: 0.4 }}>
       <button className="backArrowPage" style={{float: "left"}}
       onClick={() => {navigate("/listafornitori")}}>
       <ArrowBackIcon id="i" /></button> 
@@ -208,6 +218,7 @@ function DashFornitori({ fornId, nomeForn }) {
   </div>
   </>
 }
+</motion.div>
       </>
         )
   }
