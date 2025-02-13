@@ -486,7 +486,9 @@ function handlePopUp(image, nota) {
     {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={handleSpeedAddProd} size="small" variant="contained">Aggiungi Tinta</Button>}
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  onClick={() => {navigate("/scorta")}} color='secondary' value="scortatinte">Scorta</Button>
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={handleSpeedScorta} color='secondary' value="scorta">Scorta Tinte</Button>
+    {sup == true &&
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</Button> 
+    }
       {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
     </ToggleButtonGroup>
 </div>

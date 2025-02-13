@@ -339,7 +339,7 @@ const print = async () => {
       <>
       <hr className='hrNotDip' style={{borderTop: todo.completa==1 ? "6px solid green" : "6px solid red"}}></hr>
       <div className='row' style={{marginTop: "40px"}} >
-        <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
+        <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"20px"}}>
         <h6  style={{marginBottom:"0px", marginTop:"0px"}}> {todo.nomeC} </h6>
         </div>
 
@@ -393,7 +393,7 @@ const print = async () => {
     
     <div className='row'>
 
-      <div className='col-4' style={{paddingRight: "0px", width:"100px"}}>
+      <div className='col-4' style={{paddingRight: "0px", paddingLeft: "30px"}}>
       <h6 style={{marginTop: "12px"}}><b>N.</b> CT. = <span> {todo.NumCartoni} </span> </h6>
       <h6 style={{marginTop: "20px"}}><b>N.</b> B.&nbsp;&nbsp; = <span> {todo.NumBuste} </span> </h6>
       </div>
