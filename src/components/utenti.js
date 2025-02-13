@@ -4,8 +4,8 @@ var s7="MwUDv28kFlhWq5MmmNTfurSKRLE3"  //Hola
 var s2="bBOeGRw4vHPHnRxn8ccZast5haY2"   //Nando Liguori
 var s3= "6aFLomc8ZXV33ze0EAKgRDh9iQV2"  //Paola Liguori
 var s5="gKV9G0Q3B7gvHX3ISXJO3HwTCmT2" //Davide Liguori
-var d1= "7JUgxspZncO0WD8H8Z7ANV0UuAA3"  //dipendente1
-var g1= "wX8dxc9QOsYEIqYWjZpMvQfLPsu1"  //guidatore
+var d1= "qAXzcdGLh9VSIM2gZVlbIGuijzh2"  //dipendente1
+var g1= "wcRL7pe4fOarFYJeDaWGCsTHKRk2"  //guidatore
 
 
 //general color

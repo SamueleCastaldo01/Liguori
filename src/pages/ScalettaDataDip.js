@@ -144,7 +144,6 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
 function ScalettaDataDip({notaDat, getNotaDip }) {
  
     const [todos, setTodos] = React.useState([]);
-    const [todosDataAuto, setTodosDataAuto] = React.useState([]);
 
 
     const [dataSc, setDataSc] = React.useState(notaDat);
@@ -183,20 +182,6 @@ function ScalettaDataDip({notaDat, getNotaDip }) {
       return () => unsub();
     }, [dataSc]);
 
-    React.useEffect(() => {  //effect per l'autocompleate, vado a prendermi le date della scaletta
-        const collectionRef = collection(db, "scalDat");
-        const q = query(collectionRef, orderBy("dataMilli", "desc"), limit(3));
-    
-        const unsub = onSnapshot(q, (querySnapshot) => {
-          let todosArray = [];
-          querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
-          setTodosDataAuto(todosArray);
-        });
-        localStorage.removeItem("OrdId");
-        return () => unsub();
-      }, []);
 
     //**************************************************************************** */
     const actions = [

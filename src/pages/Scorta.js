@@ -763,47 +763,57 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
 
 </div>
 
-<div className='row' style={{marginRight: "5px"}}>
-<div className='col-1' >
-<p className='coltext'>Id Prodotto</p>
-</div>
-<div className='col-3' >
-<p className='coltext'>Prodotto</p>
-</div>
-{sup == true && 
-<>
-<div className='col-2' >
-<p className='coltext'>Categoria</p>
-</div>
-<div className='col-1' style={{padding: "0px", width:"80px"}}>
-  <p className='coltext'>Qt</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Pr(€)</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Sogl. Sott.</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Qta Ord.</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-  <p className='coltext'>Variazioni</p>
-</div>
-</>}
+        <div className='row' style={{marginRight: "5px"}}>
+        {sup == true &&
+        <div className='col-1' >
+        <p className='coltext'>Id Prodotto</p>
+        </div>
+        }
+        {sup == true &&
+          <div className='col-3' >
+          <p className='coltext'>Prodotto</p>
+          </div>
+        }
+        {dip == true &&
+          <div className='col-5' >
+          <p className='coltext'>Prodotto</p>
+          </div>
+        }
+       
+        {sup == true && 
+        <>
+        <div className='col-2' >
+        <p className='coltext'>Categoria</p>
+        </div>
+        <div className='col-1' style={{padding: "0px", width:"80px"}}>
+          <p className='coltext'>Qt</p>
+        </div>
+        <div className='col-1' style={{padding: "0px"}}>
+          <p className='coltext'>Pr(€)</p>
+        </div>
+        <div className='col-1' style={{padding: "0px"}}>
+          <p className='coltext'>Sogl. Sott.</p>
+        </div>
+        <div className='col-1' style={{padding: "0px"}}>
+          <p className='coltext'>Qta Ord.</p>
+        </div>
+        <div className='col-1' style={{padding: "0px"}}>
+          <p className='coltext'>Variazioni</p>
+        </div>
+        </>}
 
-{dip == true &&
-<>
-<div className='col-2' style={{padding: "0px"}}>
-<p className='coltext'>Qt</p>
-</div>
-<div className='col-2' style={{padding: "0px"}}>
-<p className='coltext'>Agg</p>
-</div>
-</>
-}
-<hr style={{margin: "0"}}/>
-</div>
+        {dip == true &&
+        <>
+        <div className='col-2' style={{padding: "0px"}}>
+        <p className='coltext'>Qt</p>
+        </div>
+        <div className='col-2' style={{padding: "0px"}}>
+        <p className='coltext'>Agg</p>
+        </div>
+        </>
+        }
+        <hr style={{margin: "0"}}/>
+        </div>
 
 <div className="scroll">
   {Progress == false && 

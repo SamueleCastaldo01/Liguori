@@ -94,14 +94,18 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 
     <form  onSubmit={handleSubm}>
     <div className="row ">
-{/*********************idProdotto************************************************************************ */}
-<div className="col-1 diviCol" >
-    <h5
-      style={{ textDecoration: todo.completed && "line-through", color: primary  }}
-        type="text"
-        className="inpTab"><b>{ todo.idProdotto}</b></h5>
 
-    </div>
+{/*********************idProdotto************************************************************************ */}
+  {sup == true && 
+  <div className="col-1 diviCol" >
+  <h5
+    style={{ textDecoration: todo.completed && "line-through", color: primary  }}
+      type="text"
+      className="inpTab"><b>{ todo.idProdotto}</b></h5>
+
+  </div>
+  }
+ 
 {/*********************PRODOTTO********************************************************** */}
    {sup == true && 
     <div className="col-3 diviCol" onClick={()=> { handleActiveEdit(todo) }}>
@@ -152,7 +156,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
  )}
 
  {dip ===true && ( 
-<div className="col-2 diviCol" style={{padding: "0px", position:"relative", width:"80px"}}>
+<div className="col-2 diviCol" style={{padding: "0px", position:"relative"}}>
     {ta ===true && ( 
     <h4
       style={{ textDecoration: todo.completed && "line-through" }}
@@ -163,11 +167,14 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
     )}
 </div>
  )}
- {/********************PR'*********************************************************** */}
-<div className="col-1 diviCol" style={{ textAlign: "left", padding: "0px" }}>
-<div className='col'><h3 className='inpTab'>€{Number(todo.prezzoIndi).toFixed(2).replace('.', ',')}</h3></div>
 
+ {/********************PR'*********************************************************** */}
+  {sup == true && 
+    <div className="col-1 diviCol" style={{ textAlign: "left", padding: "0px" }}>
+      <div className='col'><h3 className='inpTab'>€{Number(todo.prezzoIndi).toFixed(2).replace('.', ',')}</h3></div>
     </div>
+  }
+
   {/********************SOTTOSCORTA'*********************************************************** */}
 {sup ===true && ( 
   <div className="col-1 diviCol" style={{padding: "0px"}}>
@@ -208,7 +215,7 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 )}
 
 {dip ===true && ( 
-<div className="col-2 diviCol1" style={{width: "50px", padding: "0px", position:"relative", right:"2%"}}>
+<div className="col-2 diviCol1" style={{padding: "0px", position:"relative", right:"2%"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="number" min="1"
