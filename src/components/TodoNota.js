@@ -310,13 +310,13 @@ const handleChangeAge = (event) => {
 <form  onSubmit={handleSubm}>
 <hr style={{margin: "0"}}/>
 {((sup === true  && Completa == "1" && todo.simbolo != "(NO)") || 
-  (sup === true  && Completa == "0") ||
+  (sup === true  && (Completa == "0" || Completa == "5")) ||
   (sup === true  && Completa == "2")) &&(   //non fa visualizzare i prodotti no, quando confermi la nota
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
     <div className="col-1" style={{padding:"0px",
      background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00" }}>    
-    {sup ===true && Completa == 0 &&  ( 
+    {sup ===true && (Completa == 0 || Completa == 5) &&  ( 
       <>
       <span style={{padding:"0px"}}>
       <input
@@ -345,7 +345,7 @@ const handleChangeAge = (event) => {
 <div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",
  background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00", height: "40px"}}>
       {/***Prodotti non completati (non tinte)********************** */}
-    {sup ===true && todo.flagTinte===false && Completa == 0 &&( 
+    {sup ===true && todo.flagTinte===false && (Completa == 0 || Completa == 5) &&( 
       <>
       <Autocomplete
       clearIcon
@@ -366,7 +366,7 @@ const handleChangeAge = (event) => {
         <span className="simboloNota" style={{left: "150px", bottom: "40px"}}>+ET.</span>
         </>
       )}
-       {(todo.simbolo== "1" && Completa == 0) && <h3 className="simboloNota" style={{color: "red", fontSize: "16px", textAlign: "center", left:"150px"}}> (-
+       {(todo.simbolo== "1" && (Completa == 0 || Completa == 5)) && <h3 className="simboloNota" style={{color: "red", fontSize: "16px", textAlign: "center", left:"150px"}}> (-
                         <input
                          onChange={(e) => setMeno(e.target.value)}
                          onBlur={(e) => handleChangeMenDb(e.target.value)}
@@ -385,7 +385,7 @@ const handleChangeAge = (event) => {
     )}
 
       {/*****Tinte********************************************************************/}
-    {sup ===true && todo.flagTinte===true && Completa == 0 &&( 
+    {sup ===true && todo.flagTinte===true && (Completa == 0 || Completa == 5) &&( 
       <>
         <div className="divTinte"><span>
         <FormControl >
@@ -464,7 +464,7 @@ const handleChangeAge = (event) => {
 {/************************Prezzo Uni***************************************************************************** */}
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px" }}>
 
-    {sup ===true && Completa == 0 && (todo.simbolo2 != "-" && todo.simbolo2 != "In Omaggio" && todo.simbolo2 != "G. P." )  && ( 
+    {sup ===true && (Completa == 0 || Completa == 5) && (todo.simbolo2 != "-" && todo.simbolo2 != "In Omaggio" && todo.simbolo2 != "G. P." )  && ( 
       <span style={{ padding: "0px", marginLeft:"5px" }}>€&nbsp;
       <input
        style={{textAlign:"left", padding: "0px", width:"95px", marginTop:"0px"}}
@@ -476,7 +476,7 @@ const handleChangeAge = (event) => {
       /> </span>
     )}
 
-    {(sup ===true && Completa == 0 && (todo.simbolo2 == "-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P."))  && ( 
+    {(sup ===true && (Completa == 0 || Completa == 5) && (todo.simbolo2 == "-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P."))  && ( 
       <h3 className="inpTabNota" style={{ textAlign: "center"}}> {todo.simbolo2} </h3>
     )}
 
@@ -510,7 +510,7 @@ const handleChangeAge = (event) => {
           onClick={() => handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)}
         >
         </button>
-        {sup ===true && flagStampa==false && Completa == 0 && (   
+        {sup ===true && flagStampa==false && (Completa == 0 || Completa == 5) && (   
           <>
    <button type="button" className="buttonMenu" style={{padding: "0px"}} >
         <MoreVertIcon id="i" onClick={handleMenu}/>

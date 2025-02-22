@@ -6,9 +6,8 @@ import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import { notifyError, notifyErrorDat } from '../components/Notify';
-import Calendar from 'react-calendar';
 import Button from '@mui/material/Button';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { Modal } from 'react-bootstrap';
 import Autocomplete from '@mui/material/Autocomplete';
 import { notifyErrorCli, notifyUpdateCli, notifyErrorCliEm } from '../components/Notify';
@@ -37,7 +36,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoProdCli = [];
-//stati: 0= in lavorazione;  1=evaso; 2=Consegnato; 4 per i filtri mi fa vedere tutti gli stati
+//stati: 0= in lavorazione;  1=evaso; 2=Consegnato; 5=Preventivo 4 per i filtri mi fa vedere tutti gli stati
 
 function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     const[colle, setColle] = useState([]); 
@@ -473,6 +472,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                         <MenuItem value={"0"}>In Lavorazione</MenuItem>
                         <MenuItem value={"1"}>Evaso</MenuItem>
                         <MenuItem value={"2"}>Conseganto</MenuItem>
+                        <MenuItem value={"5"}>Preventivo</MenuItem>
                         </Select>
                         </FormControl>
                         </div>
@@ -530,6 +530,14 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                           <div className='row'>
                             <div className='col-1'><CheckCircleIcon className='inpTab' style={{ color: "green" }} /></div>
                             <div className='col'><h3 className='inpTab' style={{ color: "green" }}>Consegnato</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      {col.completa == 5 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><AcUnitIcon className='inpTab' style={{ color: "blue" }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: "blue" }}>Preventivo</h3></div>
                           </div>
                         </div>
                       )}
@@ -603,7 +611,8 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                     onChange={handleChangeDataSelect1}>
                   <MenuItem value={"0"}>In Lavorazione</MenuItem>
                   <MenuItem value={"1"}>Evaso</MenuItem>
-                  <MenuItem value={"2"}>Coseganto</MenuItem>
+                  <MenuItem value={"2"}>Conseganto</MenuItem>
+                  <MenuItem value={"5"}>Preventivo</MenuItem>
                     </Select>
               </FormControl>
           </div>

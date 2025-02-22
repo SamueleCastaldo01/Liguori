@@ -449,7 +449,7 @@ const print = async () => {
       aria-label="Platform"
     > 
 
-    {Completa ==0 && 
+    {(Completa ==0 || Completa==5) && 
     <>
     <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
     <Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button>
@@ -685,17 +685,26 @@ const print = async () => {
 
     <div className='col' style={{textAlign:"right", padding:"0px"}}>
     <h6>Totale: €{parseFloat(sumTot).toFixed(2).replace('.', ',')}</h6>
-    <form onSubmit={handleEditDebitoRes}>
-    <h6>Debito Residuo:     <input value={debitoRes} onBlur={handleEditDebitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
-      onChange={(event) => {
-      setDebitoRes(event.target.value);}}
-    />  €</h6>
-    </form>
-    <h6>Debito Totale: €{parseFloat(debitoTot).toFixed(2).replace('.', ',')}</h6>
+    {Completa !== "5" &&
+    <>
+      <form onSubmit={handleEditDebitoRes}>
+      <h6>Debito Residuo:     <input value={debitoRes} onBlur={handleEditDebitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
+        onChange={(event) => {
+        setDebitoRes(event.target.value);}}
+      />  €</h6>
+      </form>
+          <h6>Debito Totale: €{parseFloat(debitoTot).toFixed(2).replace('.', ',')}</h6>
+    </>
+    }
+    
+
     {flagStampa == false && <>
-  {Completa==0 ?  <Button variant='contained' color='success' onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</Button> :
+    {Completa==0 &&  
+    <Button variant='contained' color='success' onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</Button> 
+    }
+    {Completa==1 && 
     <Button disabled={Completa === "2"}  variant='contained' color='error' onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</Button>
-     }
+    }
   </>}
 
     
