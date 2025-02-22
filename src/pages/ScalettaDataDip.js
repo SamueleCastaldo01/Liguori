@@ -63,8 +63,6 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
   var diffPrice;
   var ripDebito;
 
-      diffPrice = (+sommaTotale) - (+Quota);  // Prima volta, prende la differenza con sommaTotale
-
 
   // Query per trovare il documento del debito
   const q = query(collection(db, "debito"), where("nomeC", "==", nomC));  
@@ -72,11 +70,10 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
   
   querySnapshot.forEach(async (hi) => {
     if(quotaV != 0) {  //se la quota vecchia ci sta, allora devo andare a ristabilire il debito
-      var n1 = +sommaTotale - (+quotaV);
-      ripDebito = (+hi.data().deb1) - (+n1);  // Ripristina il debito con la vecchia quota
-      debTot = +ripDebito + (+diffPrice);  
+      ripDebito = (+hi.data().deb1) + (+quotaV);  //vado prima a riportare il debito 1 come prima
+      debTot = +ripDebito - (+Quota);  
     } else {
-      debTot = +hi.data().deb1 + (+diffPrice); // Aggiorna il debito con la differenza
+      debTot = +hi.data().deb1 - (+Quota); // Aggiorna il debito con la differenza
     }
       var debTrunc = debTot.toFixed(2);  // Tronca a 2 decimali per evitare problemi
 
@@ -88,7 +85,9 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
 
     
     const handleEditNota = async (id) => {
-        await updateDoc(doc(db, "addNota", id), { note:nota});
+      const notaDaSalvare = nota || ""; 
+
+      await updateDoc(doc(db, "addNota", id), { note: notaDaSalvare });
         notifySuccess("Nota aggiornata");
       };
   
