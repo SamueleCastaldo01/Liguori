@@ -351,7 +351,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
         todayMilli = today.getTime()   //lo converte in millisecondi
 
         const collectionRef = collection(db, "addNota");
-        const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("scaletta", "==", false));
+        const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("scaletta", "==", false), where("completa", "==", "1"));
     
         const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
@@ -429,7 +429,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
     //********************************************************************************** */
   React.useEffect(() => {
     const collectionRef = collection(db, "addNota");
-    const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("scaletta", "==", false));
+    const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("scaletta", "==", false), where("completa", "==", "1"));
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];

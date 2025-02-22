@@ -32,6 +32,8 @@ const elimDb = async () => {
  }  
  */
 
+ //stati: 0= in lavorazione;  1=evaso; 2=Consegnato; 4 per i filtri mi fa vedere tutti gli stati
+
  const Background = () => {
   const location = useLocation();
   return (
