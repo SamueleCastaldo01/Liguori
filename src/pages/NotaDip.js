@@ -337,7 +337,13 @@ const print = async () => {
     <div key={todo.id}>
     {todo.data == notaDipDataC && todo.cont == contPage &&  (
       <>
-      <hr className='hrNotDip' style={{borderTop: todo.completa==1 ? "6px solid green" : "6px solid red"}}></hr>
+      <hr className='hrNotDip' style={{
+  borderTop:
+    todo.completa == 0 ? "6px solid red" :
+    todo.completa == 1 ? "6px solid orange" :
+    todo.completa == 5 ? "6px solid blue" :
+    "6px solid green" 
+}}></hr>
       <div className='row' style={{marginTop: "40px"}} >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"20px"}}>
         <h6  style={{marginBottom:"0px", marginTop:"0px"}}> {todo.nomeC} </h6>
@@ -388,48 +394,46 @@ const print = async () => {
   </div>
 
 {/****numero cartoni e numero buste************************************************************ */}
-  <div className='row'>
-    <div className='col' style={{textAlign:"left", padding:"0px"}}>
-    
-    <div className='row'>
-
-      <div className='col-4' style={{paddingRight: "0px", paddingLeft: "30px"}}>
-      <h6 style={{marginTop: "12px"}}><b>N.</b> CT. = <span> {todo.NumCartoni} </span> </h6>
-      <h6 style={{marginTop: "20px"}}><b>N.</b> B.&nbsp;&nbsp; = <span> {todo.NumBuste} </span> </h6>
-      </div>
-
-      <div className='col-3' style={{padding: "0px", paddingRight:"2px",  width:"197px"}}>
+<div className='ms-2'>
+    <div className='d-flex align-items-center gap-2'>
+      <h6 className='mb-0'><b>N.</b> CT. = <span> {todo.NumCartoni} </span> </h6>
       {todo.completa == 0 && flagStampa ==false &&
-      <span>
-        <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumCart(todo.id, todo.NumCartoni)}}> - </button>
-        <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumCart(todo.id, todo.NumCartoni)}}> + </button>
-      </span> }
-      {todo.completa == 0 && flagStampa ==false &&
-        <>
-        <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumBuste(todo.id, todo.NumBuste)}}> - </button>
-        <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumBuste(todo.id, todo.NumBuste)}}> + </button>
-        </>
-   }
-      </div>
+          <>
+            <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumCart(todo.id, todo.NumCartoni)}}> - </button>
+            <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumCart(todo.id, todo.NumCartoni)}}> + </button>
+          </>
+       }
     </div>
-       </div>
-  </div>
+
+    <div className='d-flex align-items-center mt-2 gap-2'>
+      <h6  className='mb-0'><b>N.</b> B.&nbsp;&nbsp; = <span> {todo.NumBuste} </span> </h6>
+      {todo.completa == 0 && flagStampa ==false &&
+          <>
+          <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumBuste(todo.id, todo.NumBuste)}}> - </button>
+          <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumBuste(todo.id, todo.NumBuste)}}> + </button>
+          </>}
+    </div>
+</div>
+  
 
   {/*******************Conferma la nota  (completa)*************************************************************** */}
 
-  {flagStampa == false && <>
-  {todo.completa == 0 ?  
+
+  {todo.completa == 0 && 
     <button className='button-comp' onClick={ ()=> {
     localStorage.setItem("completa", 1);
-     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes, todo.NumBuste, todo.NumCartoni); }}><CheckIcon sx={{ fontSize: 48 }}  /> conferma</button> :
+     handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes, todo.NumBuste, todo.NumCartoni); }}><CheckIcon sx={{ fontSize: 48 }}  /> conferma</button> 
+    }
+
+  {todo.completa == 1 &&
     <button className='button-clear' onClick={ ()=> {
       localStorage.setItem("completa", 0);
        setCompleta(0);
        handleEditCompAnn(todo.id, todo.debitoRes, todo.nomeC);
        handleInOrdineRemove(todo.nomeC)
        handleInSospesoRemove(todo.nomeC)  }}><ClearIcon sx={{ fontSize: 29 }}/>  Annulla Conferma</button>
-     }
-  </>}
+  }
+  
   {/*******************Tasti per passare da una nota ad un altra*************************************************************** */}
   {todo.cont > 1 &&
     <button type="button" className="skipPageLef" style={{padding: "0px"}} onClick={ () =>{ handleRemoveContPage() }}>

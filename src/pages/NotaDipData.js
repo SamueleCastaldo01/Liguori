@@ -172,7 +172,7 @@ const contEffect = async () => {  //fa il conteggio
         <div className='row'> 
         <div className='col' style={{paddingRight: "0px"}} >
         <p className='colTextTitle'> Ordine Clienti</p>
-        { !switChchecked ? <p className='textOrdRed'> Ordini da evadere</p> : <p className='textOrd'> Ordini evasi</p> }
+        { !switChchecked ? <p className='textOrdRed'> Ordini da evadere</p> : <p className='textOrd' style={{color: "orange"}}> Ordini evasi</p> }
         
         <div style={{height: "25px"}} className='d-flex justify-content-start'>
          <Switch sx={{ position: "relative", bottom: "15px"}}
