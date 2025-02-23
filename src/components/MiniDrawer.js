@@ -23,6 +23,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
+import DescriptionIcon from '@mui/icons-material/Description';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import HomeIcon from '@mui/icons-material/Home';
@@ -35,6 +36,7 @@ import AdUnitsIcon from '@mui/icons-material/AdUnits';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
+import AttributionIcon from '@mui/icons-material/Attribution';
 import InvertColorsIcon from '@mui/icons-material/InvertColors';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { useNavigate } from 'react-router-dom';
@@ -143,6 +145,7 @@ export default function MiniDrawer( {signUserOut} ) {
   const [openSottocategoria, setOpenSottocategoria] = React.useState(false);
   const [openSottocategoriaProd, setOpenSottocategoriaProd] = React.useState(false);
   const [openSottocategoriaOrd, setOpenSottocategoriaOrd] = React.useState(false);
+  const [openSottocategoriaDipen, setOpenSottocategoriaDipen] = React.useState(false);
   const [openSottocategoriaForn, setOpenSottocategoriaForn] = React.useState(false);
 
   //permessi utente
@@ -159,6 +162,7 @@ export default function MiniDrawer( {signUserOut} ) {
   const handleMouseEnter = () => {
     setOpenSottocategoria(true);
     setOpenSottocategoriaProd(false);
+    setOpenSottocategoriaDipen(false);
     setOpenSottocategoriaOrd(false);
   };
   const handleMouseLeave = () => {
@@ -172,6 +176,7 @@ export default function MiniDrawer( {signUserOut} ) {
   const handleMouseEnterProd = () => {
     setOpenSottocategoriaProd(true);
     setOpenSottocategoria(false);
+    setOpenSottocategoriaDipen(false);
     setOpenSottocategoriaOrd(false);
     setOpenSottocategoriaForn(false);
   };
@@ -186,6 +191,7 @@ export default function MiniDrawer( {signUserOut} ) {
     const handleMouseEnterOrd = () => {
       setOpenSottocategoriaOrd(true);
       setOpenSottocategoria(false);
+      setOpenSottocategoriaDipen(false);
       setOpenSottocategoriaProd(false)
       setOpenSottocategoriaForn(false);
     };
@@ -200,12 +206,28 @@ export default function MiniDrawer( {signUserOut} ) {
     const handleMouseEnterForn = () => {
       setOpenSottocategoriaForn(true);
       setOpenSottocategoria(false);
+      setOpenSottocategoriaDipen(false);
       setOpenSottocategoriaProd(false)
       setOpenSottocategoriaOrd(false)
     };
     const handleMouseLeaveForn = () => {
       setOpenSottocategoriaForn(false);
-    };   
+    }; 
+    
+      //Sottocategorie Dipendenti
+  const handleClickSottoCategoriaDipen = () => {
+    setOpenSottocategoriaDipen(!openSottocategoriaDipen);
+  };
+  const handleMouseEnterDipen = () => {
+    setOpenSottocategoriaDipen(true);
+    setOpenSottocategoriaProd(false);
+    setOpenSottocategoria(false);
+    setOpenSottocategoriaOrd(false);
+    setOpenSottocategoriaForn(false);
+  };
+  const handleMouseLeaveDipen = () => {
+    setOpenSottocategoriaProd(false);
+  };
 
 
   const handleListItemClick = (event, index) => {
@@ -484,7 +506,6 @@ export default function MiniDrawer( {signUserOut} ) {
 
 
       {/* Elemento padre "Prodotti" */}
-      <div >
       <ListItem  disablePadding sx={{ display: 'block', backgroundColor: openSottocategoriaProd ? 'white' : 'initial' }}>
       <ListItemButton onMouseEnter={handleMouseEnterProd }  onClick={handleClickSottoCategoriaProd}  >
         <ListItemIcon>
@@ -519,7 +540,7 @@ export default function MiniDrawer( {signUserOut} ) {
           </ListItem>
         </List>
       </Collapse>
-      </div>
+
 
 
       {/* Elemento padre Fornitori */}
@@ -563,7 +584,6 @@ export default function MiniDrawer( {signUserOut} ) {
 
 
       {/* Elemento padre "Ordini" */}
-      <div >
       <ListItem  disablePadding sx={{ display: 'block', backgroundColor: openSottocategoriaOrd ? 'white' : 'initial' }}>
       <ListItemButton onMouseEnter={handleMouseEnterOrd }  onClick={handleClickSottoCategoriaOrd}  >
         <ListItemIcon>
@@ -633,44 +653,47 @@ export default function MiniDrawer( {signUserOut} ) {
             </ListItem> */}
         </List>
       </Collapse>
-      </div>
 
-{/*** 
-      <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scalettadata")}}>
-              <ListItemButton
-          selected={selectedItem === "scaletta"}
-          onClick={(event) => handleListItemClick(event, 1)}>
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                <FormatListNumberedIcon sx={{ color: "white" }}/>
+
+      {/* Elemento padre Dipendente */}
+      <ListItem  disablePadding sx={{ display: 'block', backgroundColor: openSottocategoriaDipen ? 'white' : 'initial' }}>
+      <ListItemButton onMouseEnter={handleMouseEnterDipen}  onClick={handleClickSottoCategoriaDipen}>
+        <ListItemIcon>
+          <AttributionIcon sx={{ color: openSottocategoriaDipen ?  "black" : "white" }}/>
+        </ListItemIcon>
+        <ListItemText sx={{ color: openSottocategoriaDipen ? 'black' : 'white' }} primary="Dipendenti" />
+        {openSottocategoriaDipen ? <ExpandLess sx={{ color: 'black' }} /> : <ExpandMore />}
+      </ListItemButton>
+      </ListItem>
+      {/* Sottocategoria */}
+      <Collapse in={openSottocategoriaDipen} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+        <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/notadipdata")}}>
+              <ListItemButton sx={{ pl: 4 }}
+          selected={selectedItem === "dipedenti"}
+          onClick={(event) => handleListItemClick(event, 6)}>
+                <ListItemIcon sx={{minWidth: 0, mr: open ? 3 : 'auto'}}>
+                  <DescriptionIcon sx={{ color: "white" }}/>
                 </ListItemIcon>
-                <ListItemText primary="Scaletta" sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary="Note Dipendente" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
           </ListItem>
-
-
-          <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/notadipdata")}}>
-              <ListItemButton
-                selected={selectedItem === "notadipdata"}
-                 onClick={(event) => handleListItemClick(event, 6)}>
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : 'auto',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <AdUnitsIcon sx={{ color: "white" }}/>
+        </List>
+        <List component="div" disablePadding>
+        <ListItem  disablePadding sx={{ display: 'block' }} onClick={() => {navigate("/scalettadatadip")}}>
+              <ListItemButton sx={{ pl: 4 }}
+          selected={selectedItem === "dipedenti"}
+          onClick={(event) => handleListItemClick(event, 6)}>
+                <ListItemIcon sx={{minWidth: 0, mr: open ? 3 : 'auto'}}>
+                  <FormatListNumberedIcon sx={{ color: "white" }}/>
                 </ListItemIcon>
-                <ListItemText primary="Ordini da Evadere" sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary="Scaletta Guidatore" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
           </ListItem>
-*/}
+        </List>
+      </Collapse>
+
+
         </List>
 
       </Drawer>
