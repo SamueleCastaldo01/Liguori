@@ -575,15 +575,13 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
     }
     {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Aggiungi Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
-   <div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}> 
+    <div style={{ justifyContent: "center", textAlign: "center", marginTop: "40px" }}> 
     <ToggleButtonGroup
       color="primary"
-      value={alignment}
       exclusive
-      onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {/*{sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}  */}
+    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { navigate("/stampamassiva") }}  variant="contained">Stampa Massiva</Button>
     </ToggleButtonGroup>
     </div>
 
@@ -700,9 +698,11 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                      <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
                         <button onClick={() => {moveDown(col.id, col.scalettaOrdine)}} style={{color: "blue", marginLeft: "0px"}} className="button-delete"><ArrowDownwardIcon/></button>
                      </div>
+                     {col.completa !== "2" &&
                       <div className='col-1 ms-4' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
                         <button onClick={() => {handleRemoveFromScaletta(col.id, col.scalettaOrdine)}} style={{color: "red", marginLeft: "0px"}} className="button-delete"><PlaylistRemoveIcon/></button>
                      </div>
+                     }
                       </div>
                     </div>
                     <hr style={{margin: "0"}}/>

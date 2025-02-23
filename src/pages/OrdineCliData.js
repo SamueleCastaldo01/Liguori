@@ -428,6 +428,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
       aria-label="Platform"
     > 
     <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { setPopupActive(true); }}  variant="contained">Aggiungi Ordine</Button>
+    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { navigate("/stampamassiva") }}  variant="contained">Stampa Massiva</Button>
     <Button color='error'  style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}  onClick={() => {setFlagDelete(!flagDelete)  }}  variant="contained">Elimina</Button>
     {/*{sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}  */}
     </ToggleButtonGroup>

@@ -268,7 +268,7 @@ function AnimatedRoutes() {
     <Route path="/scaletta" element={<Scaletta TodayData={todayC} getOrdId={getOrderIdHandler} getNotaId={getNotadHandler}/>} />
     <Route path="/ordinefornitoridata" element={<OrdineForniData getOrdFornId={getOrderFornIdHandler}/>} />
     <Route path="/listaclienti" element={<AddCliente getCliId={getCliIdHandler}/>} />
-    <Route path="/stampamassiva" element={<StampaMassiva notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
+    <Route path="/stampamassiva" element={<StampaMassiva notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota} TodayData={todayC}/>} />
     <Route path="/stampamassivaprev" element={<StampaMassivaPrev notaId={notaId} cont={notaCont} nomeCli={notaNomeC} dataNota={notaDataV} dataNotaC={notaDataC} numCart={numCartoni} numBust={notaNumBuste} prezzoTotNota={sommaTotale} debit={debitoRes} debTo={debitoTot} indirizzo={notaIndi} tel={notaTel} iva={notaIva} completa={notaCompleta} idDebito={IdDebNota}/>} />
     </Route>
   

@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { supa, guid, tutti } from '../components/utenti';
 import { motion } from 'framer-motion';
+import Button from '@mui/material/Button';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoProdCli = [];
 
@@ -183,6 +185,17 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
       <ArrowBackIcon id="i" /></button> 
     }
     {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Scaletta</h1> : <div style={{marginBottom:"60px"}}></div>} 
+
+    <div style={{ justifyContent: "center", textAlign: "center", marginTop: "40px" }}> 
+    <ToggleButtonGroup
+      color="primary"
+      exclusive
+      aria-label="Platform"
+    > 
+    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { navigate("/stampamassiva") }}  variant="contained">Stampa Massiva</Button>
+    {/*{sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}  */}
+    </ToggleButtonGroup>
+    </div>
 
  {/********************Tabella scaletta***************************************** */}
 <div className='todo_container pe-0 ps-0' style={{width: "1100px"}}>

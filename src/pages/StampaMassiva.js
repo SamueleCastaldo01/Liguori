@@ -7,20 +7,19 @@ import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import BeenhereIcon from '@mui/icons-material/Beenhere';
 import TodoNota from '../components/TodoNota';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from "@mui/icons-material/Delete";
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { IconButton } from '@mui/material';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
 import { fontSize } from '@mui/system';
-import { motion } from 'framer-motion';
+import { motion, progress } from 'framer-motion';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Diversity1Sharp } from '@mui/icons-material';
 
 
-function StampaMassiva({notaId, cont, nomeCli, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, completa, idDebito }) {
+function StampaMassiva({notaId, cont, nomeCli, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, completa, idDebito, TodayData }) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -32,71 +31,40 @@ function StampaMassiva({notaId, cont, nomeCli, dataNotaC, numCart, numBust, prez
 
     let navigate = useNavigate();
 
-    const [Progress, setProgress] = React.useState(false);
+    const [progress, setProgress] = React.useState(true);
 
-    const [prodottoC, setProdottoC] = React.useState("");
-    const [t1, setT1] = React.useState("");   //tinte, che dentro una trupla ci possono essere massimo 5
-    const [t2, setT2] = React.useState("");
-    const [t3, setT3] = React.useState("");
-    const [t4, setT4] = React.useState("");
-    const [t5, setT5] = React.useState("");
-    const [nomTin, setnomTin] = React.useState("");
+    const [switchScaletta, setSwitchScaletta] = useState(false);
 
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte da millisecondi a data
+    const dataInizialeFormatted = moment(TodayData, "DD/MM/YYYY").format("DD-MM-YYYY");
+    const [scalettaDataSele, setScalettaDataSele] = useState(dataInizialeFormatted);
 
     var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
 
-    const [flagInOrdine, setFlagInOrdine] = React.useState(false);  //quando è falso si vedono le icone
-    const [flagInSospeso, setFlagInSospeso] = React.useState(false);  //quando è falso si vedono le icone,
 
-    const [NumCart, setNumCart] = React.useState(numCart);
-    const [NumBuste, setNumBuste] = React.useState(numBust);
     const [Completa, setCompleta] = useState(completa);
    
     const [sumTot, setSumTot] =React.useState(prezzoTotNota);
-    const [debitoTot, setDebTot] = React.useState(debTo);
-    const [debitoRes, setDebitoRes] = React.useState(debit);
-
-    const [qtProdotto, setQtProdotto] = React.useState("1");
-    const [prezzoUniProd, setprezzoUniProd] = React.useState("");
-    const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
     const componentRef = useRef();  //serve per la stampa
-   //_________________________________________________________________________________________________________________
-     //confirmation notification to remove the collection
-     const Msg = () => (
-      <div style={{fontSize: "16px"}}>
-        <p style={{marginBottom: "0px"}}>Sicuro di voler eliminare</p>
-        <p style={{marginBottom: "0px"}}>(perderai tutti i dati)</p>
-        <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={Remove}>Si</button>
-        <button className='buttonClose mt-2 rounded-4'>No</button>
-      </div>
-    )
 
-      const Remove = () => {
-        if(localStorage.getItem("flagRemove") == 0 ) {
-          handleDelete(localStorage.getItem("IDNOTa"));
-        }
-          toast.clearWaitingQueue(); 
-               }
+      const handleChangeDataScaletta = (e) => {
+        setScalettaDataSele(moment(e.target.value).format("DD-MM-YYYY"));
+        caricaNote(moment(e.target.value).format("DD-MM-YYYY"), switchScaletta);
+        };
 
-    const displayMsg = () => {
-      toast.warn(<Msg/>, {
-        position: "top-center",
-        autoClose: false,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        transition: Slide,
-        theme: "dark",
-        className: "rounded-4"
-        })}
+        const handleSwitchChange = () => {
+          setSwitchScaletta(prev => {
+            const newValue = !prev;
+            caricaNote(scalettaDataSele, newValue); 
+            return newValue; 
+          });
+        };
+        
 //_________________________________________________________________________________________________________________
 const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   var sommaTot=0;
@@ -112,59 +80,73 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   await updateDoc(doc(db, "addNota", notaId), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
 }
 //********************************************************************************** */ 
-    React.useEffect(() => {
-    const collectionRef = collection(db, "addNota");
-    const q = query(collectionRef, orderBy("createdAt"));
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-      setTodosAddNota(todosArray);
-      setProgress(true);
-    });
-    return () => unsub();
-  }, []);     
 
-    React.useEffect(() => {
-        const collectionRef = collection(db, "Nota");
-        const q = query(collectionRef, orderBy("createdAt"));
-        const unsub = onSnapshot(q, (querySnapshot) => {
-          let todosArray = [];
-          querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
-          setTodos(todosArray);
-          setProgress(true);
-        });
-        localStorage.removeItem("NotaId");
-        return () => unsub();
-      }, []);
+ useEffect(() => {
+  caricaNote(scalettaDataSele, switchScaletta);
+}, []);
 
-//_________________________________________________________________________________________________________________
-const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5, nomTinte) => {
-  var conTinte=0;    //alogoritmo per le tinte
-  if(tt1) {conTinte=conTinte+1}
-  if(tt2) {conTinte=conTinte+1}
-  if(tt3) {conTinte=conTinte+1}
-  if(tt4) {conTinte=conTinte+1}
-  if(tt5) {conTinte=conTinte+1}
-  if(todo.flagTinte == false){ 
-    nomTinte=""
-  conTinte=1 }
-  var preT= (conTinte*qt)*prezU;  //qui va a fare il prezzo totale del prodotto in base alla quantità e al prezzo unitario
-  if(todo.simbolo == "(NO)"){ preT=0;  }   //se il simbolo è no, non va a fare il suo prezzo totale
-  var somTrunc = preT.toFixed(2);
-  await updateDoc(doc(db, "Nota", todo.id), 
-  { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:somTrunc, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5});
-  toast.clearWaitingQueue(); 
-  SommaTot();
-};
-//_________________________________________________________________________________________________________________
-const handleDelete = async (id) => {
-  const colDoc = doc(db, "Nota", id); 
-  await deleteDoc(colDoc); 
-  SommaTot();
+const caricaNote = async (dataFil, scaletta) => {
+  setProgress(false);
+  const collectionRef = collection(db, "addNota");
+
+  let q;
+  if (scaletta) {
+    q = query(
+      collectionRef,
+      where("scaletta", "==", true),
+      where("scalettaData", "==", dataFil),
+      orderBy("scalettaOrdine")
+    );
+  } else {
+    q = query(
+      collectionRef,
+      where("data", "==", dataFil),
+      orderBy("createdAt")
+    );
+  }
+
+  // Ascolto la query
+  const unsub = onSnapshot(q, async (querySnapshot) => {
+    let todosArray = [];
+    for (const doc of querySnapshot.docs) {
+      const docData = doc.data();
+      const idNota = doc.id; // Usa doc.id per ottenere l'ID del documento
+      console.log(idNota);  // Stampa l'id del documento
+
+      if (idNota) {
+        const prodotti = await caricaProdotti(idNota);
+        docData.prodotti = prodotti;
+      } else {
+        docData.prodotti = [];
+      }
+
+      todosArray.push({ ...docData, id: doc.id });
+    }
+
+    setTodosAddNota(todosArray);
+    console.log(todosArray); // Per vedere la struttura dei dati
+    setProgress(true);
+  });
+
+  return () => unsub();
+}
+
+
+const caricaProdotti = async (idNota) => {
+  const collectionRef = collection(db, "Nota");
+  const q = query(
+    collectionRef,
+    where("idNota", "==", idNota)  // Filtro per idNota
+  );
+
+  const querySnapshot = await getDocs(q); // Esegui la query per ottenere i prodotti
+
+  const prodottiArray = [];
+  querySnapshot.forEach((doc) => {
+    prodottiArray.push({ ...doc.data(), id: doc.id }); // Aggiungi i prodotti all'array
+  });
+
+  return prodottiArray;
 };
 
 //_________________________________________________________________________________________________________________
@@ -201,10 +183,7 @@ const print = async () => {
       </div>
 
 
-        <motion.div
-        initial= {{opacity: 0}}
-        animate= {{opacity: 1}}
-        transition={{ duration: 0.7 }}>
+    <div >
 
 {!matches && 
   <button className="backArrowPage" style={{float: "left"}}
@@ -214,14 +193,38 @@ const print = async () => {
       
       {!matches ? <h1 className='title mt-3'> Stampa Massiva</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
+    <div className='d-flex gap-3 align-items-center justify-content-center'>
     <span><button onClick={print}>Stampa </button></span>
+           <input
+            type="date"
+            value={moment(scalettaDataSele, "DD-MM-YYYY").format("YYYY-MM-DD")} // Converti per l'input
+            onChange={(e) => handleChangeDataScaletta(e)} // Salva in formato gg-mm-yyyy
+            />
+            <h6 className='mb-0'>Numero note: {todosAddNota.length}</h6>
+     <label>
+        <span>Scaletta: </span>
+        <input
+          type="checkbox"
+          checked={switchScaletta}
+          onChange={handleSwitchChange}
+        />
+      </label>
+    </div>
+
+    
 
 {/*********************DDT********************************************************************** */}
-    <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
+{!progress && <CircularProgress />}
+{progress &&
+    <div ref={componentRef} className="foglioA4 overflow-auto" style={{
+      paddingLeft: "50px", 
+      paddingRight: "50px", 
+      paddingTop: "20px", 
+      height: !flagStampa ? "90vh" : "auto"
+  }}>
 
     {todosAddNota.map((todoAdd) => (
     <div key={todoAdd.id} style={{height: todoAdd.altezza}}>
-    {todoAdd.completa  == 1 && todoAdd.data == dataNotaC &&  (
       <>
       <div className='row rigaNota' >
         <div className='col colNotaSini' style={{textAlign:"left", padding:"0px", paddingLeft:"0px"}}>
@@ -274,22 +277,19 @@ const print = async () => {
 
 {/** tabella dei prodotti */}
 <div className="scrollNota">
-  {Progress == false && 
+  {progress == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
   </div>
       }
-  {todos.map((todo) => (
+  {todoAdd.prodotti.map((todo) => (
     <div key={todo.id}>
-    {todo.nomeC  === todoAdd.nomeC && todo.dataC == todoAdd.data &&  (
+
       <>
     { ta === true &&(
     <TodoNota
       key={todo.id}
       todo={todo}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      displayMsg={displayMsg}
       nomeCli={nomeCli}
       flagStampa={flagStampa}
       Completa={Completa}
@@ -297,7 +297,7 @@ const print = async () => {
     />
      )}
      </>
-                  )}
+
     </div>
   ))}
   </div>
@@ -318,13 +318,13 @@ const print = async () => {
 
   </div>
      </>
-                  )}
     </div>
   ))}
 
     </div>
+}
 
-</motion.div>
+</div>
     </>
       )
 }
