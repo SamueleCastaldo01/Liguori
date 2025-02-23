@@ -46,6 +46,9 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     let iddo=""
+    let nomeDelete= ""
+    let sTDelete= ""
+    let completaDelete= ""
 
     //dati per l'input dell'ordine
     const [idCliente, setIdCliente] = React.useState("");
@@ -374,8 +377,21 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
 
   //___________________________________________________________________________________________________
         const handleDelete = async () => {
-    
-          console.log(iddo)
+          let debTot = 0;
+
+          //aggiorna il debito 1, solo nel caso in cui l'ordine sia nello stato di evaso, altrimenti non deve aggiornare
+          if (completaDelete == "1") {
+          const q2 = query(collection(db, "debito"), where("nomeC", "==", nomeDelete));  
+          const querySnapshotD = await getDocs(q2);
+          
+          querySnapshotD.forEach(async (hi) => {
+              debTot = +hi.data().deb1 - (+sTDelete); // Aggiorna il debito, -meno la somma totale
+              let debTrunc = debTot.toFixed(2);  // Tronca a 2 decimali
+      
+              await updateDoc(doc(db, "debito", hi.id), { deb1: debTrunc });  
+          });
+        }
+
           const colDoc = doc(db, "addNota", iddo); 
         //elimina tutti i dati di nota di quel ordine, i prodotti
           const q = query(collection(db, "Nota"),  where("idNota", "==", iddo));
@@ -549,7 +565,9 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
 
                     {flagDelete ?
                       <div className='col-1' style={{padding:"0px", marginTop:"-8px", width: "20px"}}>
-                  <button className="button-delete" style={{color: rosso, marginLeft: "-70px"}} onClick={()=> {console.log(col.id); iddo=col.id; displayMsg();}}>  <DeleteIcon id="i" /> </button>
+                  <button className="button-delete" style={{color: rosso, marginLeft: "-70px"}} 
+                  onClick={()=> {console.log(col.id);
+                   iddo=col.id; nomeDelete=col.nomeC; sTDelete=col.sommaTotale; completaDelete=col.completa; displayMsg();}}>  <DeleteIcon id="i" /> </button>
                   </div> :
                   <div className='col-1'>
                   

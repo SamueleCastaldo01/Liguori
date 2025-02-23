@@ -361,7 +361,6 @@ const handleConferma = async () => {
   SommaTot();   //va a rifare la somma totale dei prodotti
   sumNota=localStorage.getItem("sumTotNota");
   var debTot= +sumNota+(+debitoRes);   
-  console.log("sommaTot:", sumNota, "  debitoResiduo:" , debitoRes) 
   var debTrunc = debTot.toFixed(2);   //somma tra la somma totale dei prodotti + il debito
   setDebTot(debTrunc);
   await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTrunc, completa: localStorage.getItem("completa")});  //aggiorna la somma totale del ddt con tutti i debiti nell'add nota
