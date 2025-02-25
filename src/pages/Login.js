@@ -68,7 +68,7 @@ const forgotPassword = () => {
     <div className="background-image"></div>
     <div className="container" style={{ justifyContent: "center", display: "flex", alignItems: "center" }}>
     {/* Utilizza il percorso relativo alla radice del tuo progetto */}
-            <div className='contanier Login'  style={{width:"500px", backgroundColor:"white", position:"absolute", top:"250px", zIndex:"9999", justifyContent: "center", borderRadius: "20px", borderColor:"black", borderWidth: "4px", borderStyle: "solid" }}>
+            <div className='contanier Login pb-4'  style={{width:"500px", backgroundColor:"white", position:"absolute", top:"60px", zIndex:"9999", justifyContent: "center", borderRadius: "20px", borderColor:"black", borderWidth: "4px", borderStyle: "solid" }}>
               <h2 className="title mt-3">Login</h2>
               <h6 className="mt-1 mb-5">Liguori Srl</h6>
               <div className="form-outline form-black mb-4">
