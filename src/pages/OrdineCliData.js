@@ -493,7 +493,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                         </Select>
                         </FormControl>
                         </div>
-                    </div>
+            </div>
                     <div className='row' style={{ height: "25px", marginTop: "7px" }}>
                       <div className='col-1 coltext' style={{ width:"100px" }}>id Ordine</div>
                       <div className='col-4 coltext'>Cliente</div>
@@ -510,6 +510,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                       <CircularProgress />
                     </div>
                     }
+                <div className='' style={{maxHeight: "300px", overflowX: "hidden", overFlowY: "scroll"}}>
                 {colle.map((col) => (
                   <div key={col.id}>
                   {(col.completa == stato  || stato == "4") && 
@@ -602,6 +603,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                   }
                   </div>
                   ))}
+                </div>
               </div>
         {/**Fine tabella */} 
 

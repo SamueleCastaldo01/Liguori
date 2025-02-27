@@ -227,8 +227,8 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
                       <CircularProgress />
                     </div>
                     }
+                <div className='' style={{maxHeight: "300px", overflowX: "hidden", overFlowY: "scroll"}}>
                 {todos.map((col) => (
-                    
                   <div key={col.id}>
                     <>
                     <div className="diviCol1" style={{height: "50px", backgroundColor: col.completa=="2" ? "#0d730d" : "transparent"}}> 
@@ -269,6 +269,7 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
                   </>
                   </div>
                   ))}
+                  </div>
               </div>
 
 
