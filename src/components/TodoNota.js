@@ -103,8 +103,8 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
       prezzoUni: newPrezzoUni,
       label: todo.prodottoC,
     };
-  await updateDoc(doc(db, "prodottoClin", idProdCli),  { prezzoUnitario: newPrezzoUni });  //aggiorna il prezzoUni di prodottoCli nel database
-  handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte) //aggiorna il prezzo unitario nel database
+    handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)
+    await updateDoc(doc(db, "prodottoClin", idProdCli),  { prezzoUnitario: newPrezzoUni });  //aggiorna il prezzoUni di prodottoCli nel database
   };
   //****************************************************************************************************************************** */
   const handleSubm = (e) => {
