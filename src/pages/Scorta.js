@@ -407,6 +407,7 @@ function handlePopUp(todo) {
       handleProdClien(idProdotto);
       }
       handleClearSet()
+      setPopupActive(false);
       setFlagEdit(+FlagEdit+1);
   };
 

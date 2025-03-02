@@ -325,7 +325,7 @@ export default function MiniDrawer( {signUserOut} ) {
   }, [location.pathname]);
 //________________________________________________________________________________________
     //Notifiche
-    {/** 
+   
     React.useEffect(() => {
       const collectionRef = collection(db, "notify");
       const q = query(collectionRef, );
@@ -350,7 +350,7 @@ export default function MiniDrawer( {signUserOut} ) {
             }
           } )
         }, [todoNoti]);
-*/}
+
 //________________________________________________________________________________________
   return (
     <Box sx={{ display: 'flex' }}>
@@ -372,7 +372,7 @@ export default function MiniDrawer( {signUserOut} ) {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             
           </Typography>
-{/**
+
         <div>
         {sup &&
         <>
@@ -405,7 +405,6 @@ export default function MiniDrawer( {signUserOut} ) {
               </>
             }
         </div>
-    */}
 
           <div >
             <Avatar alt="Remy Sharp" src={localStorage.getItem("profilePic")} onClick={handleMenu}/>
