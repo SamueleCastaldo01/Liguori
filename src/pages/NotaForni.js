@@ -6,13 +6,12 @@ import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
 import TodoNota from '../components/TodoNota';
 import TodoNotaForni from '../components/TodoNotaForni';
-import { getCountFromServer } from 'firebase/firestore';
-import { TextField } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
+import html2canvas from 'html2canvas';
 import { WhatsappShareButton, WhatsappIcon, EmailShareButton, EmailIcon } from 'react-share';
 import { useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -38,12 +37,21 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
     let navigate = useNavigate();
 
-    const string = "https://logic-2220e.web.app/notaforni/"+id+"/"+nome+"/"+data;
+    const string = "https://liguorisrl-38c83.web.app/notaforni/"+id+"/"+nome+"/"+data;
     const url = string.replace(/ /g, '%20');  //conversione da stringa a url
 
     var FlagT=false;   //flag per le tinte, viene salvato nel database serve per far riconoscere ogni singola trupla
     const [flagStampa, setFlagStampa] = React.useState(false);  //quando è falso si vedono le icone,
     const [flagProdFor, setFlagProdForn] = React.useState(false);  //quando è falso si vedono le icone,
+    const [imageUrl, setImageUrl] = React.useState("");
+
+    const captureDivAsImage = async () => {
+      if (!componentRef.current) return;
+    
+      const canvas = await html2canvas(componentRef.current, { useCORS: true });
+      const image = canvas.toDataURL("image/png"); // Converti in immagine PNG
+      setImageUrl(image); // Salva l'URL per condivisione
+    };
    
     const [sumTot, setSumTot] =React.useState("");
 
@@ -239,6 +247,19 @@ const print = async () => {
         createCate()
       }}>Aggiungi Prodotto</button></span>
       <span><button onClick={handleRefresh}>Refresh</button></span>
+
+      {imageUrl && (
+  <div>
+    <WhatsappShareButton url={imageUrl}>
+      <WhatsappIcon size={40} round={true} />
+    </WhatsappShareButton>
+    <EmailShareButton url={imageUrl}>
+      <EmailIcon size={40} round={true} />
+    </EmailShareButton>
+  </div>
+)}
+
+
   <WhatsappShareButton url={url}>
         <WhatsappIcon type="button" size={40} round={true} />
     </WhatsappShareButton>

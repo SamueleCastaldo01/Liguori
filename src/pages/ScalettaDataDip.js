@@ -58,30 +58,47 @@ function Row(props) {
 
       }
 //******************************************************************************************************************** */
-const handleEditQuota = async (id, sommaTotale, quotaV) => {  
-  var debTot;
-  var diffPrice;
-  var ripDebito;
+const handleEditQuota = async (id, sommaTotale, quotaV, idCliente, nomeCli) => {  
+  let debTot;
+  let ripDebito;
 
-
-  // Query per trovare il documento del debito
-  const q = query(collection(db, "debito"), where("nomeC", "==", nomC));  
+  // Query per trovare il documento del debito (filtrando per nome del cliente)
+  const q = query(collection(db, "debito"), where("nomeC", "==", nomeCli));
   const querySnapshot = await getDocs(q);
   
+  // Per ogni documento debito (in genere ce n'è uno solo)
   querySnapshot.forEach(async (hi) => {
-    if(quotaV != 0) {  //se la quota vecchia ci sta, allora devo andare a ristabilire il debito
-      ripDebito = (+hi.data().deb1) + (+quotaV);  //vado prima a riportare il debito 1 come prima
-      debTot = +ripDebito - (+Quota);  
+    // Salvo il valore attuale del debito (vecchio valore)
+    const oldDeb1 = hi.data().deb1;
+    
+    // Se esiste una quota vecchia, "ripristino" il debito aggiungendo quella quota
+    if (quotaV != 0) {
+      ripDebito = (+oldDeb1) + (+quotaV);
+      debTot = +ripDebito - (+Quota);
     } else {
-      debTot = +hi.data().deb1 - (+Quota); // Aggiorna il debito con la differenza
+      debTot = +oldDeb1 - (+Quota);
     }
-      var debTrunc = debTot.toFixed(2);  // Tronca a 2 decimali per evitare problemi
-
-      await updateDoc(doc(db, "debito", hi.id), { deb1: debTrunc });  // Aggiorna il debito nel DB
+    
+    // Tronca il nuovo debito a 2 decimali
+    const debTrunc = debTot.toFixed(2);
+    
+    // Aggiorna il documento "debito" con il nuovo valore
+    await updateDoc(doc(db, "debito", hi.id), { deb1: debTrunc });
+    
+    await addDoc(collection(db, "cronologiaDeb"), {
+      autore: "Liguori srl",
+      createdAt: serverTimestamp(),
+      deb1: debTrunc,   // nuovo debito
+      debv: oldDeb1,    // vecchio debito
+      idCliente: idCliente,  // deve essere disponibile nel contesto (ad es. prop)
+      nomeC: nomeCli
+    });
   });
-
-  await updateDoc(doc(db, "addNota", id), { quota: Quota, completa: "2" });  // Aggiorna la quota nella scaletta
+  
+  // Aggiorna il documento "addNota" con la nuova quota e imposta lo stato "completa" a "2"
+  await updateDoc(doc(db, "addNota", id), { quota: Quota, completa: "2" }); 
 };
+
 
     
     const handleEditNota = async (id) => {
@@ -128,7 +145,7 @@ const handleEditQuota = async (id, sommaTotale, quotaV) => {
                         <TableCell style={{padding: "0px"}}> <textarea value={nota}  style={{ padding: "0px", width:"220px", border:"none"}} 
                         onChange={(event) => {
                         setNota(event.target.value);}}></textarea></TableCell>
-                      <TableCell><button onClick={()=> {handleEditNota(row.id); handleEditQuota(row.id, row.sommaTotale, row.quota)}}>conferma</button></TableCell>
+                      <TableCell><button onClick={()=> {handleEditNota(row.id); handleEditQuota(row.id, row.sommaTotale, row.quota, row.idCliente, row.nomeC)}}>conferma</button></TableCell>
                       </TableRow>
                   </TableBody>
                 </Table>

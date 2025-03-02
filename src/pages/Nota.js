@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, getDoc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer} from 'firebase/firestore';
 import { useRef } from 'react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
-import BeenhereIcon from '@mui/icons-material/Beenhere';
 import Brightness1Icon from '@mui/icons-material/Brightness1';
 import TodoNota from '../components/TodoNota';
 import CloseIcon from '@mui/icons-material/Close';
@@ -81,6 +82,46 @@ function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, num
     const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
     const componentRef = useRef();  //serve per la stampa
+
+    const sharePdf = async () => {
+      try {
+        // Cattura il contenuto del div
+        const canvas = await html2canvas(componentRef.current, { useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Crea il PDF con jsPDF
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        
+        // Ottieni il blob del PDF
+        const pdfBlob = pdf.output('blob');
+        const file = new File([pdfBlob], 'nota.pdf', { type: 'application/pdf' });
+  
+        // Controlla se il browser supporta la condivisione di file
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Nota in PDF',
+            text: 'Ecco la nota in formato PDF',
+          });
+          console.log('Condiviso con successo');
+        } else {
+          // Fallback: ad esempio, fornisci il download del file
+          const downloadUrl = URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = 'nota.pdf';
+          link.click();
+          URL.revokeObjectURL(downloadUrl);
+          alert('La condivisione dei file non è supportata in questo browser. Il PDF è stato scaricato.');
+        }
+      } catch (error) {
+        console.error('Errore durante la creazione o la condivisione del PDF:', error);
+      }
+    };
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
      const Msg = () => (
@@ -357,20 +398,45 @@ const AlteStamp = async (e) => {  //handle se nel caso si voglia modificare il d
 
 
 const handleConferma = async () => {
-  var sumNota;
-  SommaTot();   //va a rifare la somma totale dei prodotti
-  sumNota=localStorage.getItem("sumTotNota");
-  var debTot= +sumNota+(+debitoRes);   
-  var debTrunc = debTot.toFixed(2);   //somma tra la somma totale dei prodotti + il debito
+  // Calcola la somma totale e aggiorna il debito
+  SommaTot(); // ricalcola la somma totale dei prodotti
+  const sumNota = localStorage.getItem("sumTotNota");
+  const debTot = +sumNota + (+debitoRes);
+  const debTrunc = debTot.toFixed(2); // somma totale dei prodotti + debito, formattata
   setDebTot(debTrunc);
-  await updateDoc(doc(db, "addNota", notaId), { debitoTotale:debTrunc, completa: localStorage.getItem("completa")});  //aggiorna la somma totale del ddt con tutti i debiti nell'add nota
-      await updateDoc(doc(db, "debito", idDebito), { deb1:debTrunc});  //aggiorna deb1 nel database del debito
 
-  AlteStamp(); //va a fare il controllo tramite il numero di prodotti, per andare a definire l'altezza della pagina che ci serve per la stampa
+  // Leggi il documento 'debito' per prendere il valore vecchio di deb1
+  const debitoDocRef = doc(db, "debito", idDebito);
+  const debitoSnapshot = await getDoc(debitoDocRef);
+  let oldDeb1 = "";
+  if (debitoSnapshot.exists()) {
+    oldDeb1 = debitoSnapshot.data().deb1 || "";
+  }
 
-      toast.clearWaitingQueue(); 
-      setUpdateProd(updateProdo +1)
+  // Aggiorna i documenti addNota e debito con il nuovo valore
+  await updateDoc(doc(db, "addNota", notaId), {
+    debitoTotale: debTrunc,
+    completa: localStorage.getItem("completa")
+  });
+  await updateDoc(debitoDocRef, { deb1: debTrunc });
+
+  // Aggiungi un nuovo record nella collezione cronologiaDeb
+  // con il nuovo debito (deb1) e quello vecchio (debv)
+  await addDoc(collection(db, "cronologiaDeb"), {
+    autore: "Liguori srl",              // autore fisso
+    createdAt: serverTimestamp(),       // timestamp di creazione
+    deb1: debTrunc,                     // nuovo valore
+    debv: oldDeb1,                      // valore vecchio preso dal documento attuale
+    idCliente: idCliente,               // utilizzando la variabile idCliente
+    nomeC: nomeCli                      // oppure nomeC, se corrisponde a nomeCli
+  });
+
+  // Esegue altre operazioni (ad es. AlteStamp, notifica, aggiornamento dello stato)
+  AlteStamp();
+  toast.clearWaitingQueue();
+  setUpdateProd(updateProdo + 1);
 };
+
 //_________________________________________________________________________________________________________________
 const handleDelete = async (id) => {
   const colDoc = doc(db, "Nota", id); 
@@ -457,6 +523,7 @@ const print = async () => {
       <Button onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}}  variant="contained"  value="scortatinte1">In Sospeso</Button>
     </>}
     <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }} onClick={print} size="small" variant="contained">Stampa</Button>
+    <button onClick={sharePdf}>Condividi come PDF</button>
      {Completa== 0 ? 
       <button type="button" className="button-delete" style={{padding: "0px", float: "left", }}>
         <Brightness1Icon sx={{ fontSize: 40 }}/>
