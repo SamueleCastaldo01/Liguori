@@ -819,7 +819,7 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
         <hr style={{margin: "0"}}/>
         </div>
 
-<div className="scroll">
+<div className="scroll" style={{maxHeight: "320px"}}>
   {Progress == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -944,7 +944,7 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>V.Fin.</p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scrollCrono">
+    <div className="scrollCrono" style={{maxHeight: "320px"}}>
     {Progress1 == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -1036,7 +1036,7 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Pr Fin. </p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scrollCrono">
+    <div className="scrollCrono" style={{maxHeight: "320px"}}>
     {Progress1 == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />

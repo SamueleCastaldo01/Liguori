@@ -496,7 +496,7 @@ function handlePopUp(image, nota) {
         <>    
 {/** Aggiungi Tinte **************************************************************************/}
 {/******Aggiungi Prodotto  modal***************************************************************************** */}
-<Modal  size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod} style={{ marginTop: "50px" }}>
+<Modal  size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod}>
       <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); setPopupActiveScortaEdit(false); }}>
               <CloseIcon id="i" /></button> </div>
     {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Tinta </h4>}
@@ -535,14 +535,12 @@ function handlePopUp(image, nota) {
        {popupActiveScortaEdit && <Button onClick={""} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Tinta </Button>}   
           </Modal.Body>
   </Modal>
- 
     </>
     )}
 
 {/** tabella tinte scorta *****************************************************************************************************************/}
 {popupActiveScorta &&
 <>
-{sup == true  && <div style={{marginTop: "50px"}}></div>}
 {sup == false  && <div style={{marginTop: "20px"}}></div>}
 <div ref={componentRef} className='todo_containerScorta' style={{width: dip == true ? "100%" : "700px"}}>
 <div className='row' > 
@@ -659,7 +657,7 @@ function handlePopUp(image, nota) {
 <hr style={{margin: "0"}}/>
 </div>
 
-<div className="scroll">
+<div className="scroll" style={{maxHeight: "400px"}}>
   {Progress == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -711,7 +709,7 @@ function handlePopUp(image, nota) {
       <div className='col-1' style={{padding: "0px", width:"50px"}}><p className='coltext'>V.Fin.</p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scrollCrono">
+    <div className="scrollCrono" style={{maxHeight: "400px"}}>
     {Progress1 == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
