@@ -471,6 +471,7 @@ const handleActiveEdit = async ( todo) => {
 const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
     if(todo.pa != pap) {    //la trupla viene inserita solo se pa viene cambiato
       handleCronologiaPa(todo, pap)
+      
     }
     await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd, prezzoIndi:pap});
     setFlagEdit(+FlagEdit+1);

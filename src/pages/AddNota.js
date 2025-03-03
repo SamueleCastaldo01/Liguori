@@ -122,7 +122,7 @@ function AddNota({getNotaDataScal, TodayData, getNotaId}) {
 const contEffect = async () => {
   console.log(dataOrd)
     const coll = collection(db, "addNota");
-    const q = query(coll, where("data", "==", dataOrd), orderBy("createdAt"));
+    const q = query(coll, where("data", "==", dataOrd));
     const snapshot = await getCountFromServer(q);
     setCont(snapshot.data().count+1)
   }

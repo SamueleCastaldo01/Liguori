@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import { useRef } from 'react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
@@ -11,7 +13,6 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
-import html2canvas from 'html2canvas';
 import { WhatsappShareButton, WhatsappIcon, EmailShareButton, EmailIcon } from 'react-share';
 import { useParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -27,6 +28,46 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     let sup= supa.includes(localStorage.getItem("uid"))
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+
+    const sharePdf = async () => {
+      try {
+        // Cattura il contenuto del div
+        const canvas = await html2canvas(componentRef.current, { useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Crea il PDF con jsPDF
+        const pdf = new jsPDF();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        
+        // Ottieni il blob del PDF
+        const pdfBlob = pdf.output('blob');
+        const file = new File([pdfBlob], 'nota.pdf', { type: 'application/pdf' });
+  
+        // Controlla se il browser supporta la condivisione di file
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Nota in PDF',
+            text: 'Ecco la nota in formato PDF',
+          });
+          console.log('Condiviso con successo');
+        } else {
+          // Fallback: ad esempio, fornisci il download del file
+          const downloadUrl = URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = 'nota.pdf';
+          link.click();
+          URL.revokeObjectURL(downloadUrl);
+          alert('La condivisione dei file non è supportata in questo browser. Il PDF è stato scaricato.');
+        }
+      } catch (error) {
+        console.error('Errore durante la creazione o la condivisione del PDF:', error);
+      }
+    };
 
     const { id } = useParams();
     const { nome } = useParams();
@@ -248,16 +289,7 @@ const print = async () => {
       }}>Aggiungi Prodotto</button></span>
       <span><button onClick={handleRefresh}>Refresh</button></span>
 
-      {imageUrl && (
-  <div>
-    <WhatsappShareButton url={imageUrl}>
-      <WhatsappIcon size={40} round={true} />
-    </WhatsappShareButton>
-    <EmailShareButton url={imageUrl}>
-      <EmailIcon size={40} round={true} />
-    </EmailShareButton>
-  </div>
-)}
+      <button onClick={sharePdf}>Condividi come PDF</button>
 
 
   <WhatsappShareButton url={url}>

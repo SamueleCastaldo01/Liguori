@@ -8,7 +8,7 @@ import { supa, guid, tutti, dipen, primary, rosso } from '../components/utenti';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 
-export default function TodoScorta({ todo, toggleComplete, handleDelete, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa, flagDelete, handleReparto, handleActiveEdit}) {
+export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa, flagDelete, handleReparto, handleActiveEdit}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -170,9 +170,18 @@ export default function TodoScorta({ todo, toggleComplete, handleDelete, handleE
 
  {/********************PR'*********************************************************** */}
   {sup == true && 
-    <div className="col-1 diviCol" style={{ textAlign: "left", padding: "0px" }}>
-      <div className='col'><h3 className='inpTab'>€{Number(todo.prezzoIndi).toFixed(2).replace('.', ',')}</h3></div>
-    </div>
+  <>
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
+  <input
+    style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+      type="text"
+      onBlur={handleSubm}
+      value={newPa}
+      className="inpNumb"
+      onChange={handleChangePa}
+    />
+  </div>
+  </>
   }
 
   {/********************SOTTOSCORTA'*********************************************************** */}
