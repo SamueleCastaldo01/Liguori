@@ -19,6 +19,8 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   const [newNomeP, setNomeP] = React.useState(todo.nomeP);
   const [newIdProdotto, setIdProdotto] = React.useState(todo.idProdotto);
   const [newQuantita, setQuantita] = React.useState(todo.quantita);
+  const [newListino, setListino] = React.useState(todo.listino);
+  const [newScontistica, setScontistica] = React.useState(todo.scontistica);
   const [newSottoScorta, setNewSottoScorta] = React.useState(todo.sottoScorta);
   const [newPa, setNewPa] = React.useState(todo.prezzoIndi);
   const [newQuantitaOrdinabile, setnewQuantitaOrdinabile] = React.useState(todo.quantitaOrdinabile);
@@ -26,7 +28,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa);
+    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa, newScontistica, newListino);
     setAggiungi("");
   };
 
@@ -53,6 +55,17 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   const handleChangePa = (e) => {
     e.preventDefault();
       setNewPa(e.target.value);
+  };
+
+  const handleChangeListino = (e) => {
+    e.preventDefault();
+      setListino(e.target.value);
+  };
+
+
+  const handleChangeScontistica = (e) => {
+    e.preventDefault();
+      setScontistica(e.target.value);
   };
 
   const handleChangeQo = (e) => {
@@ -96,6 +109,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
     <div className="row ">
 
 {/*********************idProdotto************************************************************************ */}
+{/** 
   {sup == true && 
   <div className="col-1 diviCol" >
   <h5
@@ -105,6 +119,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 
   </div>
   }
+  */}
  
 {/*********************PRODOTTO********************************************************** */}
    {sup == true && 
@@ -129,16 +144,16 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 
  {/********************Categoria*********************************************************** */}
  {sup ===true && ( 
-  <div className="col-2 diviCol" >
+  <div className="col-1 diviCol" >
   {todo.reparto == 1 &&
     <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
-        > Reparto Femminile </h4> }
+        > R. F. </h4> }
           {todo.reparto == 2 &&
     <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
-        > Reparto Maschile </h4> }
+        > R. M. </h4> }
       {todo.reparto == 3 &&
     <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
-        > Reparto Attrezzature </h4> }
+        > R. A. </h4> }
     </div>
     )}
 {/********************QUANTITA'*********************************************************** */}
@@ -179,6 +194,38 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
       value={newPa}
       className="inpNumb"
       onChange={handleChangePa}
+    />
+  </div>
+  </>
+  }
+
+   {/********************Listino'*********************************************************** */}
+   {sup == true && 
+  <>
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
+  <input
+    style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+      type="text"
+      onBlur={handleSubm}
+      value={newListino}
+      className="inpNumb"
+      onChange={handleChangeListino}
+    />
+  </div>
+  </>
+  }
+
+   {/********************Scontistica'*********************************************************** */}
+   {sup == true && 
+  <>
+  <div className="col-1 diviCol" style={{padding: "0px"}}>
+  <input
+    style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+      type="text"
+      onBlur={handleSubm}
+      value={newScontistica}
+      className="inpNumb"
+      onChange={handleChangeScontistica}
     />
   </div>
   </>

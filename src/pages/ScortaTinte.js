@@ -496,7 +496,7 @@ function handlePopUp(image, nota) {
         <>    
 {/** Aggiungi Tinte **************************************************************************/}
 {/******Aggiungi Prodotto  modal***************************************************************************** */}
-<Modal  size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod}>
+<Modal style={{zIndex: "9999", marginTop: "50px"}} size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod}>
       <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); setPopupActiveScortaEdit(false); }}>
               <CloseIcon id="i" /></button> </div>
     {popupActive && <h4 className='title'  style={{ width: "300px", position: "absolute", top: "10px", marginLeft: "2px" }}> Aggiungi Tinta </h4>}

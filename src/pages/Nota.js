@@ -751,12 +751,17 @@ const print = async () => {
 
     <div className='col' style={{textAlign:"right", padding:"0px"}}>
     <h6>Totale: €{parseFloat(sumTot).toFixed(2).replace('.', ',')}</h6>
+    {completa!=2 &&
       <form onSubmit={handleEditDebitoRes}>
       <h6>Debito Residuo:     <input value={debitoRes} onBlur={handleEditDebitoRes} style={{textAlign:"center", padding: "0px", width:"50px"}} 
         onChange={(event) => {
         setDebitoRes(event.target.value);}}
       />  €</h6>
       </form>
+      }
+      {completa==2 &&
+        <h6>Debito Residuo: {debitoRes}  €</h6>
+      }
           <h6>Debito Totale: €{parseFloat(debitoTot).toFixed(2).replace('.', ',')}</h6>
   
     {flagStampa == false && <>

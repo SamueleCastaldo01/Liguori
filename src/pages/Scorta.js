@@ -48,6 +48,9 @@ function Scorta() {
 
   const [idProdotto, setIdProdtto] = React.useState("");
   const [idDocumentoEdit, setIdDocumentoEdit] = React.useState("");
+  const [scontistica, setScontiscita] = React.useState("");
+  const [listino, setListino] = React.useState("");
+  const [fornitore, setFornitore] = React.useState("");
   const [brand, setBrand] = React.useState("");
   const [descrizione, setDescrizione] = React.useState("");
   const [nomeP, setNomeP] = React.useState("");
@@ -249,6 +252,7 @@ const print = async () => {
   }
 
   function handleSpeedAddProd() {
+    handleClearSet();
     setPopupActive(true)
     setOpen(false)
   }
@@ -397,6 +401,9 @@ function handlePopUp(todo) {
         quantita: 0,
         brand,
         pa: 0,
+        scontistica,
+        listino,
+        fornitore,
         nota,
         sottoScorta,
         prezzoIndi,
@@ -413,11 +420,14 @@ function handlePopUp(todo) {
 
   const handleClearSet =  () => {   //aggiunta della trupla cronologia quantità
     setNomeP("");
-    setReparto(0)
+    setReparto(1)
     setBrand("");
     setQuantita("");
+    setFornitore("");
     setImage("");
     setPrezzoIndi("");
+    setListino("");
+    setScontiscita("");
     setNota("");
     setSottoScorta("");
     setquantitaOrdinabile("");
@@ -442,22 +452,21 @@ function handlePopUp(todo) {
       });
   };
    //******************************************************************************************************** */
-   const handleCronologiaPa = async (todo, pap ) => {   //aggiunta della trupla cronologia Pa
-    let dataOd= serverTimestamp();
+   const handleCronologiaPa = async (todo, pap) => {
+    let dataFormattata = moment().format('DD-MM-YYYY');
 
-    let dataFormattata = moment(dataOd).format('DD-MM-YYYY');
-
-      await addDoc(collection(db, "cronologiaPa"), {
+    await addDoc(collection(db, "cronologiaPa"), {
         autore: auth.currentUser.displayName,
         data: dataFormattata,
         createdAt: serverTimestamp(),
         idProdotto: todo.idProdotto,
         nomeP: todo.nomeP,
-        paI: todo.prezzoIndi,
-        paF: pap,
-      });
-      await updateDoc(doc(db, "notify", notiPaId), { NotiPa: true });  //va a modificare il valore della notifica
-  };
+        paI: todo.prezzoIndi,  // Prezzo iniziale (vecchio)
+        paF: pap,  // Prezzo finale (nuovo)
+    });
+
+    await updateDoc(doc(db, "notify", notiPaId), { NotiPa: true });  
+};
 //****************************************************************************************** */
 const handleActiveEdit = async ( todo) => {
   setPopupActiveScortaEdit(true)
@@ -466,17 +475,28 @@ const handleActiveEdit = async ( todo) => {
   setPrezzoIndi(todo.prezzoIndi);
   setIdDocumentoEdit(todo.id);
   setReparto(todo.reparto);
+  setListino(todo.listino);
+  setScontiscita(todo.scontistica);
+  setFornitore(todo.fornitore);
 };
 
-const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
-    if(todo.pa != pap) {    //la trupla viene inserita solo se pa viene cambiato
-      handleCronologiaPa(todo, pap)
-      
-    }
-    await updateDoc(doc(db, "prodotto", todo.id), { nomeP: nome, sottoScorta:SotSco, quantitaOrdinabile:quaOrd, prezzoIndi:pap});
-    setFlagEdit(+FlagEdit+1);
-    toast.clearWaitingQueue(); 
-  };
+const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
+  if (parseFloat(todo.prezzoIndi) !== parseFloat(pap)) {  // Controllo se il prezzo è cambiato
+      await handleCronologiaPa(todo, pap);
+  }
+
+  await updateDoc(doc(db, "prodotto", todo.id), { 
+      nomeP: nome, 
+      sottoScorta: SotSco, 
+      quantitaOrdinabile: quaOrd, 
+      prezzoIndi: pap, 
+      scontistica: scon, 
+      listino: list 
+  });
+
+  setFlagEdit(prev => prev + 1);
+  toast.clearWaitingQueue();
+};
 
   const handleEditNomeProd = async () => {
     console.log(idProdotto)
@@ -653,25 +673,26 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
           onChange={(e) => setNomeP(e.target.value)}/>
       </div>
       <div className='col'>
-      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Brand" variant="outlined" autoComplete='off' value={brand} 
-          onChange={(e) => setBrand(e.target.value)}/>
+      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Fornitore" variant="outlined" autoComplete='off' value={fornitore} 
+          onChange={(e) => setFornitore(e.target.value)}/>
       </div>
       </div>
       <div className='row mt-4'>
         <div className='col'>
-          <FormControl className='mb-5' color='secondary'>
-            <InputLabel  color='secondary' id="demo-simple-select-label"></InputLabel>
-            <Select sx={{height:55, width: "370px"}}
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              defaultValue={1}
-              onChange={handleChangeDataSelect}
-            >
-              <MenuItem value={1}>Reparto Femminile</MenuItem>
-              <MenuItem value={2}>Reparto Maschile</MenuItem>
-              <MenuItem value={3}>Reparto Attrezzature</MenuItem>
-            </Select>
-          </FormControl>
+        <FormControl className='mb-5' color='secondary'>
+          <InputLabel color='secondary' id="demo-simple-select-label"></InputLabel>
+          <Select
+            sx={{ height: 55, width: "370px" }}
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={reparto} // Usa value invece di defaultValue
+            onChange={handleChangeDataSelect} // Aggiorna lo stato quando cambia la selezione
+          >
+            <MenuItem value={1}>Reparto Femminile</MenuItem>
+            <MenuItem value={2}>Reparto Maschile</MenuItem>
+            <MenuItem value={3}>Reparto Attrezzature</MenuItem>
+          </Select>
+        </FormControl>
         </div>
         <div className='col'>
         <TextField  style={{width: "100%"}} type="number"  color='secondary'                
@@ -681,6 +702,28 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
         onChange={(e) => setPrezzoIndi(e.target.value)}
         InputProps={{
             startAdornment: <InputAdornment position="start">€</InputAdornment>,
+          }}
+        />
+        </div>
+        <div className='col'>
+        <TextField  style={{width: "100%"}} type="number"  color='secondary'                
+        inputProps={{
+                  step: 0.01,
+                }} id="filled-basic" label="Listino" variant="outlined" autoComplete='off' value={listino} 
+        onChange={(e) => setListino(e.target.value)}
+        InputProps={{
+            startAdornment: <InputAdornment position="start">€</InputAdornment>,
+          }}
+        />
+        </div>
+        <div className='col'>
+        <TextField  style={{width: "100%"}} type="number"  color='secondary'                
+        inputProps={{
+                  step: 0.01,
+                }} id="filled-basic" label="Scontistica" variant="outlined" autoComplete='off' value={scontistica} 
+        onChange={(e) => setScontiscita(e.target.value)}
+        InputProps={{
+            startAdornment: <InputAdornment position="start">%</InputAdornment>,
           }}
         />
         </div>
@@ -769,11 +812,13 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
 </div>
 
         <div className='row' style={{marginRight: "5px"}}>
+        {/* 
         {sup == true &&
         <div className='col-1' >
         <p className='coltext'>Id Prodotto</p>
         </div>
         }
+        */}
         {sup == true &&
           <div className='col-3' >
           <p className='coltext'>Prodotto</p>
@@ -787,14 +832,20 @@ const handleEdit = async ( todo, nome, SotSco, quaOrd, pap) => {
        
         {sup == true && 
         <>
-        <div className='col-2' >
-        <p className='coltext'>Categoria</p>
+        <div className='col-1' >
+        <p className='coltext'>Cat</p>
         </div>
         <div className='col-1' style={{padding: "0px", width:"80px"}}>
           <p className='coltext'>Qt</p>
         </div>
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Pr(€)</p>
+        </div>
+        <div className='col-1 p-0' >
+        <p className='coltext'>Lis(€)</p>
+        </div>
+        <div className='col-1 p-0' >
+        <p className='coltext'>Sco(%)</p>
         </div>
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Sogl. Sott.</p>
