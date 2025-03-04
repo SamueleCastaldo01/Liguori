@@ -25,10 +25,18 @@ function NotaDipData({ notaDat, getNotaDip }) {
 
     let navigate = useNavigate();
 
-    useEffect(() => {
-        const collectionRef = collection(db, "addNota");
-        const q = query(collectionRef, orderBy("cont"));
 
+  const handleChange = (e) => {
+    setDataSc(moment(e.target.value).format("DD-MM-YYYY"));
+    };
+
+
+      useEffect(() => {
+        if (!dataSc || !statusFilter) return; 
+    
+        const collectionRef = collection(db, "addNota");
+        const q = query(collectionRef, where("data", "==", dataSc), where("completa", "==", statusFilter), orderBy("cont"));
+    
         const unsub = onSnapshot(q, (querySnapshot) => {
             let todosArray = [];
             querySnapshot.forEach((doc) => {
@@ -37,29 +45,11 @@ function NotaDipData({ notaDat, getNotaDip }) {
             setTodos(todosArray);
             setProgress(true);
         });
+    
         return () => unsub();
-    }, []);
+    }, [dataSc, statusFilter]);
+    
 
-    useEffect(() => {
-        const collectionRef = collection(db, "ordDat");
-        const q = query(collectionRef, orderBy("dataMilli", "desc"), limit(100));
-
-        const unsub = onSnapshot(q, (querySnapshot) => {
-            let todosArray = [];
-            querySnapshot.forEach((doc) => {
-                todosArray.push({ ...doc.data(), id: doc.id });
-            });
-            setTodosDataAuto(todosArray);
-        });
-        return () => unsub();
-    }, []);
-
-    function onChangeDataCal(value) {
-        setDataCal(value);
-        var formattedDate = moment(value).format('DD-MM-YYYY');
-        setDataSc(formattedDate);
-        setActiveCalender(false);
-    }
 
     return (
         <>
@@ -91,26 +81,11 @@ function NotaDipData({ notaDat, getNotaDip }) {
                                     </FormControl>
                                 </div>
                                 <div className='col' style={{ paddingLeft: "0px", textAlign: "right" }}>
-                                    {dataSc}
-                                    <button className='buttonCalender' onClick={() => setActiveCalender(!activeCalender)}>
-                                        <CalendarMonthIcon />
-                                    </button>
-                                    {activeCalender && (
-                                        <div style={{ width: "265px", position: "absolute" }}>
-                                            <motion.div
-                                                initial={{ x: -70 }}
-                                                animate={{ x: -93 }}
-                                                transition={{ type: "spring", mass: 0.5 }}>
-                                                <Calendar
-                                                    onChange={onChangeDataCal}
-                                                    value={DataCal}
-                                                    tileClassName={({ date }) => {
-                                                        return todosDataAuto.find(x => x.data === moment(date).format("DD-MM-YYYY")) ? 'highlight' : '';
-                                                    }}
-                                                />
-                                            </motion.div>
-                                        </div>
-                                    )}
+                                        <input
+                                            type="date"
+                                            value={moment(dataSc, "DD-MM-YYYY").format("YYYY-MM-DD")} // Converti per l'input
+                                            onChange={(e) => handleChange(e)} // Salva in formato gg-mm-yyyy
+                                            />
                                 </div>
                             </div>
 

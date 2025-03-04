@@ -632,9 +632,10 @@ React.useEffect(() => {
         <Select sx={{height:39, marginLeft:-1, width: 200}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue={91}
+          defaultValue={31}
           onChange={handleChangeDataSelect1}
         >
+          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
           <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
           <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
         </Select>
@@ -705,9 +706,10 @@ React.useEffect(() => {
         <Select sx={{height:39, marginLeft:-1, width: 200}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue={91}
+          defaultValue={31}
           onChange={handleChangeDataSelect}
         >
+          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
           <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
           <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
         </Select>
@@ -779,9 +781,10 @@ React.useEffect(() => {
         <Select sx={{height:39, marginLeft:-1, width: 200}}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue={91}
+          defaultValue={31}
           onChange={handleChangeDataSelect3}
         >
+          <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
           <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
           <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
         </Select>
