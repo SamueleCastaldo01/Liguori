@@ -145,6 +145,9 @@ function HomePage(  ) {
 
   const [searchTerm, setSearchTerm] = useState("");  //search
   const inputRef= useRef();
+  const cacheNumNoteRef = React.useRef({});
+  const cacheQuotaRef = React.useRef({});
+  const cacheVenditeRef = React.useRef({});
   const [popupActive, setPopupActive] = useState(false);  
   const [popupActiveInOrdine, setPopupActiveInOrdine] = useState(false); 
 
@@ -330,95 +333,190 @@ function onChangeDataFine3(value) {   //si attiva quando seleziono una data dal 
 
 
 //******************Per il grafico Ordini********************************************************************* */
-  React.useEffect(() => {    //si va a prendere il numero di note nelle varie date solo le
-    const collectionRef = collection(db, "ordDatBloccata");
-    const q = query(collectionRef, orderBy("dataMilli"));
+//vado a prendere il numero delle note per ogni giorno
+React.useEffect(() => {
+  const fetchData = async () => {
+    const cacheKey = `${filtroData1}-${DataMilliIni}-${DataMilliFine}-${localStorage.getItem("bho")}`;
+    
+    if (cacheNumNoteRef.current[cacheKey]) {
+      setTodosNumNote(cacheNumNoteRef.current[cacheKey]);
+      return;
+    }
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        if(filtroData1 == false) {   // se è uguale al primo flitro ultimi giorni va ad eseguire questo if interno
-          if(doc.data().dataMilli >= localStorage.getItem("bho")) {
-            let car = { data: doc.data().data,  numeroNote: doc.data().numeroNote}
-            todosArray.push(car);
-          }
-        }
+    const collectionRef = collection(db, "addNota");
+    let q = filtroData1
+      ? query(
+          collectionRef,
+          where("dataMilli", ">=", DataMilliIni),
+          where("dataMilli", "<=", DataMilliFine),
+          orderBy("dataMilli"),
+          limit(500)
+        )
+      : query(
+          collectionRef,
+          where("dataMilli", ">=", Number(localStorage.getItem("bho"))),
+          orderBy("dataMilli"),
+          limit(500)
+        );
 
-        if(filtroData1 == true) {   // se è uguale al primo flitro dataIniziale e finale va ad eseguire questo if interno
-          if(doc.data().dataMilli >= DataMilliIni && doc.data().dataMilli <= DataMilliFine) {
-            let car = { data: doc.data().data,  numeroNote: doc.data().numeroNote}
-            todosArray.push(car);
-          }
-        }
-      });
-      setTodosNumNote(todosArray);
-    });
-    return () => unsub();
-  }, [day1, DataMilliIni, DataMilliFine, filtroData1]);
+    const querySnapshot = await getDocs(q);
+    const groupedNotes = querySnapshot.docs.reduce((acc, doc) => {
+      const date = doc.data().data;
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
 
-  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
-    handleNumNot();
-  }, [todosNumNote]);
+    const result = Object.entries(groupedNotes)
+      .sort(([a], [b]) => new Date(a) - new Date(b))
+      .map(([data, numeroNote]) => ({ data, numeroNote }));
+
+    cacheNumNoteRef.current[cacheKey] = result;
+    setTodosNumNote(result);
+  };
+
+  fetchData();
+}, [day1, DataMilliIni, DataMilliFine, filtroData1]);
+
+const handleNumNot = React.useCallback(() => {
+  setDataNumNot({
+    labels: todosNumNote.map(({ data }) => data),
+    datasets: [{
+      label: "Numero di Note",
+      data: todosNumNote.map(({ numeroNote }) => numeroNote),
+      backgroundColor: ["#CCB497"],
+      borderColor: ["#CCB497"],
+      tension: 0.4,
+    }]
+  });
+}, [todosNumNote]);
+
+React.useEffect(() => { handleNumNot(); }, [todosNumNote]);
 
 //******************Per il grafico Incasso********************************************************************* */
-  React.useEffect(() => {    //va a prendere la quota totale dalla scalettaDat quella bloccata
-    const collectionRef = collection(db, "scalDatBloccata");
-    const q = query(collectionRef, orderBy("dataMilli"));
+//vado a prendere la quota dalle scalette
+React.useEffect(() => {
+  const fetchScalettaData = async () => {
+    const cacheKey = `${filtroData2}-${DataMilliIni2}-${DataMilliFine2}-${localStorage.getItem("bho1")}`;
+    
+    if (cacheQuotaRef.current[cacheKey]) {
+      setTodosScaletta(cacheQuotaRef.current[cacheKey]);
+      return;
+    }
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        if(filtroData2 == false) {
-          if(doc.data().dataMilli >= localStorage.getItem("bho1")) {
-            let car = { data: doc.data().data,  totalQuota: doc.data().totalQuota}
-            todosArray.push(car);
-          }
-        }
-        if(filtroData2 == true) {
-          if(doc.data().dataMilli >= DataMilliIni2 && doc.data().dataMilli <= DataMilliFine2) {
-              let car = { data: doc.data().data,  totalQuota: doc.data().totalQuota}
-              todosArray.push(car);
-          }
-        }
-      });
-      setTodosScaletta(todosArray);
-    });
-    return () => unsub();
-  }, [day, DataMilliFine2, DataMilliIni2, filtroData2]);
+    const collectionRef = collection(db, "addNota");
+    let q = filtroData2
+      ? query(
+          collectionRef,
+          where("scaletta", "==", true),
+          where("scalettaDataMilli", ">=", DataMilliIni2),
+          where("scalettaDataMilli", "<=", DataMilliFine2),
+          orderBy("scalettaDataMilli"),
+          limit(500)
+        )
+      : query(
+          collectionRef,
+          where("scaletta", "==", true),
+          where("scalettaDataMilli", ">=", Number(localStorage.getItem("bho1"))),
+          orderBy("scalettaDataMilli"),
+          limit(500)
+        );
 
-  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
-    handleTotQuota();  //per il grafico vendite
-  }, [todosScaletta]);
+    const querySnapshot = await getDocs(q);
+    const groupedQuota = querySnapshot.docs.reduce((acc, doc) => {
+      const date = doc.data().scalettaData;
+      const quota = Number(doc.data().quota) || 0;
+      acc[date] = (acc[date] || 0) + quota;
+      return acc;
+    }, {});
+
+    const result = Object.entries(groupedQuota)
+      .sort(([a], [b]) => new Date(a) - new Date(b))
+      .map(([data, totalQuota]) => ({ data, totalQuota }));
+
+    cacheQuotaRef.current[cacheKey] = result;
+    setTodosScaletta(result);
+  };
+
+  fetchScalettaData();
+}, [day, DataMilliFine2, DataMilliIni2, filtroData2]);
+
+const handleTotQuota = React.useCallback(() => {
+  setDataTotQuota({
+    labels: todosScaletta.map(({ data }) => data),
+    datasets: [{
+      label: "Incasso",
+      data: todosScaletta.map(({ totalQuota }) => totalQuota),
+      backgroundColor: ["#CCB497"],
+      borderColor: ["#CCB497"],
+      tension: 0.4,
+    }]
+  });
+}, [todosScaletta]);
+
+React.useEffect(() => { handleTotQuota(); }, [todosScaletta]);
 
   //******************Per il grafico Vendite********************************************************************* */
-  React.useEffect(() => {    //va a prendere la quota totale dalla scalettaDat quella bloccata
-    const collectionRef = collection(db, "scalDatBloccata");
-    const q = query(collectionRef, orderBy("dataMilli"));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        if(filtroData3 == false) {
-          if(doc.data().dataMilli >= localStorage.getItem("bhii")) {
-            let car = { data: doc.data().data,  totalSommaTotale: doc.data().totalSommaTotale}
-            todosArray.push(car);
-          }
-        }
-        if(filtroData3 == true) {
-          if(doc.data().dataMilli >= DataMilliIni3 && doc.data().dataMilli <= DataMilliFine3) {
-              let car = { data: doc.data().data,  totalSommaTotale: doc.data().totalSommaTotale}
-              todosArray.push(car);
-          }
-        }
-      });
-      setTodosVendite(todosArray);
+  //va a prendere la sommaTotale dalla scalettaDat quella bloccata
+  React.useEffect(() => {
+    const fetchScalettaData = async () => {
+      const cacheKey = `${filtroData2}-${DataMilliIni2}-${DataMilliFine2}-${localStorage.getItem("bhii")}`;
+      
+      if (cacheVenditeRef.current[cacheKey]) {
+        setTodosVendite(cacheVenditeRef.current[cacheKey]);
+        return;
+      }
+  
+      const collectionRef = collection(db, "addNota");
+      let q = filtroData2
+        ? query(
+            collectionRef,
+            where("scaletta", "==", true),
+            where("scalettaDataMilli", ">=", DataMilliIni2),
+            where("scalettaDataMilli", "<=", DataMilliFine2),
+            orderBy("scalettaDataMilli"),
+            limit(500)
+          )
+        : query(
+            collectionRef,
+            where("scaletta", "==", true),
+            where("scalettaDataMilli", ">=", Number(localStorage.getItem("bhii"))),
+            orderBy("scalettaDataMilli"),
+            limit(500)
+          );
+  
+      const querySnapshot = await getDocs(q);
+      const groupedSomma = querySnapshot.docs.reduce((acc, doc) => {
+        const date = doc.data().scalettaData; // Prendi la data come stringa
+        const sommaTotale = Number(doc.data().sommaTotale) || 0; // Assicurati che sia un numero
+        acc[date] = (acc[date] || 0) + sommaTotale;
+        return acc;
+      }, {});
+  
+      const result = Object.entries(groupedSomma)
+        .sort(([a], [b]) => new Date(a) - new Date(b)) // Ordina per data
+        .map(([data, totalSomma]) => ({ data, totalSomma }));
+  
+      cacheVenditeRef.current[cacheKey] = result;
+      setTodosVendite(result);
+    };
+  
+    fetchScalettaData();
+  }, [day, DataMilliFine2, DataMilliIni2, filtroData2]);
+  
+  const handleVendite1 = React.useCallback(() => {
+    setDataVendite({
+      labels: todosVendite.map(({ data }) => data), // Etichette delle date
+      datasets: [{
+        label: "Vendite",
+        data: todosVendite.map(({ totalSomma }) => totalSomma), // Somma totale delle vendite
+        backgroundColor: ["#CCB497"],
+        borderColor: ["#CCB497"],
+        tension: 0.4,
+      }]
     });
-    return () => unsub();
-  }, [day3, DataMilliFine3, DataMilliIni3, filtroData3]);
-
-  React.useEffect(() => {    //se la variabile cambia allora viene eseguita questa funzione
-    handleVendite();  //per il grafico vendite
   }, [todosVendite]);
+  
+  React.useEffect(() => { handleVendite1(); }, [todosVendite]);
 
   
 //******************Per la tabella scaletta chiusa********************************************************************* */
@@ -453,46 +551,6 @@ React.useEffect(() => {
   return () => unsub();
 }, [popupActive == true]);
 
-
-//**************Per il grafico ordini************************************************************** */
-const handleNumNot = async () => {
-    setDataNumNot({
-      labels: todosNumNote.map((dati) => dati.data ),
-      datasets: [{
-        label: "Ordini",
-        data: todosNumNote.map((dati) => dati.numeroNote ),
-        backgroundColor: ["#CCB497"],
-        borderColor: ["#CCB497"],
-        tension: 0.4,
-      }]
-    })
-};
-//**************Per il grafico Incasso************************************************************** */
-const handleTotQuota = async () => {
-  setDataTotQuota({
-    labels: todosScaletta.map((dati) => dati.data ),
-    datasets: [{
-      label: "Incasso",
-      data: todosScaletta.map((dati) => dati.totalQuota ),
-      backgroundColor: ["#CCB497"],
-      borderColor: ["#CCB497"],
-      tension: 0.4,
-    }]
-  })
-};
-//**************Per il grafico Vendite************************************************************** */
-const handleVendite = async () => {
-  setDataVendite({
-    labels: todosVendite.map((dati) => dati.data ),
-    datasets: [{
-      label: "Incasso",
-      data: todosVendite.map((dati) => dati.totalSommaTotale ),
-      backgroundColor: ["#CCB497"],
-      borderColor: ["#CCB497"],
-      tension: 0.4,
-    }]
-  })
-};
 
 
   const handleDelete = async (id, nomeCli) => {
@@ -531,19 +589,15 @@ const handleVendite = async () => {
       exclusive
       onChange={handleChangeTogg}
       aria-label="Platform"
-    > {/********* 
+    >  
       <ToggleButton  onClick={() => {setPopupActive(!popupActive); setActiveCalender(false); setPopupActiveInOrdine(false)}} size='small' color='secondary' value="scaletteChiu">Scalette Chiuse</ToggleButton>
       <ToggleButton onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
-    */}
+  
     </ToggleButtonGroup>
-
-    <div>
-      <img src="/dashLiguori.jpg" alt="Logo"  style={{width: "100%"}}/> {/* Utilizza il percorso relativo alla radice del tuo progetto */}
-    </div>
 
 <div className='containerGrafici'>
 {/***************GRAFICO ORDINI********************************************* */}
-{/*
+
     <div className='grafici' >
     <div>  <button type='button' className="ButtonFilterCale float-end" >
     <FilterListIcon id="i" onClick={handleMenu}/>
@@ -615,9 +669,8 @@ const handleVendite = async () => {
  }
       <Line data={dataNumNot} options={optionsNumCart}/>
     </div>
- */}
+
 {/*************Grafico Incasso********************************************** */}
-{/*}
     <div className='grafici' >
       <div>  <button type='button' className="ButtonFilterCale float-end mb-2" >
         <FilterListIcon id="i" onClick={handleMenu2}/>
@@ -689,9 +742,9 @@ const handleVendite = async () => {
  }
       <Line data={dataTotQuota} options={optionsTotQuota}/>
     </div>
-  */}
+
 {/***************GRAFICO VENDITE********************************************* */}
-{/*
+
 <div className='grafici' >
     <div>  <button type='button' className="ButtonFilterCale float-end" >
     <FilterListIcon id="i" onClick={handleMenu3}/>
@@ -763,7 +816,7 @@ const handleVendite = async () => {
  }
       <Line data={dataVendite} options={optionsVendite}/>
     </div>
-  */}
+
 </div>
 
 

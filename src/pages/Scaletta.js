@@ -164,51 +164,55 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
             });
     
             setScaletta(todosArray);
-            console.log(todosArray)
             setProgress(true);
         });
     };
     
 
-        //aggiunge una nota alla scaletta
-        const handleDateChange = async (id) => {
-            try {
-              // 🔍 1️⃣ Trova il valore massimo di scalettaOrdine per la data selezionata
-              const collectionRef = collection(db, "addNota");
-              const q = query(
-                collectionRef,
-                where("scalettaData", "==", scalettaDataSele),
-                where("scaletta", "==", true),
-                orderBy("scalettaOrdine", "desc"),
-                limit(1) // Prendi solo il più alto
-              );
-          
-              const querySnapshot = await getDocs(q);
-              let newOrder = 1; // Se non ci sono documenti, parte da 1
-          
-              if (!querySnapshot.empty) {
-                const highestOrder = querySnapshot.docs[0].data().scalettaOrdine;
-                newOrder = highestOrder + 1; // Incrementa di 1
-              }
-          
-              // 📝 2️⃣ Aggiorna il documento specifico con il nuovo ordine
-              const notaRef = doc(db, "addNota", id);
-              await updateDoc(notaRef, {
-                scaletta: true,
-                scalettaData: scalettaDataSele,
-                scalettaOrdine: newOrder,
-              });
-          
-              // 📌 3️⃣ Ricarica la lista dopo l'aggiornamento
-              caricaOrdiniScaletta(scalettaDataSele);
-              handleChangeDataSelect(valueDateOrd);
-          
-              console.log(`Documento aggiornato con successo! Nuovo ordine: ${newOrder}`);
-            } catch (error) {
-              console.error("Errore nell'aggiornamento:", error);
-            }
-          };
-
+  //aggiunge una nota alla scaletta
+    const handleDateChange = async (id) => {
+      try {
+        // 🔍 1️⃣ Trova il valore massimo di scalettaOrdine per la data selezionata
+        const collectionRef = collection(db, "addNota");
+        const q = query(
+          collectionRef,
+          where("scalettaData", "==", scalettaDataSele),
+          where("scaletta", "==", true),
+          orderBy("scalettaOrdine", "desc"),
+          limit(1) // Prendi solo il più alto
+        );
+    
+        const querySnapshot = await getDocs(q);
+        let newOrder = 1; // Se non ci sono documenti, parte da 1
+    
+        if (!querySnapshot.empty) {
+          const highestOrder = querySnapshot.docs[0].data().scalettaOrdine;
+          newOrder = highestOrder + 1; // Incrementa di 1
+        }
+    
+        // 📅 2️⃣ Converti scalettaData in timestamp (millisecondi)
+        const [day, month, year] = scalettaDataSele.split("-").map(Number);
+        const scalettaDataMilli = new Date(year, month - 1, day).getTime(); // Timestamp della data
+    
+        // 📝 3️⃣ Aggiorna il documento specifico con il nuovo ordine e il timestamp
+        const notaRef = doc(db, "addNota", id);
+        await updateDoc(notaRef, {
+          scaletta: true,
+          scalettaData: scalettaDataSele,
+          scalettaDataMilli,
+          scalettaOrdine: newOrder,
+        });
+    
+        // 📌 4️⃣ Ricarica la lista dopo l'aggiornamento
+        caricaOrdiniScaletta(scalettaDataSele);
+        handleChangeDataSelect(valueDateOrd);
+    
+        console.log(`Documento aggiornato con successo! Nuovo ordine: ${newOrder}, scalettaDataMilli: ${scalettaDataMilli}`);
+      } catch (error) {
+        console.error("Errore nell'aggiornamento:", error);
+      }
+    };
+        
           //-----------------------------------------------------------------------------------
           //rimuovi un nota alla scaletta
           const handleRemoveFromScaletta = async (id, scalettaOrdine) => {
@@ -396,35 +400,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
         className: "rounded-4"
         })}
 
-//_________________________________________________________________________________________________________________
-     //confirmation notification to remove the collection
-    const MsgBlock = () => (
-      <div style={{fontSize: "16px"}}>
-        <p style={{marginBottom: "0px"}}>Sicuro di voler bloccare</p>
-        <p style={{marginBottom: "0px"}}>(non sarà più annullabile)</p>
-        <button className='buttonApply ms-4 mt-2 me-1 rounded-4' onClick={block}>Si</button>
-        <button className='buttonClose mt-2 rounded-4'>No</button>
-      </div>
-    )
-
-      const block = () => {
-        bloccaNota(localStorage.getItem("ordId"), localStorage.getItem("ordDataEli"), localStorage.getItem("ordNumeroNote"), localStorage.getItem("ordDataMilli"), localStorage.getItem("ordDataTotQuot"));
-          toast.clearWaitingQueue(); 
-               }
-
-    const displayMsgBlock = () => {
-      toast.warn(<MsgBlock/>, {
-        position: "top-center",
-        autoClose: false,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        transition: Slide,
-        theme: "dark",
-        className: "rounded-4"
-        })}
 
     //********************************************************************************** */
   React.useEffect(() => {
@@ -499,53 +474,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
           //infine elimina l'ordine
           await deleteDoc(colDoc);
         };
-  //__________________________________________________________________________________________________________________________________________________
-    const bloccaNota = async (id, dat, numNot, dtMilli, TotQuot) => { //salva prima i dati su un altro database per poi cancellare i dati sul database in cui stavano
-      const colDoc = doc(db, "ordDat", id); 
-      const q = query(collection(db, "addNota"), where("data", "==", dat));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach(async (hi) => {
-        const p = query(collection(db, "Nota"), where("dataC", "==", dat), where("nomeC", "==", hi.data().nomeC));
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach(async (hip) => {
-          await addDoc(collection(db, "NotaBloccata"), {   //vado prima a salvare questi dati su un db, e poi li cancello
-            dataC: hip.data().dataC,
-            qtProdotto: hip.data().qtProdotto,
-            nomeC: hip.data().nomeC,
-            prodottoC: hip.data().prodottoC,
-            prezzoUniProd: hip.data().prezzoUniProd,
-            prezzoTotProd: hip.data().prezzoTotProd,
-            simbolo: hip.data().simbolo,
-            flagTinte: hip.data().flagTinte,
-            t1: hip.data().t1,
-            t2: hip.data().t2,
-            t3: hip.data().t3,
-            t4: hip.data().t4,
-            t5: hip.data().t5,
-          });
-          await deleteDoc(doc(db, "Nota", hip.id));  //1 elimina tutti i prodotti nella lista nota, cosi libero memoria e farò meno query
-        })
-        await addDoc(collection(db, "addNotaBloccata"), {   //vado prima a salvare questi dati su un db, e poi li cancello
-          data: hi.data().data,
-          nomeC: hi.data().nomeC,
-          dataMilli: hi.data().dataMilli,
-          debitoRes: hi.data().debitoRes,
-          debitoTotale: hi.data().debitoTotale,
-          sommaTotale: hi.data().sommaTotale,
-          quota: hi.data().quota,
-        });
-      await deleteDoc(doc(db, "addNota", hi.id));  //2 elimina tutti i dati di addNota della stessa data
-      });
-      await addDoc(collection(db, "ordDatBloccata"), {   //mette il numero di note in questo db
-        data: dat,
-        dataMilli: dtMilli,
-        numeroNote: numNot,
-        totalQuota: TotQuot,
-      });
-      await deleteDoc(colDoc); //3 infine elimina la data
-  }
-
 
 //*************************************************************** */
 //************************************************************** */
@@ -587,7 +515,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 
 
 
-{/*************************TABELLA ORDINI CLIENTI ordini evasi************************************************************************** */}
+{/*************************tabella ordini evasi************************************************************************** */}
     <div className='row'>
     <div className='col'>
     <div className='todo_container' style={{width: "420px", maxHeight:"320px"}}>
