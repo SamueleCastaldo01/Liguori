@@ -6,6 +6,7 @@ import { TextField } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Button from '@mui/material/Button';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { Modal } from 'react-bootstrap';
@@ -490,6 +491,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                         <MenuItem value={"1"}>Evaso</MenuItem>
                         <MenuItem value={"2"}>Conseganto</MenuItem>
                         <MenuItem value={"5"}>Preventivo</MenuItem>
+                        <MenuItem value={"6"}>Parziale</MenuItem>
                         </Select>
                         </FormControl>
                         </div>
@@ -554,8 +556,16 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                       {col.completa == 5 && (
                         <div className="col-2" style={{ width: "160px" }}>
                           <div className='row'>
-                            <div className='col-1'><AcUnitIcon className='inpTab' style={{ color: "blue" }} /></div>
+                            <div className='col-1'><AcUnitIcon className='inpTab' style={{ color: "yellow" }} /></div>
                             <div className='col'><h3 className='inpTab' style={{ color: "blue" }}>Preventivo</h3></div>
+                          </div>
+                        </div>
+                      )}
+                      {col.completa == 6 && (
+                        <div className="col-2" style={{ width: "160px" }}>
+                          <div className='row'>
+                            <div className='col-1'><AccessTimeIcon className='inpTab' style={{ color: "blue" }} /></div>
+                            <div className='col'><h3 className='inpTab' style={{ color: "blue" }}>Parziale</h3></div>
                           </div>
                         </div>
                       )}
@@ -634,6 +644,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                   <MenuItem value={"1"}>Evaso</MenuItem>
                   <MenuItem value={"2"}>Conseganto</MenuItem>
                   <MenuItem value={"5"}>Preventivo</MenuItem>
+                  <MenuItem value={"6"}>Parziale</MenuItem>
                     </Select>
               </FormControl>
           </div>

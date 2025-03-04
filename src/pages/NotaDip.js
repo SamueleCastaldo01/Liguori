@@ -177,8 +177,9 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
   };
 
   const handleEditCompAnn = async (id, dbRes, nomeC) => {  //aggiorna lo stato nel database che è stata completata la nota, oppure annullata, tramite il localStorage
+    console.log("entrato")
     setTimeout(async function(){
-      await updateDoc(doc(db, "addNota", id), { completa: localStorage.getItem("completa"), debitoTotale: 0});
+      await updateDoc(doc(db, "addNota", id), { completa: "6", debitoTotale: 0});
               //aggiorna ded1 nel database debito
     const q = query(collection(db, "debito"), where("nomeC", "==", nomeC));
     const querySnapshot = await getDocs(q);
@@ -429,7 +430,7 @@ const print = async () => {
   {todo.completa == 1 &&
     <button className='button-clear' onClick={ ()=> {
       localStorage.setItem("completa", 0);
-       setCompleta(0);
+       setCompleta(6);
        handleEditCompAnn(todo.id, todo.debitoRes, todo.nomeC);
        handleInOrdineRemove(todo.nomeC)
        handleInSospesoRemove(todo.nomeC)  }}><ClearIcon sx={{ fontSize: 29 }}/>  Annulla Conferma</button>
