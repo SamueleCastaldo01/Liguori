@@ -38,6 +38,7 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
     const [NumCart, setNumCart] = React.useState(numCart);
     const [Completa, setCompleta] = useState(0);
     const [contPage, setContPage] = useState(notaDipCont);
+    const [idNota, setIdNota] = useState("");
     const [numeroPagineNota, setNumeroPagineNota] = useState("");
 
     const [Progress, setProgress] = React.useState(false);
@@ -86,10 +87,26 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         className: "rounded-4"
         })}
 //********************************************************************************** */
-    //array per la tabella prodotti
+      //in realtà qui va a prendere la singola nota
+      React.useEffect(() => {
+        const collectionRef = collection(db, "addNota");
+        const q = query(collectionRef, where("data", "==", notaDipDataC), where("cont", "==", contPage));
+        const unsub = onSnapshot(q, (querySnapshot) => {
+          let todosArray = [];
+          querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+            setIdNota(doc.id);
+          });
+          setTodosAddNot(todosArray);
+        });
+        localStorage.removeItem("OrdId");
+        return () => unsub();
+      }, [contPage]);
+
+    //array per andare a prendere tutti i prodotti della singola nota
      React.useEffect(() => {
         const collectionRef = collection(db, "Nota");
-        const q = query(collectionRef, orderBy("createdAt"));
+        const q = query(collectionRef, where("idNota", "==", idNota), orderBy("createdAt"));
         const unsub = onSnapshot(q, (querySnapshot) => {
           let todosArray = [];
           querySnapshot.forEach((doc) => {
@@ -101,22 +118,8 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         localStorage.removeItem("NotaDipId");
         handleNumeroDiNote();
         return () => unsub();
-      }, []);
+      }, [idNota]);
 
-      //array di add nota
-      React.useEffect(() => {
-        const collectionRef = collection(db, "addNota");
-        const q = query(collectionRef, orderBy("cont"));
-        const unsub = onSnapshot(q, (querySnapshot) => {
-          let todosArray = [];
-          querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
-          setTodosAddNot(todosArray);
-        });
-        localStorage.removeItem("OrdId");
-        return () => unsub();
-      }, []);
 
       React.useEffect(() => {
         SommaTot()
@@ -275,7 +278,6 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
       const numeroNote = querySnapshot.size; // Conta il numero di documenti trovati
       setNumeroPagineNota(numeroNote);
       
-      console.log("Numero di note:", numeroNote);
     } catch (error) {
       console.error("Errore nel conteggio delle note:", error);
     }
