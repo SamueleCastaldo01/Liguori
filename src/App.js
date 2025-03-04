@@ -32,12 +32,12 @@ const elimDb = async () => {
  }  
  */
 
- //stati: 0= in lavorazione;  1=evaso; 2=Consegnato; 4 per i filtri mi fa vedere tutti gli stati
+ //stati: 0= in lavorazione; 6=parziale;  1=evaso; 2=Consegnato; 4 per i filtri mi fa vedere tutti gli stati, 5= preventivo
 
  const Background = () => {
   const location = useLocation();
   return (
-    <div className={location.pathname !== "/stampamassiva" && location.pathname !== "/notadip" && location.pathname !== "/scalettadatadip" ? "background-imagePage" : ""}></div>
+    <div className={location.pathname !== "/notadipdata" && location.pathname !== "/stampamassiva" && location.pathname !== "/notadip" && location.pathname !== "/scalettadatadip" ? "background-imagePage" : ""}></div>
 
   );
 };

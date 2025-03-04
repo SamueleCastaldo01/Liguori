@@ -341,7 +341,8 @@ const print = async () => {
   borderTop:
     todo.completa == 0 ? "6px solid red" :
     todo.completa == 1 ? "6px solid orange" :
-    todo.completa == 5 ? "6px solid blue" :
+    todo.completa == 5 ? "6px solid yellow" :
+    todo.completa == 6 ? "6px solid blue" :
     "6px solid green" 
 }}></hr>
       <div className='row' style={{marginTop: "40px"}} >
@@ -419,7 +420,7 @@ const print = async () => {
   {/*******************Conferma la nota  (completa)*************************************************************** */}
 
 
-  {todo.completa == 0 && 
+  {(todo.completa == 0 || todo.completa == 6) && 
     <button className='button-comp' onClick={ ()=> {
     localStorage.setItem("completa", 1);
      handleConferma(todo.id, todo.nomeC, todo.sommaTotale, todo.debitoRes, todo.NumBuste, todo.NumCartoni); }}><CheckIcon sx={{ fontSize: 48 }}  /> conferma</button> 

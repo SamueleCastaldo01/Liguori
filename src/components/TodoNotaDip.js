@@ -48,10 +48,27 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
 
   let navigate = useNavigate();
 
-  const handleChangeChecked = async (event) => {  //handle per il check
-    await updateDoc(doc(db, "Nota", todo.id), { artPreso:!checked});
-    setChecked(!checked);
+  const handleChangeChecked = async (event) => {
+    if(Completa == 1) {
+      return;
+    }
+    
+    const newChecked = !checked;
+    setChecked(newChecked);
+  
+    // Aggiorna lo stato artPreso su "Nota"
+    await updateDoc(doc(db, "Nota", todo.id), { 
+      artPreso: newChecked
+    });
+  
+    if(newChecked) {
+      await updateDoc(doc(db, "addNota", todo.idNota), {
+        completa: "6"
+      });
+    }
+  
   };
+  
 //***************************************************************************************** */
 async function sommaTotChange( meno) {  //qui va a fare il prezzo totale del prodotto
   var conTinte=0;    //alogoritmo per le tinte
