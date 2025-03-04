@@ -399,7 +399,7 @@ const print = async () => {
 <div className='ms-2'>
     <div className='d-flex align-items-center gap-2'>
       <h6 className='mb-0'><b>N.</b> CT. = <span> {todo.NumCartoni} </span> </h6>
-      {todo.completa == 0 && flagStampa ==false &&
+      {(todo.completa == 0 || todo.completa == 6) && flagStampa ==false &&
           <>
             <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumCart(todo.id, todo.NumCartoni)}}> - </button>
             <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumCart(todo.id, todo.NumCartoni)}}> + </button>
@@ -409,7 +409,7 @@ const print = async () => {
 
     <div className='d-flex align-items-center mt-2 gap-2'>
       <h6  className='mb-0'><b>N.</b> B.&nbsp;&nbsp; = <span> {todo.NumBuste} </span> </h6>
-      {todo.completa == 0 && flagStampa ==false &&
+      {(todo.completa == 0 || todo.completa == 6) && flagStampa ==false &&
           <>
           <button className="button-rem" style={{padding: "0px"}} onClick={ ()=> {handleRemoveNumBuste(todo.id, todo.NumBuste)}}> - </button>
           <button className="button-add" style={{padding: "0px"}} onClick={()=> {handleAddNumBuste(todo.id, todo.NumBuste)}}> + </button>

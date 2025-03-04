@@ -734,14 +734,14 @@ const print = async () => {
   <div className='row'>
     <div className='col' style={{textAlign:"left", padding:"0px"}}>
     <h6 className='mt-2'>Numero Cartoni: <span> {NumCart} </span> 
-    {Completa == 0 && flagStampa ==false &&
+    {(Completa == 0 || Completa == 6) && flagStampa ==false &&
       <span>
         <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumCart}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
         <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumCart}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
       </span> }
     </h6> 
     <h6 className='mt-2' style={{ width: "300px" }}>Numero Buste: <span style={{ marginLeft: "10px" }}> {NumBuste} </span> 
-    {Completa == 0 && flagStampa ==false &&
+    {(Completa == 0 || Completa == 6) && flagStampa ==false &&
       <span>
         <button className="button-complete" style={{padding: "0px"}} onClick={handleAddNumBuste}> <AddCircleIcon sx={{ fontSize: 35 }}/> </button>
         <button className="button-delete" style={{padding: "0px"}} onClick={handleRemoveNumBuste}> <RemoveCircleIcon sx={{ fontSize: 35 }}/> </button>
@@ -765,11 +765,11 @@ const print = async () => {
           <h6>Debito Totale: €{parseFloat(debitoTot).toFixed(2).replace('.', ',')}</h6>
   
     {flagStampa == false && <>
-    {Completa==0 &&  
+    {(Completa==0 || Completa == 6) &&  
     <Button variant='contained' color='success' onClick={ ()=> {localStorage.setItem("completa", 1); setCompleta(1); handleInOrdine(); handleInSospeso();  handleConferma()}}>Conferma</Button> 
     }
     {Completa==1 && 
-    <Button disabled={Completa === "2"}  variant='contained' color='error' onClick={ ()=> {localStorage.setItem("completa", 0); setCompleta(0); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</Button>
+    <Button disabled={Completa === "2"}  variant='contained' color='error' onClick={ ()=> {localStorage.setItem("completa", 6); setCompleta(6); handleInOrdineRemove(); handleInSospesoRemove(); handleEditCompAnn(); }}>Annulla Conferma</Button>
     }
   </>}
 

@@ -230,7 +230,7 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
     </div>
 {/*****************Simbolo************************************************************************************ */}
 <div className="col-2" style={{padding: "0px", position: "relative", left: "10px"}}>
-{(todo.simbolo== "1" && Completa == 0) && <h3 className="inpTabNota" style={{color: "red", fontSize: "13px", textAlign: "center"}}> (-
+{(todo.simbolo== "1" && (Completa == 0 || Completa == 6)) && <h3 className="inpTabNota" style={{color: "red", fontSize: "13px", textAlign: "center"}}> (-
                         <input
                          onChange={(e) => setMeno(e.target.value)}
                          onBlur={(e) => handleChangeMenDb(e.target.value)}
@@ -261,7 +261,7 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
         </button>
         )}
 
-        { Completa == 0 &&(
+        { (Completa == 0 || Completa == 6) &&(
       <>
         <button type="button" className="buttonMenu" style={{padding: "0px"}} >
         <MoreVertIcon id="i" onClick={handleMenu}/>
