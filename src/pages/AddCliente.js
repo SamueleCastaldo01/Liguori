@@ -584,7 +584,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
     <hr style={{margin: "0"}}/>
 </div>
 
-<div className="scroll">
+<div className="scroll" style={{maxHeight: "320px"}}>
 {Progress == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -709,7 +709,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 <hr style={{margin: "0"}}/>
 </div>
 
-<div className="scroll" style={{maxHeight: "790px"}}>
+<div className="scroll" style={{maxHeight: "320px"}}>
 {ProgressDebi == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
@@ -771,7 +771,7 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
       <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Deb1N</p></div>
       <hr style={{margin: "0"}}/>
     </div>
-    <div className="scroll">
+    <div className="scroll" style={{maxHeight: "320px"}}>
   {crono.filter((val)=> {
         if(searchTermCrono === ""){
           return val

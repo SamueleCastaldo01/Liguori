@@ -672,7 +672,7 @@ React.useEffect(() => {
       onClick={() => {navigate(-1)}}>
       <ArrowBackIcon id="i" /></button> 
     }
-    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Dashboard</h1> : <div style={{marginBottom:"60px"}}></div>} 
+    {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Seller Central</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
       <ToggleButtonGroup
       color="primary"

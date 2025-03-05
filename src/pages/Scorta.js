@@ -144,7 +144,7 @@ function Scorta() {
         })}
 
 //********************************************************************************** */
-React.useEffect(() => {
+  const caricaProdotti = () => {
     const collectionRef = collection(db, "prodotto");
     const q = query(collectionRef);  //questa se flagFilter è diverso da 1 e 2
     const unsub = onSnapshot(q, (querySnapshot) => {
@@ -168,14 +168,14 @@ React.useEffect(() => {
       console.log("entrato")
     });
     return () => unsub();
+  }
 
-  }, [FlagFilter,FlagEdit]);
+  React.useEffect(() => {
+    caricaProdotti()
+  
+    }, [FlagFilter,FlagEdit]);
 
 
-
-  const AggDatabaseProdotto = useReactToPrint({
-
-  })
 
 //cronologia debito
   React.useEffect(() => {
@@ -418,6 +418,7 @@ function handlePopUp(todo) {
       setFlagEdit(+FlagEdit+1);
   };
 
+
   const handleClearSet =  () => {   //aggiunta della trupla cronologia quantità
     setNomeP("");
     setReparto(1)
@@ -500,7 +501,9 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
 
   const handleEditNomeProd = async () => {
     console.log(idProdotto)
-    await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto});
+    await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto, fornitore:fornitore,  listino:listino, scontistica:scontistica});
+
+    setFlagEdit(+FlagEdit+1);
 
     //aggiorno il nome dei prodotti per ogni cliente     va a prendere tutti o prodotti con questo id
     const q = query(collection(db, "prodottoClin"), where("idProdotto", "==", idProdotto));
@@ -510,7 +513,7 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
     });
     
 
-    setFlagEdit(+FlagEdit+1);
+  
     handleClearSet();
     setPopupActiveScortaEdit(false);
     toast.clearWaitingQueue(); 
@@ -717,14 +720,11 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
         />
         </div>
         <div className='col'>
-        <TextField  style={{width: "100%"}} type="number"  color='secondary'                
+        <TextField  style={{width: "100%"}} type="text"  color='secondary'                
         inputProps={{
                   step: 0.01,
                 }} id="filled-basic" label="Scontistica" variant="outlined" autoComplete='off' value={scontistica} 
         onChange={(e) => setScontiscita(e.target.value)}
-        InputProps={{
-            startAdornment: <InputAdornment position="start">%</InputAdornment>,
-          }}
         />
         </div>
       </div>
