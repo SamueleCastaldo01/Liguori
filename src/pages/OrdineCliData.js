@@ -558,8 +558,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                   
                   </div> }
 
-
-
                         {/*
                         { flagBlock &&
                         <div className="col" style={{padding:"0px", marginTop:"-8px"}}>    
