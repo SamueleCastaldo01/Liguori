@@ -356,26 +356,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     }
   };
   
-  //_________________________________________________________________________________________________________________
-
-    const deleteCol = async (id, dat) => { //cancella tutto dalla data fino ai prodotti che fanno parte della lista
-        const colDoc = doc(db, "ordDat", id); 
-        const q = query(collection(db, "addNota"), where("data", "==", dat));
-        const querySnapshot = await getDocs(q);
-
-        querySnapshot.forEach(async (hi) => {
-          const p = query(collection(db, "Nota"), where("dataC", "==", dat), where("nomeC", "==", hi.data().nomeC));
-          const querySnapshotp = await getDocs(p);
-          querySnapshotp.forEach(async (hip) => {
-            await deleteDoc(doc(db, "Nota", hip.id));  //1 elimina tutti i prodotti nella lista
-          })
-
-        await deleteDoc(doc(db, "addNota", hi.id));  //2 elimina tutti i dati di addNota della stessa data
-        });
-        
-        await deleteDoc(colDoc); //3 infine elimina la data
-    }
-
   //___________________________________________________________________________________________________
         const handleDelete = async () => {
           let debTot = 0;
@@ -404,9 +384,6 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
           await deleteDoc(colDoc);
           handleClose() //chiude il menu elimina ordine
         };
-  //__________________________________________________________________________________________________________________________________________________
-   
-
 
 //*************************************************************** */
 //************************************************************** */
@@ -415,7 +392,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     return ( 
     <> 
         {/**************NAVBAR MOBILE*************************************** */}
-        <div className='navMobile row'>
+  <div className='navMobile row'>
       <div className='col-2'>
       </div>
       <div className='col' style={{padding: 0}}>
@@ -447,11 +424,8 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { setPopupActive(true); }}  variant="contained">Aggiungi Ordine</Button>
     <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { navigate("/stampamassiva") }}  variant="contained">Stampa Massiva</Button>
     <Button color='error'  style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}  onClick={() => {setFlagDelete(!flagDelete)  }}  variant="contained">Elimina</Button>
-    {/*{sup == true && <Button  onClick={() => {setFlagBlock(true); setFlagDelete(false)}} size="small" variant="contained">Blocca</Button>}  */}
     </ToggleButtonGroup>
     </div>
-
-
 
 {/*************************TABELLA ORDINI CLIENTI DATA************************************************************************** */}
           <div className='todo_container' style={{width: "1250px"}}>

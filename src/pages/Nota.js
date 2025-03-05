@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, getDoc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer, getDocsFromCache} from 'firebase/firestore';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -179,20 +179,43 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
     React.useEffect(() => {
       const collectionRef = collection(db, "Nota");
       const q = query(collectionRef, where("idNota", "==", notaId));
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
+
+      const fetchData = async () => {
+        try {
+          const querySnapshot = await getDocsFromCache(q);
+          let todosArray = [];
+          
+          querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+          });
+
+          if (todosArray.length > 0) {
+            // Se ci sono dati in cache, li uso subito
+            todosArray.sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis());
+            setTodos(todosArray);
+            setProgress(true);
+          }
+        } catch (error) {
+          console.log("Dati non trovati in cache, attivando onSnapshot...");
+        }
+
+        const unsub = onSnapshot(q, (querySnapshot) => {
+          let todosArray = [];
+          querySnapshot.forEach((doc) => {
+            todosArray.push({ ...doc.data(), id: doc.id });
+          });
+
+          todosArray.sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis());
+          setTodos(todosArray);
+          setProgress(true);
         });
 
-        // Ordina l'array in base a createdAt
-        todosArray.sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis());
+        return () => unsub();
+      };
 
-        setTodos(todosArray);
-        setProgress(true);
-      });
+      fetchData();
       localStorage.removeItem("NotaId");
-      return () => unsub();
+
     }, [updateProdo]);
 
       React.useEffect(() => {
@@ -506,23 +529,15 @@ const print = async () => {
       {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px", position: "relative", bottom: "15px" }}>Ordine di {idCliente} {nomeCli} </h1> : <div style={{marginBottom:"60px"}}></div>} 
 
 <div style={{ justifyContent: "left", textAlign: "left", marginTop: "20px" }}>
-      <ToggleButtonGroup
-      color="primary"
-      value={alignment}
-      exclusive
-      onChange={handleChangeTogg}
-      aria-label="Platform"
-    > 
-
-    {(Completa ==0 || Completa==5) && 
+    {(Completa ==0 || Completa==5 || Completa==6) && 
     <>
-    <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
-    <Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button>
+    <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createCate(); }}  variant="contained">Aggiungi Prodotto</Button>
+    <Button className='rounded-0'  onClick={() => {FlagT=true; createCate();}}  variant="contained">Aggiungi Tinte</Button>
 
-      <Button onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}}  variant="contained"  value="scortatinte">In Ordine</Button>
-      <Button onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}}  variant="contained"  value="scortatinte1">In Sospeso</Button>
+      <Button className='rounded-0' onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}}  variant="contained"  value="scortatinte">In Ordine</Button>
+      <Button className='rounded-0' onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}}  variant="contained"  value="scortatinte1">In Sospeso</Button>
     </>}
-    <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }} onClick={print} size="small" variant="contained">Stampa</Button>
+    <Button className='rounded-0' onClick={print}  variant="contained">Stampa</Button>
     <button onClick={sharePdf}>Condividi come PDF</button>
      {Completa== 0 ? 
       <button type="button" className="button-delete" style={{padding: "0px", float: "left", }}>
@@ -532,7 +547,6 @@ const print = async () => {
         <Brightness1Icon sx={{ fontSize: 40 }}/>
         </button>
         }
-    </ToggleButtonGroup>
     </div>
 
 {/**********tabella in ordine********************** */}
