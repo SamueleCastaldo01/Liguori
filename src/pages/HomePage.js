@@ -335,14 +335,17 @@ function onChangeDataFine3(value) {   //si attiva quando seleziono una data dal 
 //******************Per il grafico Ordini********************************************************************* */
 //vado a prendere il numero delle note per ogni giorno
 React.useEffect(() => {
-  const fetchData = async () => {
+  const fetchNumNoteData = async () => {
     const cacheKey = `${filtroData1}-${DataMilliIni}-${DataMilliFine}-${localStorage.getItem("bho")}`;
     
-    if (cacheNumNoteRef.current[cacheKey]) {
-      setTodosNumNote(cacheNumNoteRef.current[cacheKey]);
+    // Verifica se i dati sono già in cache
+    const cachedData = cacheNumNoteRef.current[cacheKey];
+    if (cachedData) {
+      setTodosNumNote(cachedData);
       return;
     }
 
+    // Se non ci sono dati in cache, esegui la query
     const collectionRef = collection(db, "addNota");
     let q = filtroData1
       ? query(
@@ -370,13 +373,42 @@ React.useEffect(() => {
       .sort(([a], [b]) => new Date(a) - new Date(b))
       .map(([data, numeroNote]) => ({ data, numeroNote }));
 
+    // Salva i dati in cache e in memoria
     cacheNumNoteRef.current[cacheKey] = result;
     setTodosNumNote(result);
   };
 
-  fetchData();
+  fetchNumNoteData();
 }, [day1, DataMilliIni, DataMilliFine, filtroData1]);
 
+// Funzione per caricare la cache dei dati delle note da localStorage
+const loadNumNoteCacheFromLocalStorage = () => {
+  const cache = localStorage.getItem("cacheNumNote");
+  if (cache) {
+    cacheNumNoteRef.current = JSON.parse(cache);
+  }
+};
+
+// Funzione per salvare la cache dei dati delle note in localStorage
+const saveNumNoteCacheToLocalStorage = () => {
+  if (Object.keys(cacheNumNoteRef.current).length > 0) {
+    localStorage.setItem("cacheNumNote", JSON.stringify(cacheNumNoteRef.current));
+  }
+};
+
+// Carica la cache dei dati delle note una sola volta quando il componente viene montato
+React.useEffect(() => {
+  loadNumNoteCacheFromLocalStorage();
+}, []);
+
+// Ogni volta che cambia `todosNumNote`, salva i dati in localStorage
+React.useEffect(() => {
+  if (todosNumNote.length > 0) {
+    saveNumNoteCacheToLocalStorage();
+  }
+}, [todosNumNote]);
+
+// Funzione per gestire il grafico delle note
 const handleNumNot = React.useCallback(() => {
   setDataNumNot({
     labels: todosNumNote.map(({ data }) => data),
@@ -390,19 +422,24 @@ const handleNumNot = React.useCallback(() => {
   });
 }, [todosNumNote]);
 
+// Esegui il rendering del grafico ogni volta che todosNumNote cambia
 React.useEffect(() => { handleNumNot(); }, [todosNumNote]);
+
 
 //******************Per il grafico Incasso********************************************************************* */
 //vado a prendere la quota dalle scalette
 React.useEffect(() => {
   const fetchScalettaData = async () => {
     const cacheKey = `${filtroData2}-${DataMilliIni2}-${DataMilliFine2}-${localStorage.getItem("bho1")}`;
-    
-    if (cacheQuotaRef.current[cacheKey]) {
-      setTodosScaletta(cacheQuotaRef.current[cacheKey]);
+
+    // Verifica se la cache è disponibile
+    const cachedData = cacheQuotaRef.current[cacheKey];
+    if (cachedData) {
+      setTodosScaletta(cachedData);
       return;
     }
 
+    // Query Firestore
     const collectionRef = collection(db, "addNota");
     let q = filtroData2
       ? query(
@@ -433,6 +470,7 @@ React.useEffect(() => {
       .sort(([a], [b]) => new Date(a) - new Date(b))
       .map(([data, totalQuota]) => ({ data, totalQuota }));
 
+    // Salva i dati in cache e in memoria
     cacheQuotaRef.current[cacheKey] = result;
     setTodosScaletta(result);
   };
@@ -455,17 +493,44 @@ const handleTotQuota = React.useCallback(() => {
 
 React.useEffect(() => { handleTotQuota(); }, [todosScaletta]);
 
-  //******************Per il grafico Vendite********************************************************************* */
+const loadCacheFromLocalStorage = () => {
+  const cache = localStorage.getItem("cacheQuota");
+  if (cache) {
+    cacheQuotaRef.current = JSON.parse(cache);
+  }
+};
+
+const saveCacheToLocalStorage = () => {
+  if (Object.keys(cacheQuotaRef.current).length > 0) {
+    localStorage.setItem("cacheQuota", JSON.stringify(cacheQuotaRef.current));
+  }
+};
+
+React.useEffect(() => {
+  loadCacheFromLocalStorage();
+}, []);
+
+
+React.useEffect(() => {
+  if (todosScaletta.length > 0) {
+    saveCacheToLocalStorage();
+  }
+}, [todosScaletta]);
+
+//******************Per il grafico Vendite********************************************************************* */
   //va a prendere la sommaTotale dalla scalettaDat quella bloccata
   React.useEffect(() => {
-    const fetchScalettaData = async () => {
+    const fetchVenditeData = async () => {
       const cacheKey = `${filtroData2}-${DataMilliIni2}-${DataMilliFine2}-${localStorage.getItem("bhii")}`;
       
-      if (cacheVenditeRef.current[cacheKey]) {
-        setTodosVendite(cacheVenditeRef.current[cacheKey]);
+      // Verifica se i dati sono già in cache
+      const cachedData = cacheVenditeRef.current[cacheKey];
+      if (cachedData) {
+        setTodosVendite(cachedData);
         return;
       }
   
+      // Se non ci sono dati in cache, esegui la query
       const collectionRef = collection(db, "addNota");
       let q = filtroData2
         ? query(
@@ -496,14 +561,40 @@ React.useEffect(() => { handleTotQuota(); }, [todosScaletta]);
         .sort(([a], [b]) => new Date(a) - new Date(b)) // Ordina per data
         .map(([data, totalSomma]) => ({ data, totalSomma }));
   
+      // Salva i dati in cache e in memoria
       cacheVenditeRef.current[cacheKey] = result;
       setTodosVendite(result);
     };
   
-    fetchScalettaData();
+    fetchVenditeData();
   }, [day, DataMilliFine2, DataMilliIni2, filtroData2]);
   
-  const handleVendite1 = React.useCallback(() => {
+  // Funzione per gestire il salvataggio in localStorage
+  const loadVenditeCacheFromLocalStorage = () => {
+    const cache = localStorage.getItem("cacheVendite");
+    if (cache) {
+      cacheVenditeRef.current = JSON.parse(cache);
+    }
+  };
+  
+  const saveVenditeCacheToLocalStorage = () => {
+    if (Object.keys(cacheVenditeRef.current).length > 0) {
+      localStorage.setItem("cacheVendite", JSON.stringify(cacheVenditeRef.current));
+    }
+  };
+  
+  React.useEffect(() => {
+    loadVenditeCacheFromLocalStorage();
+  }, []);
+  
+  React.useEffect(() => {
+    if (todosVendite.length > 0) {
+      saveVenditeCacheToLocalStorage();
+    }
+  }, [todosVendite]);
+  
+  // Funzione per gestire il grafico delle vendite
+  const handleVenditeChart = React.useCallback(() => {
     setDataVendite({
       labels: todosVendite.map(({ data }) => data), // Etichette delle date
       datasets: [{
@@ -516,7 +607,7 @@ React.useEffect(() => { handleTotQuota(); }, [todosScaletta]);
     });
   }, [todosVendite]);
   
-  React.useEffect(() => { handleVendite1(); }, [todosVendite]);
+  React.useEffect(() => { handleVenditeChart(); }, [todosVendite]);
 
   
 //******************Per la tabella scaletta chiusa********************************************************************* */

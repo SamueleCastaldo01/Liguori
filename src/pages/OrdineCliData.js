@@ -548,7 +548,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
                       <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' >{ col.NumCartoni }</h3></div>
                       <div className='col-1' style={{ width:"100px", }}><h3 className='inpTab' >{ col.NumBuste }</h3></div>
 
-                    {flagDelete ?
+                    {(flagDelete && col.scaletta != true) ?
                       <div className='col-1' style={{padding:"0px", marginTop:"-8px", width: "20px"}}>
                   <button className="button-delete" style={{color: rosso, marginLeft: "-70px"}} 
                   onClick={()=> {console.log(col.id);
