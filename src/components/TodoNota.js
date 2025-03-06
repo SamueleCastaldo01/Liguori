@@ -404,10 +404,14 @@ const handleChangeAge = (event) => {
           <MenuItem value={"K10"}>K10</MenuItem>
           <MenuItem value={"CB"}>CB</MenuItem>
           <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
-          <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
+          <MenuItem value={"ROYAL"}>ROYAL</MenuItem>
           <MenuItem value={"VIBRANCE"}>VIB</MenuItem>
           <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
           <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
+          <MenuItem value={"MAJIREL"}>MAJIREL</MenuItem>
+          <MenuItem value={"DIACOLOR"}>DIACOLOR</MenuItem>
+          <MenuItem value={"DIALIGHT"}>DIALIGHT</MenuItem>
+          <MenuItem value={"INOA"}>INOA</MenuItem>
         </Select>
       </FormControl>
          </span> 

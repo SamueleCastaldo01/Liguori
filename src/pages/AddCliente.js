@@ -137,23 +137,25 @@ React.useEffect(() => {
     });
     return () => unsub();
 
-  }, [flagAnaCli == true]);
+  }, [flagAnaCli]);
   
   //debito
   React.useEffect(() => {
-    const collectionRef = collection(db, "debito");
-    const q = query(collectionRef, orderBy("nomeC"));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+    if(flagDebiCli) {
+      const collectionRef = collection(db, "debito");
+      const q = query(collectionRef, orderBy("nomeC"));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setTodosDebi(todosArray);
+        setProgressDebi(true)
       });
-      setTodosDebi(todosArray);
-      setProgressDebi(true)
-    });
-    return () => unsub();
-  }, [flagDebiCli == true]);
+      return () => unsub();
+    }
+  }, [flagDebiCli]);
 
 
   //somma totale debito

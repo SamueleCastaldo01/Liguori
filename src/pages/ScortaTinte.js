@@ -288,20 +288,36 @@ const handleNuage = () => {
     setflagTinte("NUAGE");
     handleClosi();
   };
-const handleRoial = () => { 
-    setflagTinte("ROIAL");
-    handleClosi();
-  };
 const handleVibrance = () => { 
     setflagTinte("VIBRANCE");
+    handleClosi();
+  };
+  const handleExtremo = () => { 
+    setflagTinte("EXTREMO");
     handleClosi();
   };
 const handleNative = () => { 
     setflagTinte("NATIVE");
     handleClosi();
   };
-const handleExtremo = () => { 
-    setflagTinte("EXTREMO");
+const handleDiacolor = () => { 
+    setflagTinte("DIACOLOR");
+    handleClosi();
+  };
+  const handleMajirel = () => { 
+    setflagTinte("MAJIREL");
+    handleClosi();
+  };
+  const handleDialoght = () => { 
+    setflagTinte("DIALIGHT");
+    handleClosi();
+  };
+  const handleInoa = () => { 
+    setflagTinte("INOA");
+    handleClosi();
+  };
+  const handleRoyal = () => { 
+    setflagTinte("ROYAL");
     handleClosi();
   };
 
@@ -454,10 +470,13 @@ function handlePopUp(image, nota) {
 {flagTinte == "K10" && <p className='navText' style={{ color: "#f8dcb5"}}> K10</p>}
 {flagTinte == "CB" && <p className='navText' style={{ color: "#f8dcb5"}}> CB</p>}
 {flagTinte == "NUAGE" && <p className='navText' style={{ color: "#f8dcb5"}}> NUAGE</p>}
-{flagTinte == "ROIAL" && <p className='navText' style={{ color: "#f8dcb5"}}> ROIAL</p>}
 {flagTinte == "VIBRANCE" && <p className='navText' style={{ color: "#f8dcb5"}}> VIBRANCE</p>}
 {flagTinte == "EXTREMO" && <p className='navText' style={{ color: "#f8dcb5"}}> EXTREMO</p>}
 {flagTinte == "NATIVE" && <p className='navText' style={{ color: "#f8dcb5"}}> NATIVE</p>}
+{flagTinte == "MARJIREL" && <p className='navText' style={{color: "#f8dcb5"}}> MARJIREL</p>}
+{flagTinte == "DIACOLOR" && <p className='navText' style={{color: "#f8dcb5"}}> DIACOLOR</p>}
+{flagTinte == "INOA" && <p className='navText' style={{color: "#f8dcb5"}}> INOA</p>}
+{flagTinte == "ROYAL" && <p className='navText' style={{color: "#f8dcb5"}}> ROYAL</p>}
 </div>
 }
   </div>
@@ -523,10 +542,14 @@ function handlePopUp(image, nota) {
             <MenuItem value={"K10"}>K10</MenuItem>
             <MenuItem value={"CB"}>CB</MenuItem>
             <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
-            <MenuItem value={"ROIAL"}>ROIAL</MenuItem>
+            <MenuItem value={"ROYAL"}>ROYAL</MenuItem>
             <MenuItem value={"VIBRANCE"}>VIBRANCE</MenuItem>
             <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
             <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
+            <MenuItem value={"MAJIREL"}>MAJIREL</MenuItem>
+            <MenuItem value={"DIALIGHT"}>DIALIGHT</MenuItem>
+            <MenuItem value={"DIACOLOR"}>DIACOLOR</MenuItem>
+            <MenuItem value={"INOA"}>INOA</MenuItem>
           </Select>
         </FormControl>
       </div>
@@ -556,10 +579,13 @@ function handlePopUp(image, nota) {
 {flagTinte == "K10" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> K10</p>}
 {flagTinte == "CB" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> CB</p>}
 {flagTinte == "NUAGE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NUAGE</p>}
-{flagTinte == "ROIAL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> ROIAL</p>}
 {flagTinte == "VIBRANCE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> VIBRANCE</p>}
 {flagTinte == "EXTREMO" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> EXTREMO</p>}
 {flagTinte == "NATIVE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NATIVE</p>}
+{flagTinte == "MARJIREL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> MARJIREL</p>}
+{flagTinte == "DIACOLOR" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> DIACOLOR</p>}
+{flagTinte == "INOA" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> INOA</p>}
+{flagTinte == "ROYAL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> ROYAL</p>}
 </div>
 }
 
@@ -612,10 +638,14 @@ function handlePopUp(image, nota) {
                 <MenuItem onClick={handleK10}>K10</MenuItem>
                 <MenuItem onClick={handleCb}>CB</MenuItem>
                 <MenuItem onClick={handleNuage}>NUAGE</MenuItem>
-                <MenuItem onClick={handleRoial}>ROIAL</MenuItem>
+                <MenuItem onClick={handleRoyal}>ROYAL</MenuItem>
                 <MenuItem onClick={handleVibrance}>VIBRANCE</MenuItem>
                 <MenuItem onClick={handleExtremo}>EXTREMO</MenuItem>
                 <MenuItem onClick={handleNative}>NATIVE</MenuItem>
+                <MenuItem onClick={handleMajirel}>MAJIREL</MenuItem>
+                <MenuItem onClick={handleDiacolor}>DIACOLOR</MenuItem>
+                <MenuItem onClick={handleDialoght}>DIALIGHT</MenuItem>
+                <MenuItem onClick={handleInoa}>INOA</MenuItem>
               </Menu>
         </button>
   </div>
