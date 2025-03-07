@@ -249,7 +249,7 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
       }, [todos, sumTot]);
 //********************************************************************************** */
   //aggiunge un prodotto nella nota
-  const createCate = async () => {
+  const createProduct = async () => {
 
   await addDoc(collection(db, "Nota"), {
     idCliente,
@@ -347,6 +347,7 @@ const handleEdit = async ( todo, qt, prod, prezU, prezT, tt1, tt2, tt3, tt4, tt5
   { qtProdotto: qt, prodottoC:prod, prezzoUniProd:prezU, prezzoTotProd:somTrunc, t1:tt1, t2:tt2, t3:tt3, t4:tt4, t5:tt5});
   toast.clearWaitingQueue(); 
   SommaTot();
+  console.log("modificato il prodotto")
   setUpdateProd(updateProdo +1)
 };
 //_________________________________________________________________________________________________________________
@@ -531,8 +532,8 @@ const print = async () => {
 <div style={{ justifyContent: "left", textAlign: "left", marginTop: "20px" }}>
     {(Completa ==0 || Completa==5 || Completa==6) && 
     <>
-    <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createCate(); }}  variant="contained">Aggiungi Prodotto</Button>
-    <Button className='rounded-0'  onClick={() => {FlagT=true; createCate();}}  variant="contained">Aggiungi Tinte</Button>
+    <Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }} onClick={() => {FlagT=false; createProduct(); }}  variant="contained">Aggiungi Prodotto</Button>
+    <Button className='rounded-0'  onClick={() => {FlagT=true; createProduct();}}  variant="contained">Aggiungi Tinte</Button>
 
       <Button className='rounded-0' onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}}  variant="contained"  value="scortatinte">In Ordine</Button>
       <Button className='rounded-0' onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}}  variant="contained"  value="scortatinte1">In Sospeso</Button>

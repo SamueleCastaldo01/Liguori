@@ -1,5 +1,5 @@
 import React from "react";
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot, updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
 import DeleteIcon from "@mui/icons-material/Delete";
