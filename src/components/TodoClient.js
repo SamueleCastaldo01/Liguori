@@ -107,7 +107,7 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     <h5
       style={{ textDecoration: todo.completed && "line-through"  }}
         type="text"
-        className="inpTab"
+        className="inpTab mt-0"
         >{ todo.indirizzoEmail}</h5>
     </div>
 
