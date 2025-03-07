@@ -359,7 +359,7 @@ function handlePopUp(todo) {
       toast.clearWaitingQueue(); 
       return;
     }
-    if(nomeP.length >27) {
+    if(nomeP.length >36) {
       notifyError1("Il nome del prodotto ha superato i 26 caratteri");
       return;
     }
@@ -506,7 +506,7 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
 };
 
   const handleEditNomeProd = async () => {
-    if(nomeP.length >27) {
+    if(nomeP.length >36) {
       notifyError1("Il nome del prodotto ha superato i 26 caratteri");
       return;
     }
