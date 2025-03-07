@@ -36,6 +36,8 @@ function ScalettaReview({notaDat, getNotaDip, getNotaId }) {
     const [todosDataAuto, setTodosDataAuto] = React.useState([]);
     const [Progress, setProgress] = React.useState(false);
     const [quota, setQuota] = useState(0);
+    const [sommaScaletta, setSommaScaletta] = useState(0);
+    const [sommaQuota, setSommaQuota] = useState(0);
     const [nota, setNota] = React.useState("");
     const [noteMap, setNoteMap] = useState({});
     const [quotaMap, setQuotaMap] = useState({});
@@ -58,17 +60,30 @@ function ScalettaReview({notaDat, getNotaDip, getNotaId }) {
     setDataSc(moment(e.target.value).format("DD-MM-YYYY"));
     };
 
-const auto = async (idCliente) => {  //array per i prodotti dei clienti
-    const q = query(collection(db, "prodottoClin"), where("author.idCliente", "==", idCliente));
-    const querySnapshot = await  getDocs(q);
-    querySnapshot.forEach((doc) => {
+  //somma della quota----------------------------------
+    const calculateSumQuota = (todos) => {
+      let sum = 0;
+      todos.forEach(item => {
+          sum += Number(item.quota) || 0;
+      });
+      setSommaQuota(sum.toFixed(2));
+  };
+  
+  React.useEffect(() => {
+      calculateSumQuota(todos);
+  }, [todos]);
 
-    let car = { label: doc.data().nomeP,
-                id: doc.id,
-                prezzoUni: doc.data().prezzoUnitario }
-    AutoProdCli.push(car);
-    });
-    }
+  const auto = async (idCliente) => {  //array per i prodotti dei clienti
+      const q = query(collection(db, "prodottoClin"), where("author.idCliente", "==", idCliente));
+      const querySnapshot = await  getDocs(q);
+      querySnapshot.forEach((doc) => {
+
+      let car = { label: doc.data().nomeP,
+                  id: doc.id,
+                  prezzoUni: doc.data().prezzoUnitario }
+      AutoProdCli.push(car);
+      });
+      }
 
     const handleNoteChange = (id, value) => {
         setNoteMap(prev => ({
@@ -86,9 +101,18 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
     
     
     const handleSaveQuota = async (id, oldQuota, sommaTotale, nomeC, idCliente) => {
-        const updatedQuota = quotaMap[id] ?? oldQuota;  // Se non modificata, usa quella originale
-        await handleEditQuota(id, sommaTotale, oldQuota, updatedQuota, nomeC, idCliente);
-    };
+      const updatedQuota = quotaMap[id] ?? oldQuota;
+      await handleEditQuota(id, sommaTotale, oldQuota, updatedQuota, nomeC, idCliente);
+  
+     //calcola la somma della quota
+      setTodos(prevTodos => {
+          const newTodos = prevTodos.map(todo =>
+              todo.id === id ? { ...todo, quota: updatedQuota } : todo
+          );
+          calculateSumQuota(newTodos);
+          return newTodos;
+      });
+  };
 
   
     const handleEditQuota = async (id, sommaTotale, oldQuota, newQuota, nomeC, idCliente) => {  
@@ -144,20 +168,29 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
       };
   
   //********************************************************************************** */  
-    React.useEffect(() => {
-      const collectionRef = collection(db, "addNota");
-      const q = query(collectionRef, where("scalettaData", "==", dataSc), orderBy("scalettaOrdine", "asc"));
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setTodos(todosArray);
-        setProgress(true);
+  React.useEffect(() => {
+    const collectionRef = collection(db, "addNota");
+    const q = query(collectionRef, where("scalettaData", "==", dataSc), orderBy("scalettaOrdine", "asc"));
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      let somma = 0; // Variabile per sommare il totale
+  
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        todosArray.push({ ...data, id: doc.id });
+  
+        somma += Number(data.sommaTotale) || 0; // Somma i valori numerici
       });
-      localStorage.removeItem("OrdId");
-      return () => unsub();
-    }, [dataSc]);
+  
+      setTodos(todosArray);
+      setSommaScaletta(somma.toFixed(2)); // Aggiorna lo stato con la somma totale
+      setProgress(true);
+    });
+  
+    localStorage.removeItem("OrdId");
+    return () => unsub();
+  }, [dataSc]);
+  
 
 
     React.useEffect(() => {  //effect per l'autocompleate, vado a prendermi le date della scaletta
@@ -223,6 +256,12 @@ const auto = async (idCliente) => {  //array per i prodotti dei clienti
                       </div>
                       <div className='col'>
                           Barra di Ricerca
+                      </div>
+                      <div className='col'>
+                          Somma Totale: {sommaScaletta} €
+                      </div>
+                      <div className='col'>
+                          Somma Quota: {sommaQuota} €
                       </div>
                       <div className='col'>
                       <input

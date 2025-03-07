@@ -5,18 +5,12 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import moment from 'moment';
-import BeenhereIcon from '@mui/icons-material/Beenhere';
 import TodoNota from '../components/TodoNota';
 import { auth, db } from "../firebase-config";
-import { ToastContainer, toast, Slide } from 'react-toastify';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { IconButton } from '@mui/material';
 import { supa, guid, tutti, flagStampa } from '../components/utenti';
-import { fontSize } from '@mui/system';
-import { motion, progress } from 'framer-motion';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
-import { Diversity1Sharp } from '@mui/icons-material';
 
 
 function StampaMassiva({notaId, cont, nomeCli, dataNotaC, numCart, numBust, prezzoTotNota, debit, debTo, completa, idDebito, TodayData }) {
