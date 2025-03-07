@@ -15,6 +15,37 @@ export function notifyError () {
         });
 }
 
+//_____________________________________________________________________________________
+export function notifySuccess (testo) {
+    toast.success(testo, {
+        position: "bottom-center",
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        transition: Slide,
+        progress: undefined,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+//_____________________________________________________________________________________
+export function notifyError1 (testo) {
+    toast.error(testo, {
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        transition: Slide,
+        theme: "dark",
+        className: "rounded-4"
+        });
+}
+
 export function notifyErrorCliEm () {
     toast.error('Inserisci il nome del cliente', {
         position: "top-center",
@@ -224,21 +255,7 @@ export function notifyUpdateProd () {
         className: "rounded-4"
         });
 }
-//_____________________________________________________________________________________
-export function notifySuccess (testo) {
-    toast.success(testo, {
-        position: "bottom-center",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        transition: Slide,
-        progress: undefined,
-        theme: "dark",
-        className: "rounded-4"
-        });
-}
+
 //_____________________________________________________________________________________
 export function notifyUpdateDebRes () {
     toast.success("Debito Residuo aggiornato", {

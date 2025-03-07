@@ -8,7 +8,7 @@ import moment from 'moment';
 import { auth, db } from "../firebase-config";
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd } from '../components/Notify';
+import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd, notifyError, notifyError1 } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
@@ -179,38 +179,40 @@ function Scorta() {
 
 //cronologia debito
   React.useEffect(() => {
-    const collectionRef = collection(db, "cronologia");
-    const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+    if(popupActiveCrono) {
+      const collectionRef = collection(db, "cronologia");
+      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setCrono(todosArray);
+        setProgress1(true)
       });
-      setCrono(todosArray);
-      setProgress1(true)
-    });
-    return () => unsub();
-
-  }, [popupActiveCrono == true]);
+      return () => unsub();
+    }
+  }, [popupActiveCrono]);
 
 
   //cronologia Pa
   React.useEffect(() => {
-    const collectionRef = collection(db, "cronologiaPa");
-    const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+    if(popupActiveCrono) {
+      const collectionRef = collection(db, "cronologiaPa");
+      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setCronoPa(todosArray);
+        setProgress1(true)
       });
-      setCronoPa(todosArray);
-      setProgress1(true)
-    });
-    return () => unsub();
-
-  }, [popupActiveCrono == true]);
+      return () => unsub();
+    }
+  }, [popupActiveCrono]);
 
  //******************************************************************************* */
  //stampa
@@ -355,7 +357,11 @@ function handlePopUp(todo) {
     if(!nomeP) {            //controllo che il nom sia inserito
       notifyErrorProd();
       toast.clearWaitingQueue(); 
-      return
+      return;
+    }
+    if(nomeP.length >27) {
+      notifyError1("Il nome del prodotto ha superato i 26 caratteri");
+      return;
     }
     if (!prezzoIndi) { // Controllo che il prezzo sia inserito
       notifyErrorPrezzoProd();
@@ -500,6 +506,10 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
 };
 
   const handleEditNomeProd = async () => {
+    if(nomeP.length >27) {
+      notifyError1("Il nome del prodotto ha superato i 26 caratteri");
+      return;
+    }
     console.log(idProdotto)
     await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto, fornitore:fornitore,  listino:listino, scontistica:scontistica});
 

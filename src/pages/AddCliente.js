@@ -3,9 +3,8 @@ import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderB
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Input } from '@mui/material';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from "../firebase-config";
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyErrorCliEm, notifyUpdateCli, notifyErrorCliList } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
@@ -21,7 +20,6 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import moment from 'moment';
 import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
-import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyA2327mULUbMv_7eW1baIeXRwbnfYLYBWo';
@@ -166,18 +164,20 @@ React.useEffect(() => {
 
                   //cronologia debito
   React.useEffect(() => {
-    const collectionRef = collection(db, "cronologiaDeb");
-    const q = query(collectionRef, limit(50), orderBy("createdAt", "desc"));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+    if(popupActiveCrono) {
+      const collectionRef = collection(db, "cronologiaDeb");
+      const q = query(collectionRef, limit(50), orderBy("createdAt", "desc"));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setCrono(todosArray);
       });
-      setCrono(todosArray);
-    });
-    return () => unsub();
-  }, [popupActiveCrono == true]);
+      return () => unsub();
+    }
+  }, [popupActiveCrono]);
  //******************************************************************************* */
   //speed
   function handleButtonDebito() {
@@ -524,19 +524,18 @@ const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni 
 
 {/********************Bottoni Menu************************************************************************/}
       <div style={{ justifyContent: "left", textAlign: "left", marginTop: "40px" }}>
-      <ToggleButtonGroup
+      <div
       color="primary"
       value={alignment}
       exclusive
-      onChange={handleChangeTogg}
       aria-label="Platform"
     > 
-    {sup == true &&<Button variant='contained'   style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { setPopupActive(true) }} >Aggiungi Cliente</Button>}
-      <Button   style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} size="small" onClick={handleButtonAna} variant="contained" value="scorta">Anagrafiche Clienti</Button>
+    {sup == true &&<Button variant='contained'   style={{borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }}  onClick={() => { setPopupActive(true) }} >Aggiungi Cliente</Button>}
+      <Button   style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }} onClick={handleButtonAna} variant="contained" value="scorta">Anagrafiche Clienti</Button>
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }}  onClick={handleButtonDebito} variant="contained" value="scortatinte">Debito Clienti</Button>
       <Button  style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }} onClick={handleButtonCronoDeb} variant="contained" value="cronologia">Cronologia Debito</Button> 
       {sup == true && <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}   color='error' size="small" onClick={() => {setFlagDelete(!flagDelete)}}  variant="contained">elimina</Button> }
-    </ToggleButtonGroup>
+    </div>
 </div>
 
 {/********************tabella Anagrafica Clienti************************************************************************/}

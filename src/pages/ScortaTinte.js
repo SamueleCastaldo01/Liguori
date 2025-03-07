@@ -188,26 +188,25 @@ React.useEffect(() => {
         return 0; // Non dovrebbe mai arrivare a questo punto
       }
     };
-    
-
      setArrayOrdinato(todos.sort(ordinamentoPersonalizzato)) 
   }, [todos]);
 
 
   React.useEffect(() => {
-    const collectionRef = collection(db, "cronologiaTinte");
-    const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+    if(popupActiveCrono) {
+      const collectionRef = collection(db, "cronologiaTinte");
+      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
+  
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        let todosArray = [];
+        querySnapshot.forEach((doc) => {
+          todosArray.push({ ...doc.data(), id: doc.id });
+        });
+        setCrono(todosArray);
+        setProgress1(true)
       });
-      setCrono(todosArray);
-      setProgress1(true)
-    });
-    return () => unsub();
-
+      return () => unsub();
+    }
   }, [popupActiveCrono == true]);
 
  //******************************************************************************* */
