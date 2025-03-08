@@ -16,16 +16,11 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { IconButton } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { notifyUpdateProd, notifyUpdateNota, notifyUpdateDebRes} from '../components/Notify';
 import { supa, guid, tutti, flagStampa, rosso } from '../components/utenti';
-import { fontSize } from '@mui/system';
 import { motion } from 'framer-motion';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
 import Button from '@mui/material/Button';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 export const AutoProdCli = [];
 
