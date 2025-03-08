@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, limit} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, writeBatch, serverTimestamp, limit} from 'firebase/firestore';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
 import { getCountFromServer } from 'firebase/firestore';
@@ -246,95 +246,94 @@ const contEffect = async () => {
   /******************************************************************************* */
   const CreateOrdine = async (e) => {   //aggiunta Ordine
     e.preventDefault(); 
-    var debRes=0;
-    var id=0;
+    var debRes = 0;
+    var id = 0;
     var indiri;
     var telefo;
     var iva;
-    var idOrdine="1";
+    var idOrdine = "1";
 
-    console.log(status)
-
-    const dateObject = new Date(dataOrd); //conversione da stringa a data per ottenere la data in millisecondi
+    const dateObject = new Date(dataOrd); // Conversione da stringa a data per ottenere la data in millisecondi
     const dataInizialeFormatted = moment(dataOrd, "YYYY-MM-DD").format("DD-MM-YYYY");
 
-//va a  prendere d1, tramite nome del cliente e anche il suo id
-    const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  
-    const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        debRes=doc.data().deb1 ;
-        id= doc.id;
-        });
-        setDebitoRes(debRes);
+    // Crea un batch per tutte le scritture
+    const batch = writeBatch(db);
 
-    //andiamo a  prendere l'indirizzo e il tel, tramite nome del cliente, viene richiamata quando si crea la nota
-        const p = query(collection(db, "clin"), where("idCliente", "==", idCliente));  
-        const querySnapshotp = await getDocs(p);
-        querySnapshotp.forEach((doc) => {
-          indiri= doc.data().via;
-          telefo= doc.data().cellulare;
-          iva = doc.data().partitaIva;
-          });
-          setIndirizzo(indiri);
-          setTelefono(telefo);
-
-    //vado a prendere l'id dell'ultimo ordine, in modo tale da aggiungere il nuovo id al nuovo ordine
-    const d = query(collection(db, "addNota"), orderBy("createdAt", "desc"), limit(1));  
-    const querySnapshotd = await getDocs(d);
-    // Controlla se ci sono risultati nella query
-    if (!querySnapshotd.empty) {
-      // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
-      querySnapshotd.forEach((doc) => {
-        idOrdine = doc.data().idOrdine.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
-        let idOrdInt = parseInt(idOrdine) + 1 //fa la converisione in intero. e fa la somma
-        idOrdine = idOrdInt.toString()  // lo riconverte in stringa
-      });
-    }
-
-    idOrdine= "O" + idOrdine
-
-    var bol= true
-    todos.map(async (nice) => {    //controllo per verificare che questo cliente non è già presente la sua nota
-      if (nomeC == nice.nomeC && dataInizialeFormatted ==nice.data) {   //va a prendere la trupla di questo cliente di questa data
-          notifyErrorCli()
-          toast.clearWaitingQueue(); 
-          bol=false
-      }
-    })
-
-    if(!nomeC) {
-      notifyErrorCliEm();
-      toast.clearWaitingQueue(); 
-      return
-    }
-    if(bol == true) {
-    handleContAdd();
-    await addDoc(collection(db, "addNota"), {
-      idOrdine,
-      cont,
-      idCliente,
-      nomeC,
-      quota: 0,
-      completa : status,
-      data: dataInizialeFormatted,
-      NumCartoni:"0",
-      dataMilli: dateObject.getTime(),
-      NumBuste:"0",
-      sommaTotale:0,
-      altezza: "1123px",
-      debitoTotale:0,
-      createdAt: serverTimestamp(),
-      idDebito:  id,
-      note: "",
-      debitoRes: debRes,
-      indirizzo: indiri,
-      tel: telefo,
-      partitaIva: iva
+    // Lettura debito
+    const debitoSnapshot = await getDocs(query(collection(db, "debito"), where("idCliente", "==", idCliente)));
+    debitoSnapshot.forEach((doc) => {
+        debRes = doc.data().deb1;
+        id = doc.id;
     });
-    setNomeC("");
-    handleContaNote();
+
+    // Lettura indirizzo e telefono
+    const clienteSnapshot = await getDocs(query(collection(db, "clin"), where("idCliente", "==", idCliente)));
+    clienteSnapshot.forEach((doc) => {
+        indiri = doc.data().via;
+        telefo = doc.data().cellulare;
+        iva = doc.data().partitaIva;
+    });
+
+    // Lettura dell'ultimo ordine per ottenere l'ID
+    const ordineSnapshot = await getDocs(query(collection(db, "addNota"), orderBy("createdAt", "desc"), limit(1)));
+    if (!ordineSnapshot.empty) {
+        ordineSnapshot.forEach((doc) => {
+            idOrdine = doc.data().idOrdine.substring(1); // Va a prendere la stringa e rimuove la prima lettera
+            let idOrdInt = parseInt(idOrdine) + 1; // Conversione in intero e somma
+            idOrdine = idOrdInt.toString(); // Riconversione in stringa
+        });
     }
-  };
+    idOrdine = "O" + idOrdine;
+
+    // Verifica se esiste già un ordine per il cliente e la data specificata
+    let bol = true;
+    for (let nice of todos) {
+        if (nomeC === nice.nomeC && dataInizialeFormatted === nice.data) {
+            notifyErrorCli();
+            toast.clearWaitingQueue();
+            bol = false;
+            break;
+        }
+    }
+
+    if (!nomeC) {
+        notifyErrorCliEm();
+        toast.clearWaitingQueue();
+        return;
+    }
+
+    if (bol) {
+        // Aggiungi le modifiche al batch
+        batch.set(doc(collection(db, "addNota")), {
+            idOrdine,
+            cont,
+            idCliente,
+            nomeC,
+            quota: 0,
+            completa: status,
+            data: dataInizialeFormatted,
+            NumCartoni: "0",
+            dataMilli: dateObject.getTime(),
+            NumBuste: "0",
+            sommaTotale: 0,
+            altezza: "1123px",
+            debitoTotale: 0,
+            createdAt: serverTimestamp(),
+            idDebito: id,
+            note: "",
+            debitoRes: debRes,
+            indirizzo: indiri,
+            tel: telefo,
+            partitaIva: iva
+        });
+
+        // Esegui tutte le scritture in un'unica operazione
+        await batch.commit();
+        setNomeC("");
+        handleContaNote();
+    }
+};
+
 
     //___________________________________________________________________________________________________
     const handleDelete = async (id, nomeCli, DataC) => {
