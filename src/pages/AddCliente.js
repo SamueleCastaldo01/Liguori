@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, serverTimestamp, getCountFromServer, limit, where, getDocs} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, serverTimestamp, getCountFromServer, writeBatch, limit, where, getDocs} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Input } from '@mui/material';
@@ -162,7 +162,7 @@ React.useEffect(() => {
   }, [todosDebi]);
 
 
-                  //cronologia debito
+  //cronologia debito
   React.useEffect(() => {
     if(popupActiveCrono) {
       const collectionRef = collection(db, "cronologiaDeb");
@@ -202,95 +202,112 @@ React.useEffect(() => {
     setAlignment(event.target.value);
   };
  //******************************************************************************* */
-    //funzione che permette il caricamento automatico dell'aggiunta del prodotto personalizzato
- const handleProdClien = async (nomeCompleto, idCliente) => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  const q = query(collection(db, "prodotto"));  //prendo tutti i prodotti che si trovano in scorta, per poi assegnarli per ogni cliente
+ // Funzione ottimizzata per aggiungere il prodotto per ogni cliente
+ const handleProdClien = async (nomeCompleto, idCliente) => {
+  const q = query(collection(db, "prodotto"));  // Prendi tutti i prodotti
   const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      console.log(doc.id, " => ", doc.data().nomeP, doc.data().prezzoIndi);
-      await addDoc(collection(db, "prodottoClin"), {    //va ad aggiunger i prodotti per ogni cliente
-        author: { name: nomeCompleto, idCliente: idCliente },
-        idProdotto:doc.data().idProdotto,
-        nomeP: doc.data().nomeP,
-        prezzoUnitario: doc.data().prezzoIndi
-      })
-      });
- }  
-  //******************************************************************************* */
- const handleSubmit = async (e, id) => {   //creazione cliente
-    e.preventDefault();
-    var idCliente="1";  //id del cliente
-    var bol= true
 
-    if(!nome) {            //controllo sul nome
-      notifyErrorCliEm();
-      toast.clearWaitingQueue(); 
-      return 
-    }
+  const batch = writeBatch(db);  // Crea un batch per le scritture
 
-    var nomNice= nome+" "+cognome
-    const q = query(collection(db, "clin"), where("nomeC", "==", nomNice));  //controllo che non sia duplicato nel database
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
+  querySnapshot.forEach((docSnapshot) => {  // Usa docSnapshot invece di doc
+    console.log(docSnapshot.id, " => ", docSnapshot.data().nomeP, docSnapshot.data().prezzoIndi);
+    
+    const docRef = doc(collection(db, "prodottoClin"));  // Crea il riferimento corretto
+    batch.set(docRef, {    // Usa batch.set invece di addDoc
+      author: { name: nomeCompleto, idCliente: idCliente },
+      idProdotto: docSnapshot.data().idProdotto,
+      nomeP: docSnapshot.data().nomeP,
+      prezzoUnitario: docSnapshot.data().prezzoIndi
+    });
+  });
+
+  // Esegui tutte le scritture in un'unica operazione
+  await batch.commit();
+};
+
+// Funzione ottimizzata per la creazione di un cliente
+const handleSubmit = async (e, id) => {
+  e.preventDefault();
+  var idCliente = "1";
+  var bol = true;
+
+  if (!nome) {  // Controllo sul nome
+    notifyErrorCliEm();
+    toast.clearWaitingQueue();
+    return;
+  }
+
+  var nomNice = nome + " " + cognome;
+  const q = query(collection(db, "clin"), where("nomeC", "==", nomNice)); // Controlla se esiste già
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
     if (doc.data().nomeC == nomNice) {
-        notifyErrorCliList()
-         toast.clearWaitingQueue(); 
-        bol=false
+      notifyErrorCliList();
+      toast.clearWaitingQueue();
+      bol = false;
     }
+  });
+
+  // Prendi l'ID dell'ultimo cliente e incrementalo
+  const d = query(collection(db, "clin"), orderBy("createdAt", "desc"), limit(1));
+  const querySnapshotd = await getDocs(d);
+  if (!querySnapshotd.empty) {
+    querySnapshotd.forEach((doc) => {
+      idCliente = doc.data().idCliente.substring(1);
+      let idClinInt = parseInt(idCliente) + 1;
+      idCliente = idClinInt.toString();
+    });
+  }
+
+  idCliente = "C" + idCliente;
+
+  if (bol === true) {
+    let nomeCompleto = nome + " " + cognome;
+
+    const batch = writeBatch(db);  // Crea un batch per le scritture
+
+    // Aggiungi cliente alla collezione "clin"
+    const clinRef = doc(collection(db, "clin"));
+    batch.set(clinRef, {
+      createdAt: serverTimestamp(),
+      idCliente,
+      nome,
+      cognome,
+      stato,
+      numeroCivico,
+      via,
+      citta,
+      cap,
+      indirizzoEmail,
+      nomeC: nomeCompleto,
+      indirizzo,
+      indirizzoLink: "https://www.google.com/maps/search/?api=1&query=" + indirizzo,
+      partitaIva,
+      cellulare,
     });
 
-    //vado a prendere l'id dell'ultimo cliente, in modo tale da aggiungere il nuovo id al nuovo ordine
-    const d = query(collection(db, "clin"), orderBy("createdAt", "desc"), limit(1));  
-    const querySnapshotd = await getDocs(d);
-    // Controlla se ci sono risultati nella query
-    if (!querySnapshotd.empty) {
-      // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
-      querySnapshotd.forEach((doc) => {
-        idCliente = doc.data().idCliente.substring(1); //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
-        console.log(idCliente)
-        let idClinInt = parseInt(idCliente) + 1 //fa la converisione in intero. e fa la somma
-        console.log(idClinInt)
-        idCliente = idClinInt.toString()  // lo riconverte in stringa
-        console.log()
+    // Aggiungi debito nella collezione "debito"
+    const debitoRef = doc(collection(db, "debito"));
+    batch.set(debitoRef, {
+      idCliente,
+      nomeC: nomeCompleto,
+      deb1,
+      deb2,
+      deb3,
+      deb4,
+      debitoTot,
+    });
 
-      });
-    }
+    // Aggiungi i prodotti per il cliente
+    await handleProdClien(nomeCompleto, idCliente);  // Associa il prodotto al cliente
 
-    idCliente= "C" + idCliente
+    // Esegui tutte le scritture in un'unica operazione
+    await batch.commit();
 
-    if(bol == true) {
-    let  nomeCompleto = nome + " " + cognome
-      handleProdClien(nomeCompleto, idCliente);
-      await addDoc(collection(db, "clin"), {
-        createdAt: serverTimestamp(),
-        idCliente,
-        nome,
-        cognome,
-        stato,
-        numeroCivico,
-        via,
-        citta,
-        cap,
-        indirizzoEmail,
-        nomeC: nomeCompleto,
-        indirizzo,
-        indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo,
-        partitaIva,
-        cellulare,
-      });
-      await addDoc(collection(db, "debito"), {   //quando si crea il cliente viene creata anche la trupla debito del cliente
-        idCliente,
-        nomeC: nomeCompleto,
-        deb1,
-        deb2,
-        deb3,
-        deb4,
-        debitoTot,
-      });
-      handlerSetClear()
-      setPopupActive(false);
-    }
-  };
+    handlerSetClear();
+    setPopupActive(false);
+  }
+};
 //****************************************************************************************** */
   const handlerSetClear = async ( ) => {
     setNomeC("");

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, limit} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot, query, where, orderBy, serverTimestamp, limit} from 'firebase/firestore';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
 import { getCountFromServer } from 'firebase/firestore';

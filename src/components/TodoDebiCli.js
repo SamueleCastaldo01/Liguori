@@ -34,28 +34,8 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
   const handleNiente = (e) => {
     e.preventDefault();
   }
-//*************************************************************** */
-  const auto = async () => {
-    const q = query(collection(db, "prodotto"));
-    const querySnapshot = await  getDocs(q);
-    querySnapshot.forEach((doc) => {
-    console.log(doc.id, " => ", doc.data().nomeP);
-  
-    let car = { label: doc.data().nomeP }
-    AutoCompProd.push(car);
-    });
-    }
-//******************************************************************** */
 
-  const handleChange = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setNomeC(todo.nomeC);
-    } else {
-      todo.nomeC = "";
-      setNomeC(e.target.value);
-    }
-  };
+//******************************************************************** */
   const handleChangeD1 = (e) => {
     e.preventDefault();
     if (todo.complete === true) {

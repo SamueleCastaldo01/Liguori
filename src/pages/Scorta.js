@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, serverTimestamp, limit, getDocs, getCountFromServer} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, serverTimestamp, limit, getDocs, getCountFromServer, writeBatch} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
@@ -336,93 +336,96 @@ function handlePopUp(todo) {
   setPopupActiveSearch(true);
 }
  //******************************************************************************* */
- const handleProdClien = async ( idProdotto) => {    //funzione che si attiva quando si aggiunge un prodotto a scorta
-  const q = query(collection(db, "clin"));  //prendo tutti i clienti, va ad aggiungere i prodotti personalizzati, quando si aggiuge un nuovo prodotto
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      await addDoc(collection(db, "prodottoClin"), {
-        author: { name: doc.data().nomeC, idCliente: doc.data().idCliente},
-        idProdotto,
-        nomeP: nomeP,
-        prezzoUnitario: prezzoIndi
-      })
-      });
- } 
-  {/************** */}
- const handleSubmit = async (e) => {   //creazione prodotto
-  e.preventDefault();
-    var bol= true
-    var idProdotto="1";
-
-    if(!nomeP) {            //controllo che il nom sia inserito
-      notifyErrorProd();
-      toast.clearWaitingQueue(); 
-      return;
-    }
-    if(nomeP.length >36) {
-      notifyError1("Il nome del prodotto ha superato i 26 caratteri");
-      return;
-    }
-    if (!prezzoIndi) { // Controllo che il prezzo sia inserito
-      notifyErrorPrezzoProd();
-      return;
-    }
-    
-    if (prezzoIndi.includes(',')) {
-      notifyErrorPrezzoProd();
-      return;
-    }
-
-    // verifica che il prodotto sia univoco
-    const q = query(collection(db, "prodotto"), where("nomeP", "==", nomeP));
+ const handleProdClien = async (idProdotto) => {
+  try {
+    const q = query(collection(db, "clin"));  
     const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-    if (doc.data().nomeP == nomeP) {
-        notifyErrorProdList()
-         toast.clearWaitingQueue(); 
-        bol=false
-    }
-    });
 
-     //vado a prendere l'id dell'ultimo ordine, in modo tale da aggiungere il nuovo id al nuovo ordine
-     const d = query(collection(db, "prodotto"), orderBy("createdAt", "desc"), limit(1));  
-     const querySnapshotd = await getDocs(d);
-     // Controlla se ci sono risultati nella query
-     if (!querySnapshotd.empty) {
-       // Se la query ha trovato almeno un ordine, ottieni l'ID dell'ultimo ordine e incrementalo per il nuovo ID
-       querySnapshotd.forEach((doc) => {
-         idProdotto = doc.data().idProdotto.substring(1);  //va a prendere la stringa e allo stesso tempo gli toglie la prima lettera
-         let idRpdodInt = parseInt(idProdotto) + 1 //fa la converisione in intero. e fa la somma
-         idProdotto = idRpdodInt.toString()  // lo riconverte in stringa
-       });
-     }   
+    const batch = writeBatch(db); // Creiamo un batch per ridurre le scritture
 
-     idProdotto= "P" + idProdotto
-
-    if(bol == true) {
-      await addDoc(collection(db, "prodotto"), {
-        createdAt: serverTimestamp(),
+    querySnapshot.docs.forEach((docSnap) => {
+      const newDocRef = doc(collection(db, "prodottoClin")); // 🔥 Genera un nuovo ID univoco
+      batch.set(newDocRef, {
+        author: { name: docSnap.data().nomeC, idCliente: docSnap.data().idCliente },
         idProdotto,
         nomeP,
-        quantita: 0,
-        brand,
-        pa: 0,
-        scontistica,
-        listino,
-        fornitore,
-        nota,
-        sottoScorta,
-        prezzoIndi,
-        image,
-        reparto,      //se è 0 è femminile, se è 1 è maschile
-        quantitaOrdinabile,
+        prezzoUnitario: prezzoIndi
       });
-      handleProdClien(idProdotto);
-      }
-      handleClearSet()
-      setPopupActive(false);
-      setFlagEdit(+FlagEdit+1);
-  };
+    });
+
+    await batch.commit(); // Esegui tutte le scritture in un'unica richiesta
+    console.log("Prodotti personalizzati aggiunti con successo!");
+  } catch (error) {
+    console.error("Errore durante l'associazione prodotto-clienti:", error);
+    toast.error("Errore durante l'associazione prodotto-clienti.");
+  }
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  let bol = true;
+  let idProdotto = "1";
+
+  if (!nomeP) {
+    notifyErrorProd();
+    toast.clearWaitingQueue();
+    return;
+  }
+  if (nomeP.length > 36) {
+    notifyError1("Il nome del prodotto ha superato i 26 caratteri");
+    return;
+  }
+  if (!prezzoIndi || prezzoIndi.includes(',')) {
+    notifyErrorPrezzoProd();
+    return;
+  }
+
+  // 🔍 Verifica se il prodotto è univoco
+  const querySnapshot = await getDocs(query(collection(db, "prodotto"), where("nomeP", "==", nomeP)));
+  if (!querySnapshot.empty) {
+    notifyErrorProdList();
+    toast.clearWaitingQueue();
+    return;
+  }
+
+  // 📌 Ottieni l'ultimo ID prodotto
+  const lastProdSnapshot = await getDocs(query(collection(db, "prodotto"), orderBy("createdAt", "desc"), limit(1)));
+  if (!lastProdSnapshot.empty) {
+    const lastProd = lastProdSnapshot.docs[0].data();
+    idProdotto = "P" + (parseInt(lastProd.idProdotto.substring(1)) + 1).toString();
+  } else {
+    idProdotto = "P1"; // Se non ci sono prodotti, inizia da P1
+  }
+
+  // ✅ Aggiunta prodotto
+  const docRef = await addDoc(collection(db, "prodotto"), {
+    createdAt: serverTimestamp(),
+    idProdotto,
+    nomeP,
+    quantita: 0,
+    brand,
+    pa: 0,
+    scontistica,
+    listino,
+    fornitore,
+    nota,
+    sottoScorta,
+    prezzoIndi,
+    image,
+    reparto,
+    quantitaOrdinabile,
+  });
+
+  // ✅ Associa il prodotto a tutti i clienti
+  await handleProdClien(idProdotto);
+
+  // ✅ Pulizia e chiusura popup
+  handleClearSet();
+  setPopupActive(false);
+  setFlagEdit((prev) => prev + 1);
+};
+
 
 
   const handleClearSet =  () => {   //aggiunta della trupla cronologia quantità
