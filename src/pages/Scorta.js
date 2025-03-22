@@ -884,7 +884,7 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
         <hr style={{margin: "0"}}/>
         </div>
 
-<div className="scroll" style={{maxHeight: "320px"}}>
+<div className="scroll">
   {Progress == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />

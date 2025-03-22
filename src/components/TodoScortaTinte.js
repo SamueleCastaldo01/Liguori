@@ -185,13 +185,13 @@ export default function TodoScortaTinte({ todo, toggleComplete, handleDelete, ha
 )}
 {/***************************BUTTON aggiungi e rimuovi******************************************************** */}
     { (FlagStampa==false && flagDelete== false) &&
-    <div className="col diviCol" style={{padding:"0px", paddingRight: "15px"}}>
+    <div className="col diviCol d-flex gap-3 my-1" style={{padding:"0px", paddingRight: "15px"}}>
       <button 
-      className="butAddProd me-1"
+      className="butAddProd mt-0" style={{width: "40px"}}
       type="button"
       onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>+</button>
       <button
-      className="butRemProd"
+      className="butRemProd" style={{width: "40px"}}
       type="button"
       onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>-</button>
     </div> }

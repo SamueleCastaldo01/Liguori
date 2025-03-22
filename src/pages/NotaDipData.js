@@ -61,7 +61,7 @@ function NotaDipData({ notaDat, getNotaDip }) {
       </div>
       </div>
 
-            <div className='container m-0' style={{ padding: "20px" }}>
+            <div className='m-0 d-flex justify-content-center w-100' style={{ padding: "20px" }}>
                 <div className='row' style={{ marginTop: "40px" }}>
                     <div className='col' style={{ padding: "0px" }}>
                         <div className='todo_containerNoteDip w-100'>

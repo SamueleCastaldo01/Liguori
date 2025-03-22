@@ -106,7 +106,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
     <div className="prova">
 
     <form  onSubmit={handleSubm}>
-    <div className="row ">
+    <div className="row d-flex align-items-center">
 
 {/*********************idProdotto************************************************************************ */}
 {/** 
@@ -271,7 +271,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 )}
 
 {dip ===true && ( 
-<div className="col-2 diviCol1" style={{padding: "0px", position:"relative", right:"2%"}}>
+<div className="col-2 diviCol1" style={{padding: "0px", position:"relative", right:"2%", width:"40px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
         type="number" min="1"
@@ -283,13 +283,13 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 )}
 {/***************************BUTTON aggiungi e rimuovi******************************************************** */}
     { (FlagStampa==false && flagDelete== false) &&
-    <div className="col diviCol" style={{padding:"0px", paddingRight: "15px"}}>
+    <div className="col diviCol d-flex gap-3 justify-content-center my-1" style={{padding:"0px", paddingRight: "15px"}}>
       <button 
-      className="butAddProd me-1"
+      className="butAddProd mt-0" style={{width: "40px"}}
       type="button"
       onClick={() =>{ { localStorage.setItem("flagCron", true); handleAddQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>+</button>
       <button
-      className="butRemProd"
+      className="butRemProd" style={{width: "40px"}}
       type="button"
       onClick={() =>{ {localStorage.setItem("flagCron", false); handleRemQuant(todo, newNomeP, aggiungi); setAggiungi("") }}}>-</button>
     </div> }
