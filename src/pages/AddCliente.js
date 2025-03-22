@@ -358,35 +358,25 @@ const handleActiveEdit = async (todo) => {
   };
 
 //****************************************************************************************** */
-const sommaTotDebito = async ( ) => {  //va a fare la somma dei debiti per ogni cliente, questa operazione è costosa in scrittura, e anche la somma per colonne
-  var sommaTot=0;
-  var totD1=0;
-  var totD2=0;
-  var totD3=0;
-  var totD4=0;
-  var totDebTot=0;
-  todosDebi.map(async (nice) => {
-       sommaTot=+nice.deb1 + (+nice.deb2) + (+nice.deb3) + (+nice.deb4);   // va a fare la somma totale dei debiti di quel id debito per cliente
-       totD1= +nice.deb1 + (+totD1);   //va a fare la somma di tutti i debiti1
-       totD2= +nice.deb2 + (+totD2);   //va a fare la somma di tutti i debiti2
-       totD3= +nice.deb3 + (+totD3);   //va a fare la somma di tutti i debiti3
-       totD4= +nice.deb4 + (+totD4);   //va a fare la somma di tutti i debiti4
-       totDebTot= +nice.debitoTot + (+totDebTot);   //va a fare la somma di tutti i debitiTotale dei clienti
-       var somTrunc = sommaTot.toFixed(2);    //fa la conversione per ottenere i due numeri dopo la virgola
-       await updateDoc(doc(db, "debito", nice.id), { debitoTot: somTrunc});  //va ad aggiornare il debito totale nel database per cliente
-       sommaTot=0;  //riazzera la sommaTot, anche se di norma non serve
-  })  
-  var somTrunc1 = totD1.toFixed(2);  //convesione per i numeri dopo la virgola, per non avere problemi
-  var somTrunc2 = totD2.toFixed(2);
-  var somTrunc3 = totD3.toFixed(2);
-  var somTrunc4 = totD4.toFixed(2);   
-  var somTruncTotDeb = totDebTot.toFixed(2);
-      setTotDeb1(somTrunc1);
-      setTotDeb2(somTrunc2);
-      setTotDeb3(somTrunc3);
-      setTotDeb4(somTrunc4);
-      setTotDebitoTot(somTruncTotDeb);
+const sommaTotDebito = () => {  
+  let totD1 = 0, totD2 = 0, totD3 = 0, totD4 = 0, totDebTot = 0;
+
+  todosDebi.forEach((nice) => {  
+    totD1 += +nice.deb1;  
+    totD2 += +nice.deb2;  
+    totD3 += +nice.deb3;  
+    totD4 += +nice.deb4;  
+    totDebTot += +nice.debitoTot;  
+  });
+
+  // Imposta i valori nello stato per la visualizzazione
+  setTotDeb1(totD1.toFixed(2));
+  setTotDeb2(totD2.toFixed(2));
+  setTotDeb3(totD3.toFixed(2));
+  setTotDeb4(totD4.toFixed(2));
+  setTotDebitoTot(totDebTot.toFixed(2));
 };
+
 
   const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {  //edit debito
     var debV

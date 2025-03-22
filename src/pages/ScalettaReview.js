@@ -35,10 +35,8 @@ function ScalettaReview({notaDat, getNotaDip, getNotaId }) {
     const [todos, setTodos] = React.useState([]);
     const [todosDataAuto, setTodosDataAuto] = React.useState([]);
     const [Progress, setProgress] = React.useState(false);
-    const [quota, setQuota] = useState(0);
     const [sommaScaletta, setSommaScaletta] = useState(0);
     const [sommaQuota, setSommaQuota] = useState(0);
-    const [nota, setNota] = React.useState("");
     const [noteMap, setNoteMap] = useState({});
     const [quotaMap, setQuotaMap] = useState({});
 

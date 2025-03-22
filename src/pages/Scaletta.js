@@ -115,31 +115,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
       };
 
 //Funzioni per aggiungere alla scaletta-----------------------------------------------------------------
-      const SomAsc = async () => {  //qui fa sia la somma degli asc  della quota, tramite query
-        console.log("entrato nella somma")
-        var somma=0;
-        var sommaQ=0;
-        var sommaSommaTot=0;
-        var id ="";
-        const q = query(collection(db, "Scaletta"), where("dataScal", "==", TodayData));  //query per fare la somma
-        const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            somma =+doc.data().numAsc + somma;
-            sommaQ=+doc.data().quota +sommaQ;
-            sommaSommaTot= +doc.data().sommaTotale +sommaSommaTot;
-            });
-            var somTrunc = sommaQ.toFixed(2);  //conversione della quota
-            var somTruncTot = sommaSommaTot.toFixed(2);  //conversione della sommaTotale
-        const p = query(collection(db, "scalDat"), where("data", "==", TodayData));  //query per aggiornare la quota totale e gli asc, va a trovare l'id
-        const querySnapshotp = await getDocs(p);
-              querySnapshotp.forEach(async (hi) => {
-                id= hi.id
-                });
-            await updateDoc(doc(db, "scalDat", id), { totalQuota: somTrunc, totalAsc:somma, totalSommaTotale:somTruncTot  });
-            setSumQ(somTrunc);
-            setSum(somma);
-      }
-
       const caricaOrdiniScaletta = (data) => {
         const collectionRef = collection(db, "addNota");
         const q = query(
@@ -423,36 +398,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
     caricaOrdiniScaletta(dataInizialeFormatted);
     }, []);
 
-    //********************************************************************************** */
-  React.useEffect(() => {
-    const collectionRef = collection(db, "clin");
-    const q = query(collectionRef);
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      let todosArray = [];
-      querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
-      });
-
-  // Ordina l'array per la proprietà nomeC
-  todosArray.sort((a, b) => {
-    const nomeC1 = a.nomeC.toLowerCase();
-    const nomeC2 = b.nomeC.toLowerCase();
-
-    if (nomeC1 < nomeC2) {
-      return -1;
-    }
-    if (nomeC1 > nomeC2) {
-      return 1;
-    }
-    return 0;
-  });
-      setTodosClienti(todosArray);
-    });
-    return () => unsub();
-  }, []);
-
-
   /********************************************************************************************************* */
   const handleChangeDataScaletta = (e) => {
     setScalettaDataSele(moment(e.target.value).format("DD-MM-YYYY"));
@@ -462,7 +407,6 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 
   //___________________________________________________________________________________________________
         const handleDelete = async () => {
-    
           console.log(iddo)
           const colDoc = doc(db, "addNota", iddo); 
         //elimina tutti i dati di nota di quel ordine, i prodotti
