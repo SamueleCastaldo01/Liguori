@@ -10,7 +10,7 @@ import { padding } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, displayMsg, getCliId}) {
+export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, totRiga, displayMsg, getCliId}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -151,6 +151,8 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
     )}
     </div>
   {/*******************Debito totale********************************************************************************** */}
+
+  {/*
   <div className="col diviCol" style={{padding: "0px"}}>
     {sup ===true && ( 
       <h5
@@ -159,6 +161,9 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, display
         > €{Number(todo.debitoTot).toFixed(2).replace('.', ',')}</h5>
     )}
     </div>
+  */}
+
+
     </div>
 
 </form>

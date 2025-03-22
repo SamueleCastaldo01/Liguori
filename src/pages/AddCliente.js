@@ -55,6 +55,8 @@ function AddCliente( {getCliId} ) {
   const [deb3, setDeb3] = React.useState("");
   const [deb4, setDeb4] = React.useState("");
   const [debitoTot, setDebitoTot] = React.useState("");
+  const [totRiga, setTotRiga] = React.useState("");
+
 
   const [Progress, setProgress] = React.useState(false);
   const [ProgressDebi, setProgressDebi] = React.useState(false);
@@ -380,6 +382,7 @@ const sommaTotDebito = () => {
 
   const handleEditDeb = async ( todo, nome, dd1, dd2, dd3, dd4) => {  //edit debito
     var debV
+    setTotRiga(dd1+dd2+dd3+dd4);
     const q = query(collection(db, "debito"), where("idCliente", "==", todo.idCliente));  //vado a trovare il deb1 vecchio tramite query
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
@@ -664,9 +667,11 @@ const sommaTotDebito = () => {
 <div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Tot.Debito4</p>
 </div>
+{/* 
 <div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Tot.Debito Tot</p>
 </div>
+*/}
 <hr style={{margin: "0"}}/>
 </div>
 
@@ -686,9 +691,11 @@ const sommaTotDebito = () => {
 <div className='col diviCol' style={{padding: "0px"}}>
 <p className='inpTab' >€{Number(Totdeb4).toFixed(2).replace('.', ',')}</p>
 </div>
+{/* 
 <div className='col diviCol' style={{padding: "0px"}}>
 <p className='inpTab' >€{Number(TotdebitoTot).toFixed(2).replace('.', ',')}</p>
 </div>
+*/}
 <hr style={{margin: "0"}}/>
 </div>
 {/**********Debito clienti**************************************** */}
@@ -711,9 +718,11 @@ const sommaTotDebito = () => {
 <div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito4</p>
 </div>
+{/* 
 <div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Debito Tot</p>
 </div>
+*/}
 <hr style={{margin: "0"}}/>
 </div>
 
