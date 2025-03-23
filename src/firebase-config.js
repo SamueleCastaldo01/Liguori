@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, enableIndexedDbPersistence  } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAppCheck, initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAuth, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "firebase/auth";
 
 // Configurazione Firebase
@@ -30,6 +31,12 @@ enableIndexedDbPersistence(db)
     } else if (err.code === "unimplemented") {
       console.warn("⚠️ Persistenza non supportata su questo browser.");
     }
+  });
+
+
+const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(process.env.REACT_APP_FIREBASE_RECAPTCHA),
+    isTokenAutoRefreshEnabled: true,
   });
 
 export function signup(email, password) {
