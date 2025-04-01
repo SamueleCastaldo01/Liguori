@@ -32,12 +32,14 @@ enableIndexedDbPersistence(db)
       console.warn("⚠️ Persistenza non supportata su questo browser.");
     }
   });
+  
 
-
+{/* 
 const appCheck = initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider(process.env.REACT_APP_FIREBASE_RECAPTCHA),
     isTokenAutoRefreshEnabled: true,
   });
+*/}
 
 export function signup(email, password) {
     return  createUserWithEmailAndPassword(auth, email, password);

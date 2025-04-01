@@ -87,6 +87,14 @@ function BottomNavi() {
                                 icon={<FormatListBulletedIcon />}
                             />
                         )}
+                        {gui && (
+                            <BottomNavigationAction
+                                component={Link}
+                                to="/listaclientidip"
+                                label="Clienti"
+                                icon={<ContactPageIcon />}
+                            />
+                        )}
                         {sup && (
                             <BottomNavigationAction
                                 component={Link}

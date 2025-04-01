@@ -628,19 +628,21 @@ React.useEffect(() => {
 
 //per la tabella in ordine
 React.useEffect(() => {
-  const collectionRef = collection(db, "inOrdine");
-  const q = query(collectionRef, orderBy("nomeC"));
-
-  const unsub = onSnapshot(q, (querySnapshot) => {
-    let todosArray = [];
-    querySnapshot.forEach((doc) => {
-      todosArray.push({ ...doc.data(), id: doc.id });
+  if(popupActive == true) {
+    const collectionRef = collection(db, "inOrdine");
+    const q = query(collectionRef, orderBy("nomeC"));
+  
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let todosArray = [];
+      querySnapshot.forEach((doc) => {
+        todosArray.push({ ...doc.data(), id: doc.id });
+      });
+      setTodosInOrdine(todosArray);
+      setProgress2(true);
     });
-    setTodosInOrdine(todosArray);
-    setProgress2(true);
-  });
-  return () => unsub();
-}, [popupActive == true]);
+    return () => unsub();
+  }
+}, [popupActive]);
 
 
 
@@ -681,7 +683,6 @@ React.useEffect(() => {
       onChange={handleChangeTogg}
       aria-label="Platform"
     >  
-      <ToggleButton  onClick={() => {setPopupActive(!popupActive); setActiveCalender(false); setPopupActiveInOrdine(false)}} size='small' color='secondary' value="scaletteChiu">Scalette Chiuse</ToggleButton>
       <ToggleButton onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
   
     </ToggleButtonGroup>
@@ -994,79 +995,6 @@ React.useEffect(() => {
 </div>
   </div>  
   }
-
-
-{/***********Tabella scalette chiuse filtro tramite le date di scal Dat*************************** */}
-{popupActive &&
-  <>
-  <motion.div
-        initial= {{opacity: 0}}
-        animate= {{opacity: 1}}
-        transition={{ duration: "0.7" }}>
-<div className='todo_containerScalet mt-5'>
-  <div className='row'> 
-  <div className='col'><p className='colTextTitle'> Scalette chiuse</p>
-  <p style={{textAlign: "left", marginBottom: "0px"}}>Quota Totale: {quotaTot}€</p>
-  <p style={{textAlign: "left"}}>Vendite Totali: {venditeTot}€</p>
-  </div>
-  <div className='col' style={{textAlign: "right"}}>
-  <p style={{fontSize: "20px"}}>{dataSc} </p>
-  </div>
-  <div className='col-5' style={{textAlign: "right"}}>
-    <button className='buttonCalender' onClick={() => {setActiveCalender(!activeCalender)}}> <CalendarMonthIcon/></button>
-
-{activeCalender== true &&
-  <>
-  <div style={{width: "265px",position: "absolute", opacity:"100%"}}>
-  <motion.div
-        initial= {{x: 35}}
-        animate= {{x: 0}}
-        transition={{ type: "spring", mass: 0.5 }}>
-      <Calendar onChange={onChangeDataCal} value={DataCal} 
-        tileClassName={({ date, view }) => {
-      if(todosScaletta.find(x=>x.data===moment(date).format("DD-MM-YYYY"))){
-       return  'highlight'
-      }
-    }}
-      />
-        </motion.div>
-      </div>
-</>
-}
-  </div>
-</div>
-
-  <div className='row' style={{marginRight: "5px", borderBottom: "1px solid gray"}}>
-      <div className='col-4' style={{marginRight: "3px"}}><p className='coltext' >Cliente </p> </div>
-      <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>Debito</p></div>
-      <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>Vendita</p></div>
-      <div className='col-1' style={{padding: "0px", width:"100px"}}><p className='coltext'>Quota</p></div>
-      <div className='col-3' style={{padding: "0px", width:"100px"}}><p className='coltext'>Note</p></div>
-    </div>
-    <div className="scroll">
-    {Progress == false && 
-  <div style={{marginTop: "14px"}}>
-      <CircularProgress />
-  </div>
-      }
-  {todosScalettaBlock.map((col) => (
-    <div key={col.id}>
-    { dataSc == col.dataScal &&
-    <div className='row' style={{padding: "0px", borderBottom: "1px solid gray"}}>
-      <div className='col-4 diviCol'><p className='inpTab'>{col.nomeC}</p> </div>
-      <div className='col-1 diviCol' style={{padding: "0px", width:"100px"}}><p className='inpTab'>{col.debito}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px", width:"100px"}}><p className='inpTab'>{col.sommaTotale}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px", width:"100px"}}><p className='inpTab'>{col.quota}</p></div>
-      <div className='col-3 diviCol' style={{padding: "0px", width:"100px"}}><textarea style={{textAlign: "left", width:"190px", margin: "0px"}} className='inpTab'>{col.note}</textarea></div>
-    </div>
-    }
-    </div>
-    ))}
-  </div>
-  </div>
-  </motion.div>
-  </>
- }
 
   </motion.div>
     </>

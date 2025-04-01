@@ -79,6 +79,7 @@ function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, num
     const componentRef = useRef();  //serve per la stampa
 
     const sharePdf = async () => {
+      setFlagStampa(true);
       try {
         // Cattura il contenuto del div
         const canvas = await html2canvas(componentRef.current, { useCORS: true });
@@ -115,6 +116,9 @@ function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, num
         }
       } catch (error) {
         console.error('Errore durante la creazione o la condivisione del PDF:', error);
+      } finally {
+        // Ripristina il flag a false
+        setFlagStampa(false);
       }
     };
    //_________________________________________________________________________________________________________________
