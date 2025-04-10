@@ -349,7 +349,6 @@ const handleActiveEdit = async (todo) => {
   setCellulare(todo.cellulare);
 };
   const handleEdit = async () => { //va ad aggiornare le info del cliente, e va a cambiare anche il nome alla tabella debito
-    console.log(idCliente)
     await updateDoc(doc(db, "clin", idClinEdit), {nomeC:nome+" "+cognome, nome: nome, cognome:cognome, stato:stato, indirizzo:indirizzo, indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo, numeroCivico:numeroCivico, citta:citta, cap:cap, indirizzoEmail:indirizzoEmail, partitaIva:partitaIva, cellulare:cellulare});
     
     const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  //vado a trovare il deb1 vecchio tramite query

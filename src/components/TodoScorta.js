@@ -21,6 +21,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   const [newQuantita, setQuantita] = React.useState(todo.quantita);
   const [newListino, setListino] = React.useState(todo.listino);
   const [newScontistica, setScontistica] = React.useState(todo.scontistica);
+  const [fornitore, setFornitore] = React.useState(todo.fornitore);
   const [newSottoScorta, setNewSottoScorta] = React.useState(todo.sottoScorta);
   const [newPa, setNewPa] = React.useState(todo.prezzoIndi);
   const [newQuantitaOrdinabile, setnewQuantitaOrdinabile] = React.useState(todo.quantitaOrdinabile);
@@ -232,6 +233,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   }
 
   {/********************SOTTOSCORTA'*********************************************************** */}
+  {/* 
 {sup ===true && ( 
   <div className="col-1 diviCol" style={{padding: "0px"}}>
     <input
@@ -244,7 +246,9 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
       />
   </div>
     )}
+  */}
   {/********************QUANTITA ORDINABILE'*********************************************************** */}
+   {/* 
 {sup ===true && ( 
   <div className="col-1 diviCol" style={{padding: "0px"}}>
     <input
@@ -257,6 +261,13 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
       />
   </div>
     )}
+   */}
+
+  {/********************FORNITORE'*********************************************************** */}
+    <div className="col-2 d-flex align-items-center justify-content-center">
+      <p className="mb-0">{fornitore}</p>
+    </div>
+
 {/**********************AGGIUNGI************************************************************* */}
 {sup ===true && ( 
 <div className="col-1 diviCol" style={{padding: "0px"}}>

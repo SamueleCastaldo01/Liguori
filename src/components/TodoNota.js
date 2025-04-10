@@ -342,7 +342,7 @@ const handleChangeAge = (event) => {
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",
+<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", width: "422px",
  background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00", height: "40px"}}>
       {/***Prodotti non completati (non tinte)********************** */}
     {sup ===true && todo.flagTinte===false && (Completa == 0 || Completa == 5 || Completa == 6) &&( 
@@ -355,7 +355,7 @@ const handleChangeAge = (event) => {
       onInputChange={handleInputChange}
       onBlur={handleSubm}
       componentsProps={{ popper: { style: { width: 'fit-content', border: "none" } } }}
-      renderInput={(params) => <TextField {...params}  size="small"/>}
+      renderInput={(params) => <TextField {...params} size="small"/>}
     />
     {/*********Simboli*************************************************** */}
       { todo.simbolo != "1" &&
@@ -466,18 +466,20 @@ const handleChangeAge = (event) => {
     )}
     </div>
 {/************************Prezzo Uni***************************************************************************** */}
-<div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px" }}>
+<div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px", width: "100px" }}>
 
     {sup ===true && (Completa == 0 || Completa == 5 || Completa == 6) && (todo.simbolo2 != "-" && todo.simbolo2 != "In Omaggio" && todo.simbolo2 != "G. P." )  && ( 
-      <span style={{ padding: "0px", marginLeft:"5px" }}>€&nbsp;
-      <input
-       style={{textAlign:"left", padding: "0px", width:"95px", marginTop:"0px"}}
-        type="number" step="0.01"
-        onBlur={handlePrezzUniUpd}
-        value={newPrezzoUni}
-        className="inpTab"
-        onChange={handleChangePrezzoUni}
-      /> </span>
+      <div className="d-flex">
+        <span style={{ padding: "0px", marginLeft:"5px" }}>€&nbsp;
+        <input
+        style={{textAlign:"left", padding: "0px", width:"auto", marginTop:"0px"}}
+          type="number" step="0.01"
+          onBlur={handlePrezzUniUpd}
+          value={newPrezzoUni}
+          className="inpTab"
+          onChange={handleChangePrezzoUni}
+        /> </span>
+      </div>
     )}
 
     {(sup ===true && (Completa == 0 || Completa == 5 || Completa == 6) && (todo.simbolo2 == "-" || todo.simbolo2 == "In Omaggio" || todo.simbolo2 == "G. P."))  && ( 
@@ -496,10 +498,10 @@ const handleChangeAge = (event) => {
 )}
     </div>
 {/***************************Prezzo Tot************************************************************************** */}
-<div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px", marginBottom:"0px"}}>
+<div className="col-2" style={{width: "100px", borderLeft:"solid",  borderWidth: "2px", padding: "0px", marginBottom:"0px"}}>
     {sup === true && ( 
         <h4 
-            style={{textAlign:"center", fontSize:"16px", marginTop:"0px", paddingTop:"10px"  }}
+            style={{textAlign:"left", fontSize:"16px", marginTop:"0px", paddingTop:"10px", paddingLeft: "5px"  }}
             type="text"
             className="inpTab"
         >
@@ -508,7 +510,7 @@ const handleChangeAge = (event) => {
     )}
 </div>
 {/*************Button**************************************************************************************** */}
-      <div className="col-1" style={{padding: "0px"}}>
+      <div className="col-1" style={{padding: "0px", width: "35px"}}>
       <button hidden
           className="button-edit"
           onClick={() => handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)}

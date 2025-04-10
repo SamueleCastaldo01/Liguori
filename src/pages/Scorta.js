@@ -375,10 +375,7 @@ const handleSubmit = async (e) => {
     toast.clearWaitingQueue();
     return;
   }
-  if (nomeP.length > 30) {
-    notifyError1("Il nome del prodotto ha superato i 30 caratteri");
-    return;
-  }
+
   if (!prezzoIndi || prezzoIndi.includes(',')) {
     notifyErrorPrezzoProd();
     return;
@@ -493,6 +490,8 @@ const handleActiveEdit = async ( todo) => {
   setReparto(todo.reparto);
   setListino(todo.listino);
   setScontiscita(todo.scontistica);
+  setSottoScorta(todo.sottoScorta);
+  setquantitaOrdinabile(todo.quantitaOrdinabile);
   setFornitore(todo.fornitore);
 };
 
@@ -515,12 +514,8 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
 };
 
   const handleEditNomeProd = async () => {
-    if(nomeP.length >30) {
-      notifyError1("Il nome del prodotto ha superato i 30 caratteri");
-      return;
-    }
     console.log(idProdotto)
-    await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto, fornitore:fornitore,  listino:listino, scontistica:scontistica});
+    await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto, fornitore:fornitore,  listino:listino, scontistica:scontistica, quantitaOrdinabile:quantitaOrdinabile, sottoScorta:sottoScorta });
 
     setFlagEdit(+FlagEdit+1);
 
@@ -691,8 +686,21 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
           <Modal.Body>
           <div className='row mt-4' >
       <div className='col'>
-      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Prodotto" variant="outlined" autoComplete='off' value={nomeP} 
-          onChange={(e) => setNomeP(e.target.value)}/>
+      <TextField 
+        style={{width: "100%"}} 
+        color='secondary' 
+        id="filled-basic" 
+        label="Prodotto" 
+        variant="outlined" 
+        autoComplete='off' 
+        value={nomeP} 
+        onChange={(e) => {
+          if (e.target.value.length <= 30) {
+            setNomeP(e.target.value);
+          }
+        }}
+      />
+
       </div>
       <div className='col'>
       <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Fornitore" variant="outlined" autoComplete='off' value={fornitore} 
@@ -701,7 +709,7 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
       </div>
       <div className='row mt-4'>
         <div className='col'>
-        <FormControl className='mb-5' color='secondary'>
+        <FormControl className='mb-4' color='secondary'>
           <InputLabel color='secondary' id="demo-simple-select-label"></InputLabel>
           <Select
             sx={{ height: 55, width: "370px" }}
@@ -747,6 +755,27 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
         />
         </div>
       </div>
+      {popupActiveScortaEdit && 
+      <div className='row mb-5'>
+        <div className='col'>
+          <TextField  style={{width: "100%"}} type="text"  color='secondary'                
+          inputProps={{
+                    step: 0.01,
+                  }} id="filled-basic" label="Sotto Scorta" variant="outlined" autoComplete='off' value={sottoScorta} 
+          onChange={(e) => setSottoScorta(e.target.value)}
+          />
+          </div>
+          <div className='col'>
+          <TextField  style={{width: "100%"}} type="text"  color='secondary'                
+          inputProps={{
+                    step: 0.01,
+                  }} id="filled-basic" label="Quantità ordinabile" variant="outlined" autoComplete='off' value={quantitaOrdinabile} 
+          onChange={(e) => setquantitaOrdinabile(e.target.value)}
+          />
+          </div>
+      </div>
+      }
+     
        {popupActive && 
        <Button
           onClick={handleSubmit}
@@ -877,11 +906,16 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
         <div className='col-1 p-0' >
         <p className='coltext'>Sco(%)</p>
         </div>
+        {/* 
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Sogl. Sott.</p>
         </div>
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Qta Ord.</p>
+        </div>
+        */}
+        <div className='col-2'>
+           Fornitore
         </div>
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Variazioni</p>
