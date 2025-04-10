@@ -37,7 +37,7 @@ const elimDb = async () => {
  const Background = () => {
   const location = useLocation();
   return (
-    <div className={location.pathname !== "/notadipdata" && location.pathname !== "/stampamassiva" && location.pathname !== "/notadip" && location.pathname !== "/scalettadatadip" ? "background-imagePage" : ""}></div>
+    <div className={location.pathname !== "/notadipdata" && location.pathname !== "/listaclientidip" && location.pathname !== "/stampamassiva" && location.pathname !== "/notadip" && location.pathname !== "/scalettadatadip" ? "background-imagePage" : ""}></div>
 
   );
 };

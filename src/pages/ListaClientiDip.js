@@ -77,17 +77,24 @@ function ListaClientiDip() {
   
   //********************************************************************************** */  
     React.useEffect(() => {
+      const cachedData = localStorage.getItem("clientes");
+      if (cachedData) {
+        setTodos(JSON.parse(cachedData));
+      }
+    
       const collectionRef = collection(db, "clin");
       const q = query(collectionRef, orderBy("nomeC"));
-  
+    
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
         querySnapshot.forEach((doc) => {
           todosArray.push({ ...doc.data(), id: doc.id });
         });
+        console.log(todosArray);
         setTodos(todosArray);
+        localStorage.setItem("clientes", JSON.stringify(todosArray)); // Aggiorna la cache
       });
-      localStorage.removeItem("OrdId");
+    
       return () => unsub();
     }, []);
 
@@ -106,7 +113,7 @@ function ListaClientiDip() {
     <div className='navMobile row'>
     <div className='col-2'></div>
       <div className='col' style={{padding: 0}}>
-      <p className='navText'> ScalettaDip </p>
+      <p className='navText'> Clienti </p>
       </div>
       <div className='col' style={{paddingRight: "20px"} }>
       <TextField
@@ -171,21 +178,25 @@ function ListaClientiDip() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {todos.filter((val)=> {
-        if(searchTerm === ""){
-          return val
-      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
-        return val
-                }
-            }).map((todo) => (
-            <TableRow
-              key={todo.id}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-            >
-              <TableCell component="th" scope="row">{todo.nomeC}</TableCell>
-              <TableCell align="right"><a href={ todo.indirizzoLink } target="_blank">{ todo.indirizzo }</a></TableCell>
-            </TableRow>
-          ))}
+          {todos.filter((val) => {
+    if (searchTerm === "") {
+        return val;
+    } else if (val.nomeC.toLowerCase().trim().includes(searchTerm.toLowerCase().trim())) {
+        return val;
+    }
+}).map((todo) => (
+    <TableRow
+        key={todo.id}
+        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+    >
+        <TableCell component="th" scope="row">{todo.nomeC}</TableCell>
+        <TableCell align="right">
+            <a href={todo.indirizzoLink} target="_blank" rel="noopener noreferrer">
+                {todo.indirizzo}
+            </a>
+        </TableCell>
+    </TableRow>
+))}
         </TableBody>
       </Table>
     </TableContainer>

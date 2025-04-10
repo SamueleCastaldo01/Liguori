@@ -43,6 +43,8 @@ function Scorta() {
 
   const [Progress, setProgress] = React.useState(false);
   const [Progress1, setProgress1] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -366,14 +368,15 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   let bol = true;
   let idProdotto = "1";
+  setIsLoading(true); 
 
   if (!nomeP) {
     notifyErrorProd();
     toast.clearWaitingQueue();
     return;
   }
-  if (nomeP.length > 36) {
-    notifyError1("Il nome del prodotto ha superato i 26 caratteri");
+  if (nomeP.length > 30) {
+    notifyError1("Il nome del prodotto ha superato i 30 caratteri");
     return;
   }
   if (!prezzoIndi || prezzoIndi.includes(',')) {
@@ -416,11 +419,14 @@ const handleSubmit = async (e) => {
     reparto,
     quantitaOrdinabile,
   });
+  console.log("entrato nel submit")
 
   // ✅ Associa il prodotto a tutti i clienti
   await handleProdClien(idProdotto);
 
   // ✅ Pulizia e chiusura popup
+  setIsLoading(false);
+  console.log(isLoading);
   handleClearSet();
   setPopupActive(false);
   setFlagEdit((prev) => prev + 1);
@@ -509,8 +515,8 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
 };
 
   const handleEditNomeProd = async () => {
-    if(nomeP.length >36) {
-      notifyError1("Il nome del prodotto ha superato i 26 caratteri");
+    if(nomeP.length >30) {
+      notifyError1("Il nome del prodotto ha superato i 30 caratteri");
       return;
     }
     console.log(idProdotto)
@@ -741,7 +747,18 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
         />
         </div>
       </div>
-       {popupActive && <Button onClick={handleSubmit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Prodotto </Button>}
+       {popupActive && 
+       <Button
+          onClick={handleSubmit}
+          style={{ width: "100%", height: "50px" }}
+          className=""
+          type="submit"
+          color="primary"
+          variant="contained"
+          disabled={isLoading} // Disabilita il bottone durante il caricamento
+        >
+          {isLoading ? <CircularProgress size={24} color="inherit" /> : "Aggiungi Prodotto"}
+        </Button>}
        {popupActiveScortaEdit && <Button onClick={handleEditNomeProd} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Prodotto </Button>}   
           </Modal.Body>
       </Modal>

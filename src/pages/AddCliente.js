@@ -34,6 +34,7 @@ function AddCliente( {getCliId} ) {
   const [idClinEdit, setIdClinEdit] = React.useState([]);
 
   const [idCliente, setIdCliente] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
   const [indirizzo, setIndirizzo] = React.useState("");
   const [via, setVia] = React.useState("");
   const [stato, setStato] = React.useState("");
@@ -232,6 +233,7 @@ const handleSubmit = async (e, id) => {
   e.preventDefault();
   var idCliente = "1";
   var bol = true;
+  setIsLoading(true);
 
   if (!nome) {  // Controllo sul nome
     notifyErrorCliEm();
@@ -307,6 +309,7 @@ const handleSubmit = async (e, id) => {
     await batch.commit();
 
     handlerSetClear();
+    setIsLoading(false);
     setPopupActive(false);
   }
 };
@@ -524,7 +527,17 @@ const sommaTotDebito = () => {
               onChange={(e) => setCellulare(e.target.value)}/>
             </div>
             <div className='col'>
-              {popupActive && <Button onClick={handleSubmit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Cliente </Button>}
+              {popupActive &&  <Button
+                        onClick={handleSubmit}
+                        style={{ width: "100%", height: "50px" }}
+                        className=""
+                        type="submit"
+                        color="primary"
+                        variant="contained"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Aggiungi Prodotto"}
+                      </Button>}
               {popupActiveEdit && <Button onClick={handleEdit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Cliente </Button>}  
             </div>
           </div> 
