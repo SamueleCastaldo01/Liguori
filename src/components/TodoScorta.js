@@ -29,7 +29,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa, newScontistica, newListino);
+    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa, newScontistica, newListino, fornitore);
     setAggiungi("");
   };
 
@@ -67,6 +67,11 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   const handleChangeScontistica = (e) => {
     e.preventDefault();
       setScontistica(e.target.value);
+  };
+
+  const handleChangeFornitore = (e) => {
+    e.preventDefault();
+      setFornitore(e.target.value);
   };
 
   const handleChangeQo = (e) => {
@@ -264,9 +269,18 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
    */}
 
   {/********************FORNITORE'*********************************************************** */}
+  {sup ===true && ( 
     <div className="col-2 d-flex align-items-center justify-content-center">
-      <p className="mb-0">{fornitore}</p>
+      <input
+      style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
+         min="1"
+        value={fornitore}
+        onBlur={handleSubm}
+        onChange={handleChangeFornitore}
+        className="inpNumb"
+      />
     </div>
+  )} 
 
 {/**********************AGGIUNGI************************************************************* */}
 {sup ===true && ( 

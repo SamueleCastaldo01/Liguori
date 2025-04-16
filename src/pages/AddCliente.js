@@ -332,6 +332,7 @@ const handleSubmit = async (e, id) => {
 
 //****************************************************************************************** */
 const handleActiveEdit = async (todo) => {
+  console.log(todo)
   setIdClinEdit(todo.id)
   setIndirizzo(todo.indirizzo)
   setPopupActiveEdit(true)
@@ -477,12 +478,12 @@ const sommaTotDebito = () => {
           <Modal.Body style={{  }}>
       <div className='row mt-4' >
         <div className='col'>
-            <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Nome" variant="outlined" autoComplete='off' value={nome} 
-              onChange={(e) => setNome(e.target.value)}/>
-        </div>
-        <div className='col'>
           <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Cognome" variant="outlined" autoComplete='off' value={cognome} 
               onChange={(e) => setCognome(e.target.value)}/>
+        </div>
+        <div className='col'>
+            <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" label="Nome" variant="outlined" autoComplete='off' value={nome} 
+              onChange={(e) => setNome(e.target.value)}/>
         </div>
       </div>
       <div className='row mt-4 mb-4' style={{ paddingBottom: "-50px" }}><div >
@@ -758,6 +759,7 @@ const sommaTotDebito = () => {
       todo={todo}
       handleDelete={handleDelete}
       handleEditDeb={handleEditDeb}
+      handleActiveEdit={handleActiveEdit}
       displayMsg={displayMsg}
       getCliId={getCliId}
     />

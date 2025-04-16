@@ -1,5 +1,5 @@
 import React from "react";
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -10,7 +10,7 @@ import { padding } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, totRiga, displayMsg, getCliId}) {
+export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, totRiga, displayMsg, getCliId, handleActiveEdit}) {
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -34,6 +34,21 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, totRiga
   const handleNiente = (e) => {
     e.preventDefault();
   }
+
+  const handleModal = async (idCliente) => {
+    try {
+      const clinRef = collection(db, "clin");
+      const q = query(clinRef, where("idCliente", "==", idCliente));
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+        const clienteData = querySnapshot.docs[0].data();
+        handleActiveEdit(clienteData);
+      }
+    } catch (error) {
+      console.error("Errore nel recupero del cliente:", error);
+    }
+  };
 
 //******************************************************************** */
   const handleChangeD1 = (e) => {
@@ -82,10 +97,12 @@ export default function TodoDebiCli({ todo, handleDelete, handleEditDeb, totRiga
 {/*****************idCliente**************************************************************************** */}
 <div className="col-1 diviCol"  >
     <h5
-      style={{ textDecoration: todo.completed && "line-through"  }}
-      
-        className="inpTab"
-        >{todo.idCliente}</h5>
+      style={{ textDecoration: todo.completed && "line-through" }}
+      onClick={() => handleModal(todo.idCliente)}
+      className="inpTab"
+    >
+      {todo.idCliente}
+    </h5>
 
     </div>
 {/*****************NOME**************************************************************************** */}

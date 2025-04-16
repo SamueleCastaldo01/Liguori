@@ -495,7 +495,7 @@ const handleActiveEdit = async ( todo) => {
   setFornitore(todo.fornitore);
 };
 
-const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
+const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn) => {
   if (parseFloat(todo.prezzoIndi) !== parseFloat(pap)) {  // Controllo se il prezzo è cambiato
       await handleCronologiaPa(todo, pap);
   }
@@ -506,7 +506,8 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
       quantitaOrdinabile: quaOrd, 
       prezzoIndi: pap, 
       scontistica: scon, 
-      listino: list 
+      listino: list,
+      fornitore: forn
   });
 
   setFlagEdit(prev => prev + 1);
@@ -613,13 +614,6 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
 
     await deleteDoc(doc(db, "prodotto", id)); //infine elimina il prodotto
   };
-//**************************************************************************** */
-  const actions = [     //speedDial
-    { icon: <InventoryIcon />, name: 'Scorta', action:handleSpeedScorta },
-    { icon: <RestoreIcon />, name: 'Cronologia', action: handleSpeedCronologia },
-    { icon: <PrintIcon />, name: 'Stampa', action: print},
-    { icon: <AddIcon />, name: 'Aggiungi Prodotto', action: handleSpeedAddProd },
-  ];
 //******************************************************************************************************************************** */
 //                              NICE
 //********************************************************************************************************************************* */
@@ -914,8 +908,8 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list) => {
           <p className='coltext'>Qta Ord.</p>
         </div>
         */}
-        <div className='col-2'>
-           Fornitore
+        <div className='col-2 text-start'>
+           <p style={{fontWeight: "bold", fontSize: "14px"}} className=''>Fornitore</p>
         </div>
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Variazioni</p>
