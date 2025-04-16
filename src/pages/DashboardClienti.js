@@ -50,6 +50,9 @@ function DashClienti({ clientId, nomeCli, getNotaDash, getNotaId }) {
   const [sommaTotIncasso, setSommaTotIncasso] = React.useState(0);
   const [sommaTotVendita, setSommaTotVendita] = React.useState(0);
 
+  const [incassoExtra, setIncassoExtra] = React.useState(0);
+  const [nuovoValore, setNuovoValore] = useState("");
+
   const [flagRicercaProd, setFlagRicercaProd] = React.useState(false);
   const [AutoProd, setAutoProd] = React.useState(localStorage.getItem("AutoProd"));
 
@@ -66,7 +69,67 @@ function DashClienti({ clientId, nomeCli, getNotaDash, getNotaId }) {
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
+  //---------------------------------------------------------------------------------------
+    const fetchIncassoExtra = async () => {
+      console.log("entrato nella fetchh")
+      try {
+        const clinRef = collection(db, "clin");
+        const q = query(clinRef, where("nomeC", "==", nomeCli));
+        const querySnapshot = await getDocs(q);
+    
+        if (!querySnapshot.empty) {
+          const clienteData = querySnapshot.docs[0].data();
+    
+          // Verifica che incassoExtra esista
+          if ("incassoExtra" in clienteData) {
+            setIncassoExtra(clienteData.incassoExtra);
+          } else {
+            setIncassoExtra(0);
+          }
+    
+        }
+      } catch (error) {
+        console.error("Errore durante il recupero dell'incassoExtra:", error);
+      }
+    };
 
+    const handleChangeIncassoExtra = async (e) => {
+      e.preventDefault();
+    
+      try {
+        // Parse il numero (positivo o negativo)
+        const valoreDigitato = parseFloat(nuovoValore);
+        if (isNaN(valoreDigitato)) {
+          alert("Inserisci un numero valido.");
+          return;
+        }
+    
+        const nuovoTotale = (parseFloat(incassoExtra) || 0) + valoreDigitato;
+    
+        const q = query(collection(db, "clin"), where("nomeC", "==", nomeCli));
+        const querySnapshot = await getDocs(q);
+    
+        if (!querySnapshot.empty) {
+          const docRef = querySnapshot.docs[0].ref;
+    
+          await updateDoc(docRef, {
+            incassoExtra: nuovoTotale
+          });
+    
+          setIncassoExtra(nuovoTotale);
+          setNuovoValore("");
+        } else {
+          alert("Cliente non trovato.");
+        }
+    
+      } catch (error) {
+        console.error("Errore nell'aggiornamento di incassoExtra:", error);
+      }
+
+      fetchIncassoExtra();
+    };
+
+  //---------------------------------------------------------------------------------------
 
 
     function handleInputChange(event, value) {
@@ -105,7 +168,12 @@ function DashClienti({ clientId, nomeCli, getNotaDash, getNotaId }) {
 //********************************************************************************** */
   React.useEffect(() => {   //mi serve per la tabella ordini chiusi
     handleChangeDataSelect(31)
+    
   }, []);
+
+  React.useEffect(() => {  
+    fetchIncassoExtra();
+  }, [nomeCli]);
 
   React.useEffect(() => {   //mi serve per la tabella ordini chiusi
     SommaTot()
@@ -246,7 +314,7 @@ const print = async () => {
   }
 
 {/*************Tabella ordini chiusi******************************************* */}
-<div ref={componentRef} className='todo_containerProdCli mt-3'>
+<div ref={componentRef} style={{width: "600px"}} className='todo_containerProdCli mt-3'>
 <div className='row' > 
 <div className='col-5'>
 <p className='colTextTitle'> Ordini Chiusi</p>
@@ -271,13 +339,25 @@ const print = async () => {
       <button onClick={print}> <ShareIcon/> </button>
     </div>
 </div>
-    <div className='row mt-1' style={{padding: "0px"}}>
-<div className='col-2'></div>
-    <div className='col' style={{padding: "0px"}}>
-    <span><h6> Tot. Incasso: {sommaTotIncasso} </h6></span>
-    </div>
-    <div className='col' style={{padding: "0px"}}>
-    <span><h6> Tot. Vendita: {sommaTotVendita} </h6></span>
+
+    <form onSubmit={handleChangeIncassoExtra} className='d-flex justify-content-start mt-3'>
+      <TextField
+        placeholder='Incasso Extra'
+        value={nuovoValore}
+        onChange={(e) => setNuovoValore(e.target.value)}
+      />
+      <Button variant='contained' type="submit">Conferma</Button>
+    </form>
+
+    <div className='row mt-4 mb-4' style={{padding: "0px"}}>
+      <div className='col d-flex justify-content-center'>
+      <h6 style={{fontWeight: "bold"}}> Tot. Incasso: {sommaTotIncasso} </h6>
+      </div>
+      <div className='col d-flex justify-content-center'>
+      <h6 style={{fontWeight: "bold"}}> Tot. Vendita: {sommaTotVendita} </h6>
+      </div>
+      <div className='col d-flex justify-content-center'>
+      <h6 style={{fontWeight: "bold"}}> Incasso Extra: {incassoExtra} </h6>
       </div>
     </div>
 
@@ -316,7 +396,7 @@ const print = async () => {
             AutoProdCli.length = 0
                                 }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
-      <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
+      <div className='col diviCol'><p className='inpTab'> {todo.quota}</p> </div>
       <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
@@ -344,6 +424,7 @@ const print = async () => {
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
       <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
       <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
+      <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.incassoExtra}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     }

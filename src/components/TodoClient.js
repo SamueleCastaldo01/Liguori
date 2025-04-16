@@ -36,7 +36,6 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     const q = query(collection(db, "prodotto"));
     const querySnapshot = await  getDocs(q);
     querySnapshot.forEach((doc) => {
-    console.log(doc.id, " => ", doc.data().nomeP);
   
     let car = { label: doc.data().nomeP }
     AutoCompProd.push(car);
