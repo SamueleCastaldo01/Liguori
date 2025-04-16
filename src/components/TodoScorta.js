@@ -24,49 +24,34 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   const [fornitore, setFornitore] = React.useState(todo.fornitore);
   const [newSottoScorta, setNewSottoScorta] = React.useState(todo.sottoScorta);
   const [newPa, setNewPa] = React.useState(todo.prezzoIndi);
+  const [tipo, setTipo] = React.useState("");
   const [newQuantitaOrdinabile, setnewQuantitaOrdinabile] = React.useState(todo.quantitaOrdinabile);
   const [aggiungi, setAggiungi] = React.useState("");
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa, newScontistica, newListino, fornitore);
+    handleEdit(todo, newNomeP, newSottoScorta, newQuantitaOrdinabile, newPa, newScontistica, newListino, fornitore, tipo);
     setAggiungi("");
-  };
-
-  const handleChange = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setNomeP(todo.nomeP);
-    } else {
-      todo.nomeP = "";
-      setNomeP(e.target.value);
-    }
-  };
-
-  const handleChangeSs = (e) => {
-    e.preventDefault();
-    if (todo.complete === true) {
-      setNewSottoScorta(todo.sottoScorta);
-    } else {
-      todo.sottoScorta = "";
-      setNewSottoScorta(e.target.value);
-    }
+    setTipo("");
   };
 
   const handleChangePa = (e) => {
     e.preventDefault();
       setNewPa(e.target.value);
+      setTipo("Prezzo");
   };
 
   const handleChangeListino = (e) => {
     e.preventDefault();
       setListino(e.target.value);
+      setTipo("Listino");
   };
 
 
   const handleChangeScontistica = (e) => {
     e.preventDefault();
       setScontistica(e.target.value);
+      setTipo("Scontistica");
   };
 
   const handleChangeFornitore = (e) => {

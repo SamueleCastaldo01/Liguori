@@ -179,7 +179,7 @@ function Scorta() {
 
 
 
-//cronologia debito
+//cronologia
   React.useEffect(() => {
     if(popupActiveCrono) {
       const collectionRef = collection(db, "cronologia");
@@ -200,7 +200,7 @@ function Scorta() {
 
   //cronologia Pa
   React.useEffect(() => {
-    if(popupActiveCrono) {
+    if(popupActiveCronoPa) {
       const collectionRef = collection(db, "cronologiaPa");
       const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
   
@@ -214,7 +214,7 @@ function Scorta() {
       });
       return () => unsub();
     }
-  }, [popupActiveCrono]);
+  }, [popupActiveCronoPa]);
 
  //******************************************************************************* */
  //stampa
@@ -465,17 +465,19 @@ const handleSubmit = async (e) => {
       });
   };
    //******************************************************************************************************** */
-   const handleCronologiaPa = async (todo, pap) => {
+   const handleCronologiaPa = async (todo, vari, tip, variV) => {
     let dataFormattata = moment().format('DD-MM-YYYY');
+    console.log("entrato nella modifica")
 
     await addDoc(collection(db, "cronologiaPa"), {
         autore: auth.currentUser.displayName,
         data: dataFormattata,
+        tipo: tip,
         createdAt: serverTimestamp(),
         idProdotto: todo.idProdotto,
         nomeP: todo.nomeP,
-        paI: todo.prezzoIndi,  // Prezzo iniziale (vecchio)
-        paF: pap,  // Prezzo finale (nuovo)
+        varI: variV,  // iniziale (vecchio)
+        varF: vari,  // finale (nuovo)
     });
 
     await updateDoc(doc(db, "notify", notiPaId), { NotiPa: true });  
@@ -495,9 +497,18 @@ const handleActiveEdit = async ( todo) => {
   setFornitore(todo.fornitore);
 };
 
-const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn) => {
-  if (parseFloat(todo.prezzoIndi) !== parseFloat(pap)) {  // Controllo se il prezzo è cambiato
-      await handleCronologiaPa(todo, pap);
+const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip) => {
+  if(tip == "Listino") {
+    let listV = todo.listino
+    await handleCronologiaPa(todo, list, tip, listV);
+  }
+  if(tip == "Prezzo") {
+    let papV = todo.prezzoIndi
+    await handleCronologiaPa(todo, pap, tip, papV);
+  }
+  if(tip == "Scontistica") {
+    let sconV = todo.scontistica
+    await handleCronologiaPa(todo, scon, tip, sconV);
   }
 
   await updateDoc(doc(db, "prodotto", todo.id), { 
@@ -1141,9 +1152,9 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn) => 
       <div className='col-2' ><p  className='coltext' >Data Modifica</p></div>
       <div className='col-1' style={{padding: "0px"}}><p className='coltext' >id Prodotto</p> </div>
       <div className='col-4' style={{padding: "0px"}}><p className='coltext' >Prodotto</p> </div>
-      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Utente</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Pr Ini.</p></div>
-      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Pr Fin. </p></div>
+      <div className='col-2' style={{padding: "0px"}}><p className='coltext'>Tipo</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Prima</p></div>
+      <div className='col-1' style={{padding: "0px"}}><p className='coltext'>Dopo</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scrollCrono" style={{maxHeight: "320px"}}>
@@ -1164,9 +1175,18 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn) => 
       <div className='col-2 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.idProdotto} </p> </div>
       <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
-      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.paI).toFixed(2).replace('.', ',')}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.paF).toFixed(2).replace('.', ',')}</p></div>
+      {col.tipo &&
+      <>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.tipo}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{Number(col.varI).toFixed(2).replace('.', ',')}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{Number(col.varF).toFixed(2).replace('.', ',')}</p></div>
+      </>}
+      {!col.tipo &&
+      <>
+      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>Prezzo</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{Number(col.paI).toFixed(2).replace('.', ',')}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{Number(col.paF).toFixed(2).replace('.', ',')}</p></div>
+      </>}
       <hr style={{margin: "0"}}/>
     </div>
     </div>
