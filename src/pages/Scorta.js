@@ -76,6 +76,7 @@ function Scorta() {
 
   const [alignment, setAlignment] = React.useState('scorta');
 
+
   const componentRef = useRef();  //serve per la stampa
   const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
 
@@ -678,6 +679,7 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}   variant="contained" onClick={handleSpeedCronologia}  value="cronologia">Cronologia Qta</Button> 
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }}  variant="contained" onClick={handleSpeedCronologiaPa}  value="cronologiaPa">Cronologia PR</Button> 
       </>}
+      {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={print} size="small" variant="contained">Stampa</Button>}
       {sup == true && <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}   onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
     </ToggleButtonGroup>
 </div>
@@ -940,7 +942,7 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
         <hr style={{margin: "0"}}/>
         </div>
 
-<div className="scroll">
+<div className={FlagStampa ? "" : "scroll"}>
   {Progress == false && 
   <div style={{marginTop: "14px"}}>
       <CircularProgress />
