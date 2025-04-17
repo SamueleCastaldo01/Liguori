@@ -412,6 +412,7 @@ const handleChangeAge = (event) => {
           <MenuItem value={"DIACOLOR"}>DIACOLOR</MenuItem>
           <MenuItem value={"DIALIGHT"}>DIALIGHT</MenuItem>
           <MenuItem value={"INOA"}>INOA</MenuItem>
+          <MenuItem value={"C.OIL"}>C.OIL</MenuItem>
         </Select>
       </FormControl>
          </span> 
