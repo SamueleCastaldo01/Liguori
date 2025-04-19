@@ -31,6 +31,7 @@ function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, num
     let sup= supa.includes(localStorage.getItem("uid"))
     let gui= guid.includes(localStorage.getItem("uid"))
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
+    const [brandTinte, setBrandTinte] = useState([]);
 
     const [todos, setTodos] = React.useState([]);
     const [todosInOrdine, setTodosInOrdine] = React.useState([]);
@@ -175,6 +176,26 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
   await updateDoc(doc(db, "addNota", notaId), { sommaTotale: somTrunc});  //aggiorna la somma totale nell'add nota
 }
 //********************************************************************************** */ 
+        useEffect(() => {
+          const fetchTinte = async () => {
+            try {
+              const tinteCollection = collection(db, 'tinte');
+              const snapshot = await getDocs(tinteCollection);
+              const lista = snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a, b) => a.brand.localeCompare(b.brand)); // <-- ordinamento qui
+  
+              setBrandTinte(lista);
+            } catch (err) {
+              console.error('Errore nel recupero delle tinte:', err);
+            }
+          };
+  
+          fetchTinte();
+        }, []);
+
+
+
     React.useEffect(() => {
       const collectionRef = collection(db, "Nota");
       const q = query(collectionRef, where("idNota", "==", notaId));
@@ -730,6 +751,7 @@ const print = async () => {
     <TodoNota
       key={todo.id}
       todo={todo}
+      brandTinte={brandTinte}
       handleDelete={handleDelete}
       handleEdit={handleEdit}
       displayMsg={displayMsg}

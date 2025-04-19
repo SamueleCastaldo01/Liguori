@@ -19,7 +19,7 @@ import Menu from '@mui/material/Menu';
 import { FlareSharp } from "@mui/icons-material";
 
 
-export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot, flagBho}) {
+export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot, flagBho, brandTinte}) {
 
   const [todosProdottiCli, setTodosProdottiCli] = React.useState([]);
 
@@ -388,33 +388,24 @@ const handleChangeAge = (event) => {
     {sup ===true && todo.flagTinte===true && (Completa == 0 || Completa == 5|| Completa == 6) &&( 
       <>
         <div className="divTinte"><span>
-        <FormControl >
-        <InputLabel id="demo-simple-select-label"></InputLabel>
-        <Select sx={{height:39, marginLeft:-1}}
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={newProdotto}
-          onChange={handleChangeTintSelect}
-          onBlur={handleSubm}
-        >
-          <MenuItem value={"TECH"}>TECH</MenuItem>
-          <MenuItem value={"KF"}>KF</MenuItem>
-          <MenuItem value={"KR"}>KR</MenuItem>
-          <MenuItem value={"KG"}>KG</MenuItem>
-          <MenuItem value={"K10"}>K10</MenuItem>
-          <MenuItem value={"CB"}>CB</MenuItem>
-          <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
-          <MenuItem value={"ROYAL"}>ROYAL</MenuItem>
-          <MenuItem value={"VIBRANCE"}>VIB</MenuItem>
-          <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
-          <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
-          <MenuItem value={"MAJIREL"}>MAJIREL</MenuItem>
-          <MenuItem value={"DIACOLOR"}>DIACOLOR</MenuItem>
-          <MenuItem value={"DIALIGHT"}>DIALIGHT</MenuItem>
-          <MenuItem value={"INOA"}>INOA</MenuItem>
-          <MenuItem value={"C.OIL"}>C.OIL</MenuItem>
-        </Select>
-      </FormControl>
+        <FormControl>
+          <InputLabel id="demo-simple-select-label"></InputLabel>
+          <Select
+            sx={{ height: 39, marginLeft: -1 }}
+            labelId="demo-simple-select-label"
+            id="demo-simple-select"
+            value={newProdotto}
+            onChange={handleChangeTintSelect}
+            onBlur={handleSubm}
+          >
+            {brandTinte.map(tinta => (
+              <MenuItem key={tinta.id} value={tinta.brand}>
+                {tinta.brand}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
          </span> 
         <input
       style={{textAlign:"center", width:"42px", padding:"0px"}}

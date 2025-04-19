@@ -29,16 +29,20 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import { color, motion } from 'framer-motion';
 import TodoScortaTinte from '../components/TodoScortaTinte';
+import TinteModal from '../components/TinteModal';
 
 function ScortaTinte() {
 
   const [todos, setTodos] = React.useState([]);
   const [crono, setCrono] = React.useState([]);
+  const [brandTinte, setBrandTinte] = useState([]);
 
   const [arrayOrdinato, setArrayOrdinato] = React.useState([]);
 
   const [Progress, setProgress] = React.useState(false);
   const [Progress1, setProgress1] = React.useState(false);
+
+  const [showAddTinte, setShowAddTinte] = useState(false);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -119,6 +123,24 @@ function ScortaTinte() {
         })}
 
 //********************************************************************************** */
+      useEffect(() => {
+        const fetchTinte = async () => {
+          try {
+            const tinteCollection = collection(db, 'tinte');
+            const snapshot = await getDocs(tinteCollection);
+            const lista = snapshot.docs
+              .map(doc => ({ id: doc.id, ...doc.data() }))
+              .sort((a, b) => a.brand.localeCompare(b.brand)); // <-- ordinamento qui
+
+            setBrandTinte(lista);
+          } catch (err) {
+            console.error('Errore nel recupero delle tinte:', err);
+          }
+        };
+
+        fetchTinte();
+      }, []);
+
 React.useEffect(() => {
     const collectionRef = collection(db, "scortaTinte");
     var q;
@@ -335,6 +357,11 @@ const handleProdDisp = () => {  //va a prendere i prodotti disponibili
     handleClosi();
   };
 
+  const handleFilter = (brand) => {
+    setflagTinte(brand);
+    handleClosi();
+  };
+
 function handlePopUp(image, nota) {
   setImageSer(image)
   setNotaSer(nota)
@@ -464,25 +491,17 @@ function handlePopUp(image, nota) {
   <div className='col' style={{padding: 0}}>
   <p className='navText'> Scorta Tinte </p>
   </div>
-  {dip == true && 
-<div className='col-4'>
-{flagTinte == "TECH" && <p className='navText' style={{ color: "#f8dcb5"}}> TECH</p>}
-{flagTinte == "KF" && <p className='navText' style={{ color: "#f8dcb5"}}> KF</p>}
-{flagTinte == "KR" && <p className='navText' style={{ color: "#f8dcb5"}}> KR</p>}
-{flagTinte == "KG" && <p className='navText' style={{ color: "#f8dcb5"}}> KG</p>}
-{flagTinte == "K10" && <p className='navText' style={{ color: "#f8dcb5"}}> K10</p>}
-{flagTinte == "CB" && <p className='navText' style={{ color: "#f8dcb5"}}> CB</p>}
-{flagTinte == "NUAGE" && <p className='navText' style={{ color: "#f8dcb5"}}> NUAGE</p>}
-{flagTinte == "VIBRANCE" && <p className='navText' style={{ color: "#f8dcb5"}}> VIBRANCE</p>}
-{flagTinte == "EXTREMO" && <p className='navText' style={{ color: "#f8dcb5"}}> EXTREMO</p>}
-{flagTinte == "NATIVE" && <p className='navText' style={{ color: "#f8dcb5"}}> NATIVE</p>}
-{flagTinte == "MARJIREL" && <p className='navText' style={{color: "#f8dcb5"}}> MARJIREL</p>}
-{flagTinte == "DIACOLOR" && <p className='navText' style={{color: "#f8dcb5"}}> DIACOLOR</p>}
-{flagTinte == "INOA" && <p className='navText' style={{color: "#f8dcb5"}}> INOA</p>}
-{flagTinte == "ROYAL" && <p className='navText' style={{color: "#f8dcb5"}}> ROYAL</p>}
-{flagTinte == "C.OIL" && <p className='navText' style={{color: "#f8dcb5"}}> C.OIL</p>}
-</div>
-}
+      {dip == true && 
+        <div className='col-4'>
+      {brandTinte
+        .filter(tinta => tinta.brand === flagTinte)
+        .map(tinta => (
+          <p key={tinta.id} className='navText' style={{ color: "#f8dcb5" }}>
+            {tinta.brand}
+          </p>
+        ))}
+    </div>
+    }
   </div>
    <motion.div
            initial= {{x: "-100vw"}}
@@ -513,11 +532,19 @@ function handlePopUp(image, nota) {
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</Button> 
     }
       {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
+      {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => setShowAddTinte(true)} size="small" variant="contained">Aggiungi Brand</Button>}
     </ToggleButtonGroup>
 </div>
     {sup ===true && (
-        <>    
-{/** Aggiungi Tinte **************************************************************************/}
+        <> 
+
+    {/** Aggiungi Brand **************************************************************************/}
+      <TinteModal
+        show={showAddTinte}
+        onClose={() => setShowAddTinte(false)}
+        onSave={() => { /* ricarica la lista tinte */ }}
+      />
+
 {/******Aggiungi Prodotto  modal***************************************************************************** */}
 <Modal style={{ marginTop: "50px"}} size="lg" show={popupActive || popupActiveScortaEdit} onHide={handleCloseMod}>
       <div>  <button type='button' className="button-close float-end" onClick={() => { setPopupActive(false); setPopupActiveScortaEdit(false); }}>
@@ -531,32 +558,22 @@ function handlePopUp(image, nota) {
           onChange={(e) => setNomeP(e.target.value)}/>
       </div>
       <div className='col-4'> 
-        <FormControl >
-          <InputLabel id="demo-simple-select-label"></InputLabel>
-          <Select sx={{height:60, marginLeft:-1, width: 200, marginTop: "0px"}}
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            defaultValue={"TECH"}
-            onChange={handleChangeBrand}
-          >
-            <MenuItem value={"TECH"}>TECH</MenuItem>
-            <MenuItem value={"KF"}>KF</MenuItem>
-            <MenuItem value={"KR"}>KR</MenuItem>
-            <MenuItem value={"KG"}>KG</MenuItem>
-            <MenuItem value={"K10"}>K10</MenuItem>
-            <MenuItem value={"CB"}>CB</MenuItem>
-            <MenuItem value={"NUAGE"}>NUAGE</MenuItem>
-            <MenuItem value={"ROYAL"}>ROYAL</MenuItem>
-            <MenuItem value={"VIBRANCE"}>VIBRANCE</MenuItem>
-            <MenuItem value={"EXTREMO"}>EXTREMO</MenuItem>
-            <MenuItem value={"NATIVE"}>NATIVE</MenuItem>
-            <MenuItem value={"MAJIREL"}>MAJIREL</MenuItem>
-            <MenuItem value={"DIALIGHT"}>DIALIGHT</MenuItem>
-            <MenuItem value={"DIACOLOR"}>DIACOLOR</MenuItem>
-            <MenuItem value={"INOA"}>INOA</MenuItem>
-            <MenuItem value={"C.OIL"}>C.OIL</MenuItem>
-          </Select>
-        </FormControl>
+      <FormControl>
+        <InputLabel id="select-brand-label">Brand</InputLabel>
+        <Select
+          sx={{ height: 60, marginLeft: -1, width: 200, marginTop: "0px" }}
+          labelId="select-brand-label"
+          id="select-brand"
+          onChange={handleChangeBrand}
+          defaultValue={brandTinte[0]?.brand || ""}
+        >
+          {brandTinte.map((tinta) => (
+            <MenuItem key={tinta.id} value={tinta.brand}>
+              {tinta.brand}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       </div>
       </div>
        {popupActive && <Button onClick={handleSubmit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Tinta </Button>}
@@ -576,23 +593,19 @@ function handlePopUp(image, nota) {
 <p className='colTextTitle'>Tinte</p>
 </div>
 {sup == true && 
-<div className='col-3'>
-{flagTinte == "TECH" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> TECH</p>}
-{flagTinte == "KF" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KF</p>}
-{flagTinte == "KR" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KR</p>}
-{flagTinte == "KG" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> KG</p>}
-{flagTinte == "K10" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> K10</p>}
-{flagTinte == "CB" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> CB</p>}
-{flagTinte == "NUAGE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NUAGE</p>}
-{flagTinte == "VIBRANCE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> VIBRANCE</p>}
-{flagTinte == "EXTREMO" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> EXTREMO</p>}
-{flagTinte == "NATIVE" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> NATIVE</p>}
-{flagTinte == "MARJIREL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> MARJIREL</p>}
-{flagTinte == "DIACOLOR" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> DIACOLOR</p>}
-{flagTinte == "INOA" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> INOA</p>}
-{flagTinte == "ROYAL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> ROYAL</p>}
-{flagTinte == "C.OIL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> C.OIL</p>}
-</div>
+  <div className='col-3'>
+    {brandTinte
+      .filter(tinta => tinta.brand === flagTinte)
+      .map(tinta => (
+        <p
+          key={tinta.id}
+          className='colTextTitle'
+          style={{ textAlign: 'right', color: 'black' }}
+        >
+          {tinta.brand}
+        </p>
+      ))}
+  </div>
 }
 
 <div className='col' style={{padding: "0px", paddingRight: "15px"}}>
@@ -612,50 +625,42 @@ function handlePopUp(image, nota) {
        variant="outlined"/>
   </div>
 
-  <div className='col-1'  style={{marginLeft: "20px"}}>   
-  <button type="button" className="buttonMenu" style={{paddingRight:"15px",float:"right"}} >
-        <FilterListIcon id="i" onClick={handleMenu}/>
-        <Menu  sx={
-        { mt: "1px", "& .MuiMenu-paper": 
-        { backgroundColor: "#333",
-          color: "white" }, 
-        }
-        }
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClosi}
-              >
-                <MenuItem onClick={handleNome}>Annulla filtri</MenuItem>
-                <MenuItem onClick={handleProdDisp}>Prodotti disponibili</MenuItem>
-                <MenuItem onClick={handleTech}>TECH</MenuItem>
-                <MenuItem onClick={handleKf}>KF</MenuItem>
-                <MenuItem onClick={handleKr}>KR</MenuItem>
-                <MenuItem onClick={handleKG}>KG</MenuItem>
-                <MenuItem onClick={handleK10}>K10</MenuItem>
-                <MenuItem onClick={handleCb}>CB</MenuItem>
-                <MenuItem onClick={handleNuage}>NUAGE</MenuItem>
-                <MenuItem onClick={handleRoyal}>ROYAL</MenuItem>
-                <MenuItem onClick={handleVibrance}>VIBRANCE</MenuItem>
-                <MenuItem onClick={handleExtremo}>EXTREMO</MenuItem>
-                <MenuItem onClick={handleNative}>NATIVE</MenuItem>
-                <MenuItem onClick={handleMajirel}>MAJIREL</MenuItem>
-                <MenuItem onClick={handleDiacolor}>DIACOLOR</MenuItem>
-                <MenuItem onClick={handleDialoght}>DIALIGHT</MenuItem>
-                <MenuItem onClick={handleInoa}>INOA</MenuItem>
-                <MenuItem onClick={handleCOil}>C.OIL</MenuItem>
-              </Menu>
-        </button>
-  </div>
+  <div className='col-1' style={{ marginLeft: '20px' }}>
+      <button
+        type="button"
+        className="buttonMenu"
+        style={{ paddingRight: '15px', float: 'right' }}
+      >
+        <FilterListIcon id="i" onClick={handleMenu} />
+        <Menu
+          sx={{
+            mt: '1px',
+            '& .MuiMenu-paper': { backgroundColor: '#333', color: 'white' },
+          }}
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          keepMounted
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          open={Boolean(anchorEl)}
+          onClose={handleClosi}
+        >
+          {/* Voci statiche */}
+          <MenuItem onClick={handleNome}>Annulla filtri</MenuItem>
+          <MenuItem onClick={handleProdDisp}>Prodotti disponibili</MenuItem>
+
+          {/* Voci dinamiche */}
+          {brandTinte.map(tinta => (
+            <MenuItem
+              key={tinta.id}
+              onClick={() => handleFilter(tinta.brand)}
+            >
+              {tinta.brand}
+            </MenuItem>
+          ))}
+        </Menu>
+      </button>
+    </div>
 
 </div>
 
