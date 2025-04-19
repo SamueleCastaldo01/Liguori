@@ -319,6 +319,10 @@ const handleDiacolor = () => {
     setflagTinte("ROYAL");
     handleClosi();
   };
+  const handleCOil = () => { 
+    setflagTinte("C.OIL");
+    handleClosi();
+  };
 
 
 const handleNome = () => {  //va a fare l'ordinamento della qt in modo crescente
@@ -476,6 +480,7 @@ function handlePopUp(image, nota) {
 {flagTinte == "DIACOLOR" && <p className='navText' style={{color: "#f8dcb5"}}> DIACOLOR</p>}
 {flagTinte == "INOA" && <p className='navText' style={{color: "#f8dcb5"}}> INOA</p>}
 {flagTinte == "ROYAL" && <p className='navText' style={{color: "#f8dcb5"}}> ROYAL</p>}
+{flagTinte == "C.OIL" && <p className='navText' style={{color: "#f8dcb5"}}> C.OIL</p>}
 </div>
 }
   </div>
@@ -549,6 +554,7 @@ function handlePopUp(image, nota) {
             <MenuItem value={"DIALIGHT"}>DIALIGHT</MenuItem>
             <MenuItem value={"DIACOLOR"}>DIACOLOR</MenuItem>
             <MenuItem value={"INOA"}>INOA</MenuItem>
+            <MenuItem value={"C.OIL"}>C.OIL</MenuItem>
           </Select>
         </FormControl>
       </div>
@@ -585,6 +591,7 @@ function handlePopUp(image, nota) {
 {flagTinte == "DIACOLOR" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> DIACOLOR</p>}
 {flagTinte == "INOA" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> INOA</p>}
 {flagTinte == "ROYAL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> ROYAL</p>}
+{flagTinte == "C.OIL" && <p className='colTextTitle' style={{textAlign: "right", color: "black"}}> C.OIL</p>}
 </div>
 }
 
@@ -645,6 +652,7 @@ function handlePopUp(image, nota) {
                 <MenuItem onClick={handleDiacolor}>DIACOLOR</MenuItem>
                 <MenuItem onClick={handleDialoght}>DIALIGHT</MenuItem>
                 <MenuItem onClick={handleInoa}>INOA</MenuItem>
+                <MenuItem onClick={handleCOil}>C.OIL</MenuItem>
               </Menu>
         </button>
   </div>
