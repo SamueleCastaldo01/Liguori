@@ -189,7 +189,7 @@ function ListaClientiDip() {
         key={todo.id}
         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
     >
-        <TableCell component="th" scope="row">{todo.nomeC}</TableCell>
+        <TableCell component="th" scope="row"><p className='mb-2'>{todo.nomeC}</p> <p className='mb-0 fw-bold'>{todo.cellulare}</p> </TableCell>
         <TableCell align="right">
             <a href={todo.indirizzoLink} target="_blank" rel="noopener noreferrer">
                 {todo.indirizzo}

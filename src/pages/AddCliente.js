@@ -401,7 +401,7 @@ const sommaTotDebito = () => {
   //----------------------------------------------------------------------------------------------
   const handleCronologia = async (todo, dd1, debV) => {
     const collectionRef = collection(db, "cronologiaDeb");
-    const q = query(collectionRef, orderBy("createdAt"), limit(50)); // Limite impostato a 10 documenti
+    const q = query(collectionRef, orderBy("createdAt"), limit(100)); // Limite impostato a 10 documenti
   
     await addDoc(collectionRef, {
       autore: auth.currentUser.displayName,
@@ -536,7 +536,7 @@ const sommaTotDebito = () => {
                         variant="contained"
                         disabled={isLoading}
                       >
-                        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Aggiungi Prodotto"}
+                        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Aggiungi Cliente"}
                       </Button>}
               {popupActiveEdit && <Button onClick={handleEdit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Cliente </Button>}  
             </div>
