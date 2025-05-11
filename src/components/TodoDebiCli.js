@@ -14,6 +14,7 @@ export default function TodoDebiCli({
   todo,
   handleDelete,
   handleEditDeb,
+  updateSingleDebito,
   totRiga,
   displayMsg,
   getCliId,
@@ -28,6 +29,7 @@ export default function TodoDebiCli({
     setShowModal(false);
     setPendingUpdate(null);
   };
+
   const cancelUpdate = () => {
     if (pendingUpdate?.rollback) pendingUpdate.rollback();
     setShowModal(false);
@@ -96,21 +98,21 @@ export default function TodoDebiCli({
   // onBlur apre modal e memorizza commit/rollback
   const handleBlurD2 = () => {
     setPendingUpdate({
-      commit: () => handleEditDeb(todo, d2),
+      commit: () => updateSingleDebito(todo.id, "deb2", d2),
       rollback: () => setD2(origD2.current)
     });
     setShowModal(true);
   };
   const handleBlurD3 = () => {
     setPendingUpdate({
-      commit: () => handleEditDeb(todo, d3),
+      commit: () => updateSingleDebito(todo.id, "deb3", d3),
       rollback: () => setD3(origD3.current)
     });
     setShowModal(true);
   };
   const handleBlurD4 = () => {
     setPendingUpdate({
-      commit: () => handleEditDeb(todo, d4),
+      commit: () => updateSingleDebito(todo.id, "deb4", d4),
       rollback: () => setD4(origD4.current)
     });
     setShowModal(true);

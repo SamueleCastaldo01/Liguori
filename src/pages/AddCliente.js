@@ -398,6 +398,20 @@ const sommaTotDebito = () => {
     toast.clearWaitingQueue(); 
     setPopupActiveEdit(false);
   };
+
+  const updateSingleDebito = async (idDoc, fieldName, value) => {
+  try {
+    // crea un oggetto dinamico { [fieldName]: value }
+    const payload = { [fieldName]: value };
+    await updateDoc(doc(db, "debito", idDoc), payload);
+    toast.success(`Debito ${fieldName} aggiornato!`);
+  } catch (err) {
+    console.error("Errore aggiornamento singolo debito:", err);
+    toast.error("Errore aggiornamento");
+  }
+};
+
+
   //----------------------------------------------------------------------------------------------
   const handleCronologia = async (todo, dd1, debV) => {
     const collectionRef = collection(db, "cronologiaDeb");
@@ -759,6 +773,7 @@ const sommaTotDebito = () => {
       todo={todo}
       handleDelete={handleDelete}
       handleEditDeb={handleEditDeb}
+      updateSingleDebito={updateSingleDebito}
       handleActiveEdit={handleActiveEdit}
       displayMsg={displayMsg}
       getCliId={getCliId}
