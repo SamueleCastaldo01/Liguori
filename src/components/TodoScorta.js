@@ -6,6 +6,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { supa, guid, tutti, dipen, primary, rosso } from '../components/utenti';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import { Flag } from "@mui/icons-material";
 
 
 export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRemQuant, handlePopUp, displayMsg, FlagStampa, flagDelete, handleReparto, handleActiveEdit}) {
@@ -134,7 +135,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   }
 
  {/********************Categoria*********************************************************** */}
- {sup ===true && ( 
+ {(sup ===true && FlagStampa == false) && ( 
   <div className="col-1 diviCol" >
   {todo.reparto == 1 &&
     <h4 style={{ textDecoration: todo.completed && "line-through" }} type="text" className="inpTab"
@@ -175,7 +176,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
  )}
 
  {/********************PR'*********************************************************** */}
-  {sup == true && 
+  {(sup == true && FlagStampa==false) && 
   <>
   <div className="col-1 diviCol" style={{padding: "0px"}}>
   <input
@@ -191,7 +192,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   }
 
    {/********************Listino'*********************************************************** */}
-   {sup == true && 
+   {(sup == true && FlagStampa==false) && 
   <>
   <div className="col-1 diviCol" style={{padding: "0px"}}>
   <input
@@ -207,7 +208,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   }
 
    {/********************Scontistica'*********************************************************** */}
-   {sup == true && 
+   {(sup == true && FlagStampa == false) && 
   <>
   <div className="col-1 diviCol" style={{padding: "0px"}}>
   <input
@@ -254,7 +255,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
    */}
 
   {/********************FORNITORE'*********************************************************** */}
-  {sup ===true && ( 
+  {(sup ===true && FlagStampa == false) && ( 
     <div className="col-2 d-flex align-items-center justify-content-center">
       <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -268,7 +269,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   )} 
 
 {/**********************AGGIUNGI************************************************************* */}
-{sup ===true && ( 
+{(sup ===true && FlagStampa == false) && ( 
 <div className="col-1 diviCol" style={{padding: "0px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
@@ -280,7 +281,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
 </div>
 )}
 
-{dip ===true && ( 
+{(dip ===true && FlagStampa == false) && ( 
 <div className="col-2 diviCol1" style={{padding: "0px", position:"relative", right:"2%", width:"40px"}}>
     <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}

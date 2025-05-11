@@ -898,12 +898,16 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
        
         {sup == true && 
         <>
+        {FlagStampa == false &&
         <div className='col-1' >
         <p className='coltext'>Cat</p>
         </div>
+        }
         <div className='col-1' style={{padding: "0px", width:"80px"}}>
           <p className='coltext'>Qt</p>
         </div>
+        {FlagStampa == false &&
+        <>
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Pr(€)</p>
         </div>
@@ -927,9 +931,11 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
         <div className='col-1' style={{padding: "0px"}}>
           <p className='coltext'>Variazioni</p>
         </div>
+        </>
+        }
         </>}
 
-        {dip == true &&
+        {(dip == true && FlagStampa == false) &&
         <>
         <div className='col-2' style={{padding: "0px"}}>
         <p className='coltext'>Qt</p>
