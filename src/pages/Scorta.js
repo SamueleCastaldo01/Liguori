@@ -1180,8 +1180,8 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
       {col.tipo &&
       <>
       <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.tipo}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{Number(col.varI).toFixed(2).replace('.', ',')}</p></div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{Number(col.varF).toFixed(2).replace('.', ',')}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.varI}</p></div>
+      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.varF}</p></div>
       </>}
       {!col.tipo &&
       <>

@@ -64,9 +64,10 @@ export default function TodoNotaForni({ todo, handleDelete, handleEdit, displayM
       <input
       style={{ textDecoration: todo.completed && "line-through", textAlign:"center", padding:"0px", width:"30px", marginTop:"0px" }}
         type="text"
-        value={todo.quantita === "" ? newQtProdotto : todo.quantita}
+        value={newQtProdotto}
         className="inpTab"
         onChange={handleChange}
+        onBlur={() => handleEdit(todo, newQtProdotto, newProdotto)}
       />
       </span>
     </>
@@ -76,12 +77,17 @@ export default function TodoNotaForni({ todo, handleDelete, handleEdit, displayM
 <div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px",}}>
       {/***Prodotti********************** */}
     {sup ===true && ( 
-      <Autocomplete
+     <Autocomplete
       value={newProdotto}
       options={AutoProdForn}
-      onInputChange={handleInputChange}
-      componentsProps={{ popper: { style: { width: 'fit-content' } } }}
-      renderInput={(params) => <TextField {...params}  size="small"/>}
+      onChange={(_, value) => setNewProdotto(value)}
+      renderInput={params => (
+        <TextField
+          {...params}
+          size="small"
+          onBlur={() => handleEdit(todo, newQtProdotto, newProdotto)}
+        />
+      )}
     />
     )}
     </div>

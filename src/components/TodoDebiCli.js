@@ -45,7 +45,6 @@ export default function TodoDebiCli({
   const origD3 = React.useRef(todo.deb3);
   const origD4 = React.useRef(todo.deb4);
 
-  const [newNomeC, setNomeC] = React.useState(todo.nomeC);
   const [d1, setD1] = React.useState(todo.deb1);
   const [d2, setD2] = React.useState(todo.deb2);
   const [d3, setD3] = React.useState(todo.deb3);
@@ -55,26 +54,29 @@ export default function TodoDebiCli({
 
   const handleSubm = (e) => {
     e.preventDefault();
-    handleEditDeb(todo, newNomeC, d1, d2, d3, d4);
+    handleEditDeb(todo, todo.nomeC, d1, d2, d3, d4);
   };
 
   const handleNiente = (e) => {
     e.preventDefault();
   };
 
-  const handleModal = async (idCliente) => {
-    try {
-      const clinRef = collection(db, "clin");
-      const q = query(clinRef, where("idCliente", "==", idCliente));
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        const clienteData = querySnapshot.docs[0].data();
-        handleActiveEdit(clienteData);
-      }
-    } catch (error) {
-      console.error("Errore nel recupero del cliente:", error);
+const handleModal = async (idCliente) => {
+  try {
+    const clinRef = collection(db, "clin");
+    const q = query(clinRef, where("idCliente", "==", idCliente));
+    const querySnapshot = await getDocs(q);
+    console.log("Query clin per idCliente=", idCliente, "- trovati:", querySnapshot.size);
+    if (!querySnapshot.empty) {
+      const docSnap = querySnapshot.docs[0];
+      console.log(">> docSnap.id:", docSnap.id, "  data:", docSnap.data());
+      handleActiveEdit({ id: docSnap.id, ...docSnap.data() });
     }
-  };
+  } catch (error) {
+    console.error("Errore nel recupero del cliente:", error);
+  }
+};
+
 
   const handleFocusD2 = () => { origD2.current = d2; };
   const handleFocusD3 = () => { origD3.current = d3; };
@@ -137,7 +139,7 @@ export default function TodoDebiCli({
                 style={{ textDecoration: todo.completed && "line-through" }}
                 className="inpTab"
               >
-                {newNomeC}
+               {todo.nomeC}
               </h5>
             </div>
 

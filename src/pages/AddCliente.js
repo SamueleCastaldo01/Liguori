@@ -140,22 +140,19 @@ React.useEffect(() => {
 
   }, [flagAnaCli]);
   
-  //debito
+
+  const loadDebiti = async () => {
+    const collectionRef = collection(db, "debito");
+    const q = query(collectionRef, orderBy("nomeC"));
+    const snap = await getDocs(q);
+    const arr = [];
+    snap.forEach(doc => arr.push({ ...doc.data(), id: doc.id }));
+    setTodosDebi(arr);
+    setProgressDebi(true);
+  };
+
   React.useEffect(() => {
-    if(flagDebiCli) {
-      const collectionRef = collection(db, "debito");
-      const q = query(collectionRef, orderBy("nomeC"));
-  
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setTodosDebi(todosArray);
-        setProgressDebi(true)
-      });
-      return () => unsub();
-    }
+      loadDebiti();
   }, [flagDebiCli]);
 
 
@@ -332,6 +329,7 @@ const handleSubmit = async (e, id) => {
 
 //****************************************************************************************** */
 const handleActiveEdit = async (todo) => {
+  console.log("🚀 handleActiveEdit chiamato con:", todo.id);
   console.log(todo)
   setIdClinEdit(todo.id)
   setIndirizzo(todo.indirizzo)
@@ -349,7 +347,8 @@ const handleActiveEdit = async (todo) => {
   setPartitaIva(todo.partitaIva);
   setCellulare(todo.cellulare);
 };
-  const handleEdit = async () => { //va ad aggiornare le info del cliente, e va a cambiare anche il nome alla tabella debito
+  const handleEdit = async () => {
+    console.log(idClinEdit)
     await updateDoc(doc(db, "clin", idClinEdit), {nomeC:nome+" "+cognome, nome: nome, cognome:cognome, stato:stato, indirizzo:indirizzo, indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo, numeroCivico:numeroCivico, citta:citta, cap:cap, indirizzoEmail:indirizzoEmail, partitaIva:partitaIva, cellulare:cellulare});
     
     const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  //vado a trovare il deb1 vecchio tramite query
@@ -359,6 +358,11 @@ const handleActiveEdit = async (todo) => {
     });
     handlerSetClear();
     setPopupActiveEdit(false)
+
+    if(flagDebiCli == true) {
+    loadDebiti();
+    }
+
     toast.clearWaitingQueue(); 
   };
 
@@ -404,7 +408,6 @@ const sommaTotDebito = () => {
     // crea un oggetto dinamico { [fieldName]: value }
     const payload = { [fieldName]: value };
     await updateDoc(doc(db, "debito", idDoc), payload);
-    toast.success(`Debito ${fieldName} aggiornato!`);
   } catch (err) {
     console.error("Errore aggiornamento singolo debito:", err);
     toast.error("Errore aggiornamento");
