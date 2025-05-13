@@ -30,6 +30,7 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
     const sharePdf = async () => {
+      
       try {
         // Cattura il contenuto del div
         const canvas = await html2canvas(componentRef.current, { useCORS: true });
@@ -66,6 +67,8 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
         }
       } catch (error) {
         console.error('Errore durante la creazione o la condivisione del PDF:', error);
+      }finally {
+      setFlagStampa(false);
       }
     };
 
@@ -289,7 +292,12 @@ const print = async () => {
       }}>Aggiungi Prodotto</button></span>
       <span><button onClick={handleRefresh}>Refresh</button></span>
 
-      <button onClick={sharePdf}>Condividi come PDF</button>
+      <button   onClick={() => {
+    setFlagStampa(true);
+    setTimeout(() => {
+      sharePdf();
+    }, 100); // Puoi regolare il delay se necessario
+  }}>Condividi come PDF</button>
 
 
   <WhatsappShareButton url={url}>
