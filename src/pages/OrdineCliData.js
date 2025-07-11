@@ -311,17 +311,19 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     const querySnapshots = await getDocs(s);
     querySnapshots.forEach((doc) => {
       if (nomeC == doc.data().nomeC && dataInizialeFormatted == doc.data().data) {  
-        notifyErrorCli();
+        //notifyErrorCli();
         toast.clearWaitingQueue(); 
-        bol = false;
+        bol = true;  //per il momento togliamo il controllo
       }
     });
   
+
     if (!nomeC) {
       notifyErrorCliEm();
       toast.clearWaitingQueue(); 
       return;
     }
+
   
     // 📌 6️⃣ Se tutto va bene, aggiungi il nuovo ordine con il cont aggiornato
     if (bol == true) {

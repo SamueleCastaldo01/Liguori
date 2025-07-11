@@ -476,7 +476,9 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                         defaultValue={0}
                         onChange={(e) => handleChangeDataSelect(e.target.value)}>
                         <MenuItem value={0}>Oggi</MenuItem>
+                        <MenuItem value={3}>Ultimi 3 giorni</MenuItem>
                         <MenuItem value={7}>Ultimi 7 giorni</MenuItem>
+                        <MenuItem value={10}>Ultimi 10 giorni</MenuItem>
                         <MenuItem value={30}>Ultimi 30 giorni</MenuItem>
                         <MenuItem value={90}>Ultimi 90 giorni</MenuItem>
                         <MenuItem value={365}>Ultimi 365 giorni</MenuItem>

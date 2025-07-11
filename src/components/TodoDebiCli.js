@@ -208,7 +208,11 @@ const handleModal = async (idCliente) => {
 
       <Modal
         open={showModal}
-        onClose={cancelUpdate}
+        onClose={(event, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            cancelUpdate(); // chiudi solo se è stato premuto "Annulla"
+          }
+        }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
