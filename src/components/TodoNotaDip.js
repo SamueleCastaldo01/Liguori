@@ -505,13 +505,18 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
     <h5>Rimuovi tinta: <strong>{todo.prodottoC} {todo[selectedTinta]}</strong></h5>
     <p>Quantità da rimuovere:</p>
     <TextField
-        type="number"
-        value={splitQt}
-        inputProps={{ min: 1, max: todo.qtProdotto }}
-        onChange={(e) => setSplitQt(e.target.value)}
-        fullWidth
-        margin="dense"
-      />
+      type="number"
+      value={splitQt}
+      inputProps={{ min: 1, max: todo.qtProdotto }}
+      onChange={(e) => setSplitQt(e.target.value)}
+      fullWidth
+      margin="dense"
+      InputProps={{
+        startAdornment: (
+          <span style={{ marginRight: 8, fontWeight: 'bold' }}>-</span>
+        ),
+      }}
+    />
     <Box mt={2}>
       <Button variant="contained" className=" me-2" onClick={handleConfirmSplit}>Conferma</Button>
       <Button className="" onClick={() => setPopupTinta(false)}>Annulla</Button>
