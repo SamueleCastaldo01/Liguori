@@ -63,6 +63,8 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
     const [telefono, setTelefono] = React.useState("");
     const [cont, setCont] = React.useState(1);
 
+    const [loading, setLoading] = useState(false);
+
     const timeElapsed = Date.now();  //prende la data attuale in millisecondi
     const today = new Date(timeElapsed);    //converte
     today.setHours(0, 0, 0, 0);
@@ -246,6 +248,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
   //funzione per aggiungere un ordine
   const CreateOrdine = async (e) => {   
     e.preventDefault(); 
+     setLoading(true);
     var debRes = 0;
     var id = 0;
     var indiri;
@@ -320,6 +323,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
 
     if (!nomeC) {
       notifyErrorCliEm();
+      setLoading(false);
       toast.clearWaitingQueue(); 
       return;
     }
@@ -354,6 +358,7 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
       });
   
       setNomeC("");
+      setLoading(false);
       setPopupActive(false);
     }
   };
@@ -633,7 +638,23 @@ function OrdineCliData({ getOrdId, getNotaId, TodayData }) {
           />
 
       </div>
-       {popupActive && <Button onClick={CreateOrdine} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Aggiungi Ordine </Button>}
+       {popupActive && (
+            <Button
+              onClick={CreateOrdine}
+              style={{ width: "100%", height: "50px" }}
+              type="submit"
+              color="primary"
+              variant="contained"
+              disabled={loading} // disattiva il bottone durante il caricamento
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Aggiungi Ordine"
+              )}
+            </Button>
+          )}
+
           </Modal.Body>
       </Modal>
 

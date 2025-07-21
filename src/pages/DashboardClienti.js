@@ -36,6 +36,9 @@ export const AutoProdCli = [];
 
 function DashClienti({ clientId, nomeCli, getNotaDash, getNotaId }) {
 
+  const currentYear = new Date().getFullYear();
+  const previousYears = [currentYear - 1, currentYear - 2];
+
   const [todosOrdChiu, setTodosOrdChiu] = React.useState([]);
   const [todosNotaBlock, setTodosNotaBlock] = React.useState([]);
   const [todosProdotto, setTodosProdotto] = React.useState([]);
@@ -209,26 +212,42 @@ function DashClienti({ clientId, nomeCli, getNotaDash, getNotaId }) {
   }, [flagRicercaProd]);
     //**************************************************************************** */
 
-    const handleChangeDataSelect = (ok) => {
-      console.log(ok);
-      today.setDate(today.getDate() - ok);   //fa la differenza rispetto al valore del select sottraendo (per ridurre e i vari giorni)
-      today.setHours(0, 0, 0, 0);   //mette la data a 00:00
-      todayMilli = today.getTime()   //lo converte in millisecondi
+    const handleChangeDataSelect = (val) => {
+      let startMilli = 0;
+      let endMilli = Date.now();
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (typeof val === "number") {
+        today.setDate(today.getDate() - val);
+        startMilli = today.getTime();
+      } else if (typeof val === "string" && val.startsWith("anno")) {
+        const selectedYear = parseInt(val.replace("anno", ""));
+        startMilli = new Date(`${selectedYear}-01-01T00:00:00`).getTime();
+        endMilli = new Date(`${selectedYear}-12-31T23:59:59`).getTime();
+      }
+
 
       const collectionRef = collection(db, "addNota");
-      const q = query(collectionRef, where("dataMilli", ">", todayMilli), where("completa", "==", "2"));
-  
+      const q = query(
+        collectionRef,
+        where("dataMilli", ">=", startMilli),
+        where("dataMilli", "<=", endMilli),
+        where("completa", "==", "2")
+      );
+
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
         querySnapshot.forEach((doc) => {
           todosArray.push({ ...doc.data(), id: doc.id });
         });
-        todosArray.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate()); // Ordine crescente
+        todosArray.sort((a, b) => a.createdAt.toDate() - b.createdAt.toDate());
         setTodosOrdChiu(todosArray);
         setProgress(true);
       });
-
     };
+
 
     const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
       var sommaTotIncasso=0;
@@ -332,6 +351,9 @@ const print = async () => {
               <MenuItem value={31}>Ultimi 30 giorni</MenuItem>
               <MenuItem value={91}>Ultimi 90 giorni</MenuItem>
               <MenuItem value={366}>Ultimi 365 giorni</MenuItem>
+              {previousYears.map((year) => (
+                <MenuItem key={year} value={`anno${year}`}>Anno {year}</MenuItem>
+              ))}
            </Select>
         </FormControl>
     </div>

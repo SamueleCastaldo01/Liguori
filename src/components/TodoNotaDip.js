@@ -1,8 +1,9 @@
 import React from "react";
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs, serverTimestamp, getDoc} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Modal, Box, Button } from '@mui/material';
 import { supa, guid, tutti } from '../components/utenti';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast, Slide } from 'react-toastify';
@@ -28,6 +29,11 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
     let ta= tutti.includes(localStorage.getItem("uid"))  //se trova id esatto nell'array rispetto a quello corrente, ritorna true
 
 
+    const [popupTinta, setPopupTinta] = React.useState(false);
+    const [selectedTinta, setSelectedTinta] = React.useState('');
+    const [splitQt, setSplitQt] = React.useState("");
+
+
   const [newQtProdotto, setQtProdotto] = React.useState(todo.qtProdotto);
   const [nomeTinte, setNomeTinte] = React.useState(todo.nomeTinte);
   const [newProdotto, setNewProdotto] = React.useState(todo.prodottoC);
@@ -48,6 +54,144 @@ export default function TodoNotaDip({ todo, handleEdit, displayMsg, nomeCli, fla
 
   let navigate = useNavigate();
 
+
+  //-------------------------------------------------
+    const handleClickTinta = (tinta) => {
+    if (Completa === 1) return;
+    setSelectedTinta(tinta);
+    setSplitQt("");
+    setPopupTinta(true);
+  };
+
+
+
+const handleConfirmSplit = async () => {
+  const qt = parseInt(splitQt);
+
+  if (!qt || isNaN(qt) || qt <= 0 || qt > todo.qtProdotto) {
+    toast.error("Quantità non valida");
+    return;
+  }
+
+  const tintaVal = todo[selectedTinta];
+  const originaleQt = parseFloat(todo.qtProdotto);
+  const isFullSplit = qt === originaleQt;
+
+  // 1. Rimuovi la tinta dalla riga originale
+  // 1. Calcola nuove tinte rimanenti
+const nuoveTinte = {
+  t1: selectedTinta === 't1' ? "" : todo.t1,
+  t2: selectedTinta === 't2' ? "" : todo.t2,
+  t3: selectedTinta === 't3' ? "" : todo.t3,
+  t4: selectedTinta === 't4' ? "" : todo.t4,
+  t5: selectedTinta === 't5' ? "" : todo.t5,
+};
+
+// Conta quante tinte restano
+const tinteRimaste = Object.values(nuoveTinte).filter(Boolean).length;
+
+// Calcola nuovo prezzo totale (in base alle tinte rimaste)
+const prezzoTotaleOriginale = (tinteRimaste * todo.qtProdotto * parseFloat(todo.prezzoUniProd)).toFixed(2);
+
+// 2. Aggiorna la riga originale: rimuove tinta e aggiorna prezzo
+await updateDoc(doc(db, "Nota", todo.id), {
+  [selectedTinta]: "",
+  prezzoTotProd: prezzoTotaleOriginale,
+});
+
+
+
+  // 2. Crea riga nuova
+  const nuovoProd = {
+    ...todo,
+    createdAt: serverTimestamp(),
+    qtProdotto: isFullSplit ? originaleQt : (originaleQt - qt),
+    [selectedTinta]: tintaVal,
+    t1: selectedTinta === 't1' ? tintaVal : "",
+    t2: selectedTinta === 't2' ? tintaVal : "",
+    t3: selectedTinta === 't3' ? tintaVal : "",
+    t4: selectedTinta === 't4' ? tintaVal : "",
+    t5: "",
+    idOriginale: todo.id,
+    simbolo: isFullSplit ? "(NO)" : "",
+    prezzoTotProd: isFullSplit ? 0 : (todo.prezzoUniProd * (originaleQt - qt)).toFixed(2),
+  };
+  delete nuovoProd.id;
+
+  await addDoc(collection(db, "Nota"), nuovoProd);
+
+  // 3. Aggiungi la quantità selezionata in inOrdine
+  await addDoc(collection(db, "inOrdine"), {
+    nomeC: todo.nomeC,
+    dataC: todo.dataC,
+    qtProdotto: qt,
+    prodottoC: todo.prodottoC,
+  });
+
+  setSplitQt("");
+  setPopupTinta(false);
+};
+
+
+
+const handleDeleteSplit = async (docToDelete) => {
+  if (!docToDelete.idOriginale) return;
+
+  const originalRef = doc(db, "Nota", docToDelete.idOriginale);
+  const originalSnap = await getDoc(originalRef);
+
+  if (originalSnap.exists()) {
+    const tintaKey = ['t1', 't2', 't3', 't4', 't5'].find(k => docToDelete[k]);
+    const tintaValue = docToDelete[tintaKey];
+
+    const updateData = {};
+
+      if (tintaKey) {
+        updateData[tintaKey] = tintaValue;
+      }
+
+      // Calcola quante tinte ci sono dopo il ripristino
+      const tintaCount = ['t1', 't2', 't3', 't4', 't5'].reduce((acc, key) => {
+        const valore = key === tintaKey ? tintaValue : originalSnap.data()[key];
+        return valore ? acc + 1 : acc;
+      }, 0);
+
+      // Ricalcola prezzo
+      const nuovaQt = originalSnap.data().qtProdotto;
+      const prezzoUni = parseFloat(originalSnap.data().prezzoUniProd);
+      updateData.prezzoTotProd = (tintaCount * nuovaQt * prezzoUni).toFixed(2);
+
+      // Se aveva il simbolo NO lo rimuovi
+      if (docToDelete.simbolo === "(NO)") {
+        updateData.simbolo = "";
+      }
+
+
+    await updateDoc(originalRef, updateData);
+  }
+
+  // Elimina la riga di split
+  await deleteDoc(doc(db, "Nota", docToDelete.id));
+
+  // Elimina anche da inOrdine (se presente)
+  const inOrdineQuery = query(
+    collection(db, "inOrdine"),
+    where("nomeC", "==", docToDelete.nomeC),
+    where("prodottoC", "==", docToDelete.prodottoC),
+    where("qtProdotto", "==", docToDelete.qtProdotto),
+    where("dataC", "==", docToDelete.dataC)
+  );
+
+  const inOrdineSnap = await getDocs(inOrdineQuery);
+  inOrdineSnap.forEach(async (doc) => {
+    await deleteDoc(doc.ref);
+  });
+
+};
+
+
+
+  //-------------------------------------------------
   const handleChangeChecked = async (event) => {
     if(Completa == 1) {
       return;
@@ -185,6 +329,7 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
 //INTERFACCIA ***************************************************************************************************************
 //*************************************************************************************************************************** */
   return (
+    <>
     <div className="prova">
 
 <form  onSubmit={handleSubm}>
@@ -220,10 +365,40 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
     { todo.flagTinte===true && (
       <>
       <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> {todo.prodottoC} 
-      {todo.t1 && <> <span className="inpTabNota" style={{ marginLeft: "35px", textAlign:"center", padding:"0px"}}> {todo.t1} </span>   </> }
-      {todo.t2 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t2} </span>  </> }
-      {todo.t3 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t3} </span> </> }
-      {todo.t4 && <> <span style={{marginLeft: "10px"}}>-</span> <span className="inpTabNota" style={{ marginLeft: "10px", textAlign:"center", padding:"0px"}}> {todo.t4} </span> </> }
+      {todo.t1 && <> <span
+          className="inpTabNota"
+          style={{ marginLeft: "20px", textAlign: "center", padding: "0px", cursor: "pointer" }}
+          onClick={() => handleClickTinta('t1')}
+        >
+          {todo.t1}
+      </span>   </> }
+      {todo.t2 && 
+      <span style={{marginLeft: "15px"}}>-<span
+          className="inpTabNota"
+          style={{ marginLeft: "15px", textAlign: "center", padding: "0px", cursor: "pointer" }}
+          onClick={() => handleClickTinta('t2')}
+        >
+           {todo.t2}
+        </span>  </span> }
+          {todo.t3 && 
+            <span style={{marginLeft: "15px"}}>- 
+              <span
+                className="inpTabNota"
+                style={{ marginLeft: "15px", textAlign: "center", padding: "0px", cursor: "pointer" }}
+                onClick={() => handleClickTinta('t3')}
+              >
+                {todo.t3}
+              </span>
+            </span>
+          }
+      {todo.t4 && 
+      <span style={{marginLeft: "15px"}}>- <span
+        className="inpTabNota"
+        style={{ marginLeft: "15px", textAlign: "center", padding: "0px", cursor: "pointer" }}
+        onClick={() => handleClickTinta('t4')}
+            >
+        {todo.t4}
+        </span></span> }
       </h3>
       </>
     )}
@@ -291,6 +466,9 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
                 <MenuItem onClick={handleChangeMeno}>(- )</MenuItem>
                 <MenuItem onClick={handleChangeInterro}>?</MenuItem>
                 <MenuItem onClick={handleChangeRemMenu}>Rimuovi</MenuItem>
+                {todo.idOriginale && (
+                  <MenuItem onClick={() => handleDeleteSplit(todo)}>Elimina prodotto (split)</MenuItem>
+                )}
               </Menu>
         </button>
         </>
@@ -304,5 +482,43 @@ const handleChangeNo = async (event) => {   //aggiorna sia il simbolo del prodot
 
 
     </div>
+
+
+<Modal
+  open={popupTinta}
+  onClose={() => setPopupTinta(false)}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+>
+  <Box sx={{
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 320,
+    bgcolor: 'background.paper',
+    borderRadius: 2,
+    boxShadow: 24,
+    p: 4,
+    textAlign: 'center'
+  }}>
+    <h5>Rimuovi tinta: <strong>{todo.prodottoC} {todo[selectedTinta]}</strong></h5>
+    <p>Quantità da rimuovere:</p>
+    <TextField
+        type="number"
+        value={splitQt}
+        inputProps={{ min: 1, max: todo.qtProdotto }}
+        onChange={(e) => setSplitQt(e.target.value)}
+        fullWidth
+        margin="dense"
+      />
+    <Box mt={2}>
+      <Button variant="contained" className=" me-2" onClick={handleConfirmSplit}>Conferma</Button>
+      <Button className="" onClick={() => setPopupTinta(false)}>Annulla</Button>
+    </Box>
+  </Box>
+</Modal>
+
+</>
   );
 }

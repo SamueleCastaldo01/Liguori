@@ -626,23 +626,29 @@ React.useEffect(() => {
   return () => unsub();
 }, [popupActive == true]);
 
+
 //per la tabella in ordine
 React.useEffect(() => {
-  if(popupActive == true) {
+  if (popupActive === true) {
     const collectionRef = collection(db, "inOrdine");
-    const q = query(collectionRef, orderBy("nomeC"));
-  
+    const q = query(collectionRef);
+
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
       querySnapshot.forEach((doc) => {
         todosArray.push({ ...doc.data(), id: doc.id });
       });
+
+      console.log("Array inOrdine ricevuto da Firestore:", todosArray); // 👈 LOG AGGIUNTO
+
       setTodosInOrdine(todosArray);
       setProgress2(true);
     });
+
     return () => unsub();
   }
 }, [popupActive]);
+
 
 
 
@@ -683,7 +689,7 @@ React.useEffect(() => {
       onChange={handleChangeTogg}
       aria-label="Platform"
     >  
-      <ToggleButton onClick={() => {setPopupActive(false); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
+      <ToggleButton onClick={() => {setPopupActive(true); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
   
     </ToggleButtonGroup>
 
@@ -917,7 +923,7 @@ React.useEffect(() => {
 
 {/**********tabella in ordine********************** */}
 {popupActiveInOrdine == true && 
-<div className='todo_containerInOrdine mt-5' style={{paddingTop: "0px"}}>
+<div className='todo_containerInOrdine mt-5 mb-4' style={{paddingTop: "0px"}}>
 <div className='row' > 
 <div className='col'>
 <p className='colTextTitle'> In ordine </p>
