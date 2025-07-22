@@ -84,6 +84,30 @@ function NotaDip({notaDipId, notaDipCont, notaDipNome, notaDipDataC, numCart }) 
         theme: "dark",
         className: "rounded-4"
         })}
+
+        function ordinaNoteConSplit(lista) {
+          const mappa = new Map();
+
+          lista.forEach(nota => {
+            const key = nota.idOriginale || nota.id; // Split? -> raggruppa sotto l'originale
+            if (!mappa.has(key)) {
+              mappa.set(key, []);
+            }
+            mappa.get(key).push(nota);
+          });
+
+          const ordinata = [];
+
+          for (let [id, noteGroup] of mappa) {
+            // ordina gruppo con la principale sopra e gli split sotto
+            const principali = noteGroup.filter(n => !n.idOriginale);
+            const split = noteGroup.filter(n => n.idOriginale);
+            ordinata.push(...principali, ...split);
+          }
+
+          return ordinata;
+        }
+
 //********************************************************************************** */
       //in realtà qui va a prendere la singola nota
       React.useEffect(() => {
@@ -370,7 +394,7 @@ const print = async () => {
     <CircularProgress />
   </div>
       }
-  {todos.map((todo1) => (
+  {ordinaNoteConSplit(todos).map((todo1) => (
     <div key={todo1.id}>
     {todo1.nomeC  === todo.nomeC && todo1.dataC == todo.data &&  (
       <>

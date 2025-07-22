@@ -196,6 +196,56 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
 
 
 
+const ordinaNoteConSplit = (note) => {
+  // Ordina in base a createdAt per mantenere l’ordine cronologico
+  const noteOrdinate = [...note].sort((a, b) => {
+    if (!a.createdAt || !b.createdAt) return 0;
+    return a.createdAt.toMillis() - b.createdAt.toMillis();
+  });
+
+  // Mappa di split per idOriginale
+  const splitMap = {};
+  noteOrdinate.forEach(nota => {
+    if (nota.idOriginale) {
+      if (!splitMap[nota.idOriginale]) splitMap[nota.idOriginale] = [];
+      splitMap[nota.idOriginale].push(nota);
+    }
+  });
+
+  // Ordina ogni gruppo di split in base a createdAt
+  Object.keys(splitMap).forEach(id => {
+    splitMap[id].sort((a, b) => {
+      if (!a.createdAt || !b.createdAt) return 0;
+      return a.createdAt.toMillis() - b.createdAt.toMillis();
+    });
+  });
+
+  // Costruzione finale
+  const risultato = [];
+  noteOrdinate.forEach(nota => {
+    // Solo se è una riga principale (senza idOriginale)
+    if (!nota.idOriginale) {
+      risultato.push(nota);
+      if (splitMap[nota.id]) {
+        risultato.push(...splitMap[nota.id]); // Inserisci subito dopo i suoi split
+      }
+    }
+
+    // Se è una riga split orfana (non ha più riga principale), la mostro alla fine
+    else if (!note.find(n => n.id === nota.idOriginale)) {
+      risultato.push(nota);
+    }
+  });
+
+  return risultato;
+};
+
+const todosOrdinati = React.useMemo(() => {
+      return ordinaNoteConSplit(todos);
+    }, [todos]);
+
+
+
     React.useEffect(() => {
       const collectionRef = collection(db, "Nota");
       const q = query(collectionRef, where("idNota", "==", notaId));
@@ -222,11 +272,12 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
         const unsub = onSnapshot(q, (querySnapshot) => {
           let todosArray = [];
           querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
+              todosArray.push({ ...doc.data(), id: doc.id });
+            });
 
-          todosArray.sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis());
-          setTodos(todosArray);
+            const ordinati = ordinaNoteConSplit(todosArray);
+            setTodos(ordinati);
+
           setProgress(true);
         });
 
@@ -743,7 +794,7 @@ const print = async () => {
       <CircularProgress />
   </div>
       }
-  {todos.map((todo) => (
+  {todosOrdinati.map((todo) => (
     <div key={todo.id}>
     {todo.nomeC  === nomeCli && todo.dataC == dataNotaC &&  (
       <>
