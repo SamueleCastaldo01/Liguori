@@ -240,9 +240,22 @@ const ordinaNoteConSplit = (note) => {
   return risultato;
 };
 
-const todosOrdinati = React.useMemo(() => {
-      return ordinaNoteConSplit(todos);
+    const todosOrdinati = React.useMemo(() => {
+          return ordinaNoteConSplit(todos);
     }, [todos]);
+
+
+    const filtraTodosStampabili = (lista) => {
+      return lista.filter(todo => {
+        // Se la nota è confermata e il prodotto ha flagTinte true ma nessuna tinta => NASCONDI
+        if ((Completa === 1 || Completa === "1") && todo.flagTinte === true) {
+          const tinte = [todo.t1, todo.t2, todo.t3, todo.t4, todo.t5];
+          const haTinte = tinte.some(t => t && t.trim() !== "");
+          return haTinte; // true se almeno una tinta è presente, altrimenti false (quindi filtrata via)
+        }
+        return true; // tutte le altre le mostra normalmente
+      });
+    };
 
 
 
@@ -794,28 +807,29 @@ const print = async () => {
       <CircularProgress />
   </div>
       }
-  {todosOrdinati.map((todo) => (
-    <div key={todo.id}>
-    {todo.nomeC  === nomeCli && todo.dataC == dataNotaC &&  (
+  {filtraTodosStampabili(todosOrdinati).map((todo) => (
+  <div key={todo.id}>
+    {todo.nomeC === nomeCli && todo.dataC == dataNotaC && (
       <>
-    { ta === true &&(
-    <TodoNota
-      key={todo.id}
-      todo={todo}
-      brandTinte={brandTinte}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      displayMsg={displayMsg}
-      nomeCli={nomeCli}
-      flagStampa={flagStampa}
-      Completa={Completa}
-      SommaTot={SommaTot}
-    />
-     )}
-     </>
-                  )}
-    </div>
-  ))}
+        {ta === true && (
+          <TodoNota
+            key={todo.id}
+            todo={todo}
+            brandTinte={brandTinte}
+            handleDelete={handleDelete}
+            handleEdit={handleEdit}
+            displayMsg={displayMsg}
+            nomeCli={nomeCli}
+            flagStampa={flagStampa}
+            Completa={Completa}
+            SommaTot={SommaTot}
+          />
+        )}
+      </>
+    )}
+  </div>
+))}
+
   </div>
 
   <div className='row'>
