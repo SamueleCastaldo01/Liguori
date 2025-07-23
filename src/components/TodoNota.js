@@ -87,26 +87,50 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
 
   const handleChangeTintSelect = async (event) => {
   setNewProdotto(event.target.value);
-  const trovato = prodottiLocali.find(p => p.label === event.target.value);
-  if (trovato) {
-    setPrezzoUni(trovato.prezzoUni);
+  const tintaSelezionata = brandTinte.find(t => t.brand === event.target.value);
+  if (!tintaSelezionata) return;
+
+  let prezzoFinale = tintaSelezionata.prezzo || 0;
+
+  // Verifica prezzo personalizzato (es. sotto /tinte/{idTinta}/prezzi_custom/{idCliente})
+  const prezzoCustomRef = doc(db, "tinte", tintaSelezionata.id, "prezzi_custom", idCliente);
+  const prezzoSnap = await getDoc(prezzoCustomRef);
+
+  if (prezzoSnap.exists()) {
+    prezzoFinale = prezzoSnap.data().prezzo;
   }
+
+  setPrezzoUni(prezzoFinale);
 };
   //****************************************************************************************************************************** */
-  const handlePrezzUniUpd = async (e) => {
-    e.preventDefault();
+const handlePrezzUniUpd = async (e) => {
+  e.preventDefault();
 
+  let prezzoCustomRef;
+
+  if (todo.flagTinte) {
+    // Se è una tinta
+    const tinta = brandTinte.find(t => t.brand === todo.prodottoC);
+    if (!tinta) return;
+
+    prezzoCustomRef = doc(db, "tinte", tinta.id, "prezzi_custom", idCliente);
+  } else {
+    // Se è un prodotto normale
     const prodotto = prodottiLocali.find(p => p.label === todo.prodottoC);
     if (!prodotto) return;
 
-    const prezzoCustomRef = doc(db, "prodotto", prodotto.id, "prezzi_custom", idCliente);
-    await updateDoc(prezzoCustomRef, { prezzo: newPrezzoUni }).catch(async (err) => {
-      // Se non esiste, lo crea
-      await setDoc(prezzoCustomRef, { prezzo: newPrezzoUni });
-    });
+    prezzoCustomRef = doc(db, "prodotto", prodotto.id, "prezzi_custom", idCliente);
+  }
 
-    handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte);
-  };
+  // Aggiorna o crea il prezzo personalizzato
+  await updateDoc(prezzoCustomRef, { prezzo: newPrezzoUni }).catch(async () => {
+    await setDoc(prezzoCustomRef, { prezzo: newPrezzoUni });
+  });
+
+  // Applica la modifica
+  handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte);
+};
+
   //****************************************************************************************************************************** */
   const handleSubm = (e) => {
     e.preventDefault();

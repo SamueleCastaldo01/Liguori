@@ -384,7 +384,7 @@ function handlePopUp(image, nota) {
 
  //******************************************************************************* */
 
- const handleSubmit = async (e) => {   //creazione prdotto
+ const handleSubmit = async (e) => {   //creazione tinte
     var bol= true
     e.preventDefault();
     if(!nomeP) {            //controllo che il nom sia inserito
