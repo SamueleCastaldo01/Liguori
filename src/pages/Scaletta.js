@@ -508,7 +508,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <div className='col-7'><h3 className='inpTab' onClick={()=> {
                         getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
                         navigate("/nota")
-                        auto(col.idCliente);
+                        //auto(col.idCliente);
                         AutoProdCli.length = 0
                         }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
                      <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
@@ -563,7 +563,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
                       <div className='col-6'><h3 className='inpTab' onClick={()=> {
                         getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
                         navigate("/nota")
-                        auto(col.idCliente);
+                        //auto(col.idCliente);
                         AutoProdCli.length = 0
                         }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
                             <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>

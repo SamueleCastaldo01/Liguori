@@ -510,7 +510,7 @@ const contEffect = async () => {
           onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, todo.data, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                 navigate("/nota");
-                auto(todo.nomeC);
+                //auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>
              <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
@@ -519,7 +519,7 @@ const contEffect = async () => {
             onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                 navigate("/nota");
-                auto(todo.nomeC);
+                //auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>  
                         <NavigateNextIcon/>          
@@ -606,7 +606,7 @@ const contEffect = async () => {
           onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                 navigate("/nota");
-                auto(todo.nomeC);
+                //auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>
              <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeC}</p>
@@ -615,7 +615,7 @@ const contEffect = async () => {
           onClick={() => {
                 getNotaId(todo.id, todo.cont, todo.nomeC, dataOrd, dataOrdConf, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                 navigate("/nota");
-                auto(todo.nomeC);
+                //auto(todo.nomeC);
                 AutoProdCli.length = 0
                          }}>  
                         <NavigateNextIcon/>          

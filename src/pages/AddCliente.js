@@ -202,28 +202,7 @@ React.useEffect(() => {
     setAlignment(event.target.value);
   };
  //******************************************************************************* */
- // Funzione ottimizzata per aggiungere il prodotto per ogni cliente
- const handleProdClien = async (nomeCompleto, idCliente) => {
-  const q = query(collection(db, "prodotto"));  // Prendi tutti i prodotti
-  const querySnapshot = await getDocs(q);
 
-  const batch = writeBatch(db);  // Crea un batch per le scritture
-
-  querySnapshot.forEach((docSnapshot) => {  // Usa docSnapshot invece di doc
-    console.log(docSnapshot.id, " => ", docSnapshot.data().nomeP, docSnapshot.data().prezzoIndi);
-    
-    const docRef = doc(collection(db, "prodottoClin"));  // Crea il riferimento corretto
-    batch.set(docRef, {    // Usa batch.set invece di addDoc
-      author: { name: nomeCompleto, idCliente: idCliente },
-      idProdotto: docSnapshot.data().idProdotto,
-      nomeP: docSnapshot.data().nomeP,
-      prezzoUnitario: docSnapshot.data().prezzoIndi
-    });
-  });
-
-  // Esegui tutte le scritture in un'unica operazione
-  await batch.commit();
-};
 
 // Funzione ottimizzata per la creazione di un cliente
 const handleSubmit = async (e, id) => {
@@ -299,8 +278,6 @@ const handleSubmit = async (e, id) => {
       debitoTot,
     });
 
-    // Aggiungi i prodotti per il cliente
-    await handleProdClien(nomeCompleto, idCliente);  // Associa il prodotto al cliente
 
     // Esegui tutte le scritture in un'unica operazione
     await batch.commit();
@@ -432,14 +409,13 @@ const sommaTotDebito = () => {
 
   const handleDelete = async (id, nomeCli) => { //per cancellare un cliente dal db
     const colDoc = doc(db, "clin", id); 
+
+    const prodottiSnap = await getDocs(collection(db, "prodotto"));
+    for (const prodotto of prodottiSnap.docs) {
+      const prezzoDocRef = doc(db, "prodotto", prodotto.id, "prezzi_custom", localStorage.getItem("IdCliProd"));
+      await deleteDoc(prezzoDocRef);  // cancella il prezzo personalizzato
+    }
      
-  //elimina tutti i dati di prodottoClin con lo stesso id del Cliente     elimina tutti gli articoli di quel cliente
-    const q = query(collection(db, "prodottoClin"), where("author.idCliente", "==", localStorage.getItem("IdCliProd")));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-  // doc.data() is never undefined for query doc snapshots
-    await deleteDoc(doc(db, "prodottoClin", hi.id)); 
-    });
   //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
     const p = query(collection(db, "debito"), where("idCliente", "==", localStorage.getItem("IdCliProd")));
     const querySnapshotP = await getDocs(p);

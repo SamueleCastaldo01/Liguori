@@ -105,7 +105,6 @@ const caricaNote = async (dataFil, scaletta) => {
     for (const doc of querySnapshot.docs) {
       const docData = doc.data();
       const idNota = doc.id; // Usa doc.id per ottenere l'ID del documento
-      console.log(idNota);  // Stampa l'id del documento
 
       if (idNota) {
         const prodotti = await caricaProdotti(idNota);
@@ -118,7 +117,6 @@ const caricaNote = async (dataFil, scaletta) => {
     }
 
     setTodosAddNota(todosArray);
-    console.log(todosArray); // Per vedere la struttura dei dati
     setProgress(true);
   });
 

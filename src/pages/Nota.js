@@ -196,6 +196,74 @@ const SommaTot = async () => {  //fa la somma totale, di tutti i prezzi totali
 
 
 
+
+  //caricamento prodotti in locale per l'autocomplete   
+    React.useEffect(() => {
+      const caricaProdottiBase = async () => {
+        const cached = localStorage.getItem("prodottiCache");
+        const localUpdatedAt = localStorage.getItem("prodottiUpdatedAt");
+
+        const metaRef = doc(db, "meta", "prodotti");
+        const metaSnap = await getDoc(metaRef);
+        const serverUpdatedAt = metaSnap.exists() ? metaSnap.data().updatedAtMillis?.toString() : null;
+
+        // Se non esiste server timestamp, fallback: forza caricamento da Firestore
+        if (!serverUpdatedAt) {
+          console.warn("⚠️ Nessun timestamp trovato in Firestore. Caricamento forzato.");
+          return await aggiornaProdottiDaFirestore();
+        }
+
+        // Primo accesso: non esiste prodottiUpdatedAt locale → ricarica tutto
+        if (!localUpdatedAt || localUpdatedAt !== serverUpdatedAt) {
+          console.log("🔁 Nessun timestamp locale o diverso dal server. Ricarico da Firestore.");
+          return await aggiornaProdottiDaFirestore(serverUpdatedAt);
+        }
+
+        // Se il timestamp combacia, si usa la cache
+        if (cached && localUpdatedAt === serverUpdatedAt) {
+          console.log("✅ Cache valida, caricamento da localStorage.");
+          return;
+        }
+
+        // Timestamp differente o cache assente → aggiorno tutto
+        console.log("🔁 Timestamp modificato o cache assente. Ricarico da Firestore.");
+        await aggiornaProdottiDaFirestore(serverUpdatedAt);
+      };
+
+      const aggiornaProdottiDaFirestore = async (timestampOverride = null) => {
+        const prodottiRef = collection(db, "prodotto");
+        const prodottiSnap = await getDocs(prodottiRef);
+
+        const listaProdotti = prodottiSnap.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            label: data.nomeP,
+            id: doc.id,
+            prezzoUni: data.prezzoIndi,
+          };
+        });
+
+        listaProdotti.sort((a, b) => a.label.localeCompare(b.label));
+
+        localStorage.setItem("prodottiCache", JSON.stringify(listaProdotti));
+
+        // Usa il timestamp fornito o ne imposta uno nuovo (fallback se meta non era ancora creato)
+        const updatedAtToStore = timestampOverride || Date.now().toString();
+        localStorage.setItem("prodottiUpdatedAt", updatedAtToStore);
+
+        console.log("📦 Prodotti caricati da Firestore e aggiornati nel localStorage.");
+      };
+
+      caricaProdottiBase();
+    }, []);
+
+
+
+
+
+
+
+
 const ordinaNoteConSplit = (note) => {
   // Ordina in base a createdAt per mantenere l’ordine cronologico
   const noteOrdinate = [...note].sort((a, b) => {
@@ -823,6 +891,7 @@ const print = async () => {
             flagStampa={flagStampa}
             Completa={Completa}
             SommaTot={SommaTot}
+            idCliente={idCliente}
           />
         )}
       </>

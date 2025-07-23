@@ -1,5 +1,5 @@
 import React from "react";
-import {collection, deleteDoc, doc, onSnapshot, updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, onSnapshot, updateDoc, query, orderBy, where, getDocs, setDoc} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
 import { auth, db } from "../firebase-config";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -19,11 +19,9 @@ import Menu from '@mui/material/Menu';
 import { FlareSharp } from "@mui/icons-material";
 
 
-export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot, flagBho, brandTinte}) {
+export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot, flagBho, brandTinte, idCliente}) {
 
-  const [todosProdottiCli, setTodosProdottiCli] = React.useState([]);
-
-  const [flagProd, setFlagProd] = React.useState("1");
+  const prodottiLocali = JSON.parse(localStorage.getItem("prodottiCache") || "[]");
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -67,44 +65,47 @@ export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, n
   }, [flagProd]);
 */}
 
-  const handleInputChange = async (event, value) => {  //trova il prezzo unitario del prodotto
-    setNewProdotto(value);
-    AutoProdCli.map((nice) => {
-        if (value == nice.label) {   //se i nomi dei prodotti sono uguali allora si prende il prezzo unitario
-          setPrezzoUni(nice.prezzoUni);
-        }
-    })
-  }
+  const handleInputChange = async (event, value) => {
+  setNewProdotto(value);
+  if (!value) return;
+  const trovato = prodottiLocali.find(p => p.label === value);
+  if (trovato) {
+  // Prezzo base
+    let prezzoFinale = trovato.prezzoUni;
 
-  const handleChangeTintSelect = async (event) => {  //funzione che si attiva quando selezioni l'autocomplete delle tinte
-    setNewProdotto(event.target.value);
-    AutoProdCli.map((nice) => {
-      if (event.target.value == nice.label) {   //se il nome della tinta è uguale ad un prodotto dell'array allora si prende il prezzo unitario
-        setPrezzoUni(nice.prezzoUni);
-      }
-  })
-  };
-  //****************************************************************************************************************************** */
-  const handlePrezzUniUpd = async (e) => {  // funzione che si attiva quando cambio il prezzo unitario del prodotto
-    e.preventDefault();
-    var idProdCli;
-    let index = 0;
+    // Verifica se esiste un prezzo personalizzato
+    const prezzoCustomRef = doc(db, "prodotto", trovato.id, "prezzi_custom", idCliente);
+    const prezzoSnap = await getDoc(prezzoCustomRef);
 
-    for(let i = 0; i < AutoProdCli.length; i++) {  // va a fare il for fin quando non rispetta la condizione
-      let obj = AutoProdCli[i];
-        if(todo.prodottoC === obj.label) {
-            index = i;      //salva l'indice per poi aggiornare l'array di oggetti
-            idProdCli= obj.id;   //va a salvarsi l'id di prodottoClin
-             break;
-          }
+    if (prezzoSnap.exists()) {
+      prezzoFinale = prezzoSnap.data().prezzo;
     }
-    AutoProdCli[index] = {  //aggiorna  l'array
-      id: idProdCli,
-      prezzoUni: newPrezzoUni,
-      label: todo.prodottoC,
-    };
-    handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte)
-    await updateDoc(doc(db, "prodottoClin", idProdCli),  { prezzoUnitario: newPrezzoUni });  //aggiorna il prezzoUni di prodottoCli nel database
+
+    setPrezzoUni(prezzoFinale);
+  }
+  };
+
+  const handleChangeTintSelect = async (event) => {
+  setNewProdotto(event.target.value);
+  const trovato = prodottiLocali.find(p => p.label === event.target.value);
+  if (trovato) {
+    setPrezzoUni(trovato.prezzoUni);
+  }
+};
+  //****************************************************************************************************************************** */
+  const handlePrezzUniUpd = async (e) => {
+    e.preventDefault();
+
+    const prodotto = prodottiLocali.find(p => p.label === todo.prodottoC);
+    if (!prodotto) return;
+
+    const prezzoCustomRef = doc(db, "prodotto", prodotto.id, "prezzi_custom", idCliente);
+    await updateDoc(prezzoCustomRef, { prezzo: newPrezzoUni }).catch(async (err) => {
+      // Se non esiste, lo crea
+      await setDoc(prezzoCustomRef, { prezzo: newPrezzoUni });
+    });
+
+    handleEdit(todo, newQtProdotto, newProdotto, newPrezzoUni, newPrezzoTot, newT1, newT2, newT3, newT4, newT5, nomeTinte);
   };
   //****************************************************************************************************************************** */
   const handleSubm = (e) => {
@@ -351,7 +352,7 @@ const handleChangeAge = (event) => {
       clearIcon
       freeSolo
       value={newProdotto}
-      options={AutoProdCli}
+      options={prodottiLocali}
       onInputChange={handleInputChange}
       onBlur={handleSubm}
       componentsProps={{ popper: { style: { width: 'fit-content', border: "none" } } }}

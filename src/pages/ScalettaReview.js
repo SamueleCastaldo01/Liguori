@@ -292,7 +292,7 @@ function ScalettaReview({notaDat, getNotaDip, getNotaId }) {
                       <div className='col-3'><h3 className='inpTab' onClick={()=> {
                         getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
                         navigate("/nota")
-                        auto(col.idCliente);
+                        //auto(col.idCliente);
                         AutoProdCli.length = 0
                         }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
 

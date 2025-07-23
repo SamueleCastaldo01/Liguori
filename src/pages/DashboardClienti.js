@@ -414,7 +414,7 @@ const print = async () => {
           onClick={()=> {
             getNotaId(todo.idCliente, todo.id, todo.cont, todo.nomeC, todo.data, todo.data, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
             navigate("/nota")
-            auto(todo.idCliente);
+            //auto(todo.idCliente);
             AutoProdCli.length = 0
                                 }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
@@ -440,7 +440,7 @@ const print = async () => {
                   onClick={()=> {
                       getNotaId(todo.idCliente, todo.id, todo.cont, todo.nomeC, todo.data, todo.data, todo.NumCartoni, todo.sommaTotale, todo.debitoRes, todo.debitoTotale, todo.indirizzo, todo.tel, todo.partitaIva, todo.completa, todo.idDebito, todo.NumBuste)
                       navigate("/nota")
-                      auto(todo.idCliente);
+                      //auto(todo.idCliente);
                       AutoProdCli.length = 0
                                           }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>

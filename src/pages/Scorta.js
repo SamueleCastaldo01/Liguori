@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, serverTimestamp, limit, getDocs, getCountFromServer, writeBatch} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, serverTimestamp, limit, getDocs, getCountFromServer, writeBatch, getDoc, setDoc} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
@@ -147,31 +147,37 @@ function Scorta() {
         })}
 
 //********************************************************************************** */
-  const caricaProdotti = () => {
+    const caricaProdotti = () => {
     const collectionRef = collection(db, "prodotto");
-    const q = query(collectionRef);  //questa se flagFilter è diverso da 1 e 2
+    const q = query(collectionRef);
+    
     const unsub = onSnapshot(q, (querySnapshot) => {
       let todosArray = [];
       querySnapshot.forEach((doc) => {
-        todosArray.push({ ...doc.data(), id: doc.id });
+        todosArray.push({
+          ...doc.data(),
+          id: doc.id,
+        });
       });
-      if(FlagFilter != "1"  && FlagFilter != 2) { //crescente
-        todosArray.sort((a, b) => a.nomeP.localeCompare(b.nomeP));
-      }
-  
-      if(FlagFilter == "1") { //crescente
-        todosArray.sort((a, b) => a.quantita - b.quantita);
-      }
+
+      // Ordina per nome
+      todosArray.sort((a, b) => a.nomeP.localeCompare(b.nomeP));
       
-      if(FlagFilter == "2") { //decrescente
-        todosArray.sort((a, b) => b.quantita - a.quantita);
-      }
+      // Salva nel localStorage
+      const prodottiCache = todosArray.map((p) => ({
+        label: p.nomeP,
+        id: p.id,
+        prezzoUni: p.prezzoIndi,
+      }));
+      localStorage.setItem("prodottiCache", JSON.stringify(prodottiCache));
+
       setTodos(todosArray);
       setProgress(true);
-      console.log("entrato")
     });
+
     return () => unsub();
-  }
+  };
+
 
   React.useEffect(() => {
     caricaProdotti()
@@ -339,67 +345,45 @@ function handlePopUp(todo) {
   setPopupActiveSearch(true);
 }
  //******************************************************************************* */
- const handleProdClien = async (idProdotto) => {
-  try {
-    const q = query(collection(db, "clin"));  
-    const querySnapshot = await getDocs(q);
-
-    const batch = writeBatch(db); // Creiamo un batch per ridurre le scritture
-
-    querySnapshot.docs.forEach((docSnap) => {
-      const newDocRef = doc(collection(db, "prodottoClin")); // 🔥 Genera un nuovo ID univoco
-      batch.set(newDocRef, {
-        author: { name: docSnap.data().nomeC, idCliente: docSnap.data().idCliente },
-        idProdotto,
-        nomeP,
-        prezzoUnitario: prezzoIndi
-      });
-    });
-
-    await batch.commit(); // Esegui tutte le scritture in un'unica richiesta
-    console.log("Prodotti personalizzati aggiunti con successo!");
-  } catch (error) {
-    console.error("Errore durante l'associazione prodotto-clienti:", error);
-    toast.error("Errore durante l'associazione prodotto-clienti.");
-  }
-};
-
-
 const handleSubmit = async (e) => {
   e.preventDefault();
-  let bol = true;
-  let idProdotto = "1";
-  setIsLoading(true); 
+  setIsLoading(true);
 
   if (!nomeP) {
     notifyErrorProd();
     toast.clearWaitingQueue();
+    setIsLoading(false);
     return;
   }
 
   if (!prezzoIndi || prezzoIndi.includes(',')) {
     notifyErrorPrezzoProd();
+    setIsLoading(false);
     return;
   }
 
   // 🔍 Verifica se il prodotto è univoco
-  const querySnapshot = await getDocs(query(collection(db, "prodotto"), where("nomeP", "==", nomeP)));
+  const querySnapshot = await getDocs(
+    query(collection(db, "prodotto"), where("nomeP", "==", nomeP))
+  );
   if (!querySnapshot.empty) {
     notifyErrorProdList();
     toast.clearWaitingQueue();
+    setIsLoading(false);
     return;
   }
 
   // 📌 Ottieni l'ultimo ID prodotto
-  const lastProdSnapshot = await getDocs(query(collection(db, "prodotto"), orderBy("createdAt", "desc"), limit(1)));
+  let idProdotto = "P1";
+  const lastProdSnapshot = await getDocs(
+    query(collection(db, "prodotto"), orderBy("createdAt", "desc"), limit(1))
+  );
   if (!lastProdSnapshot.empty) {
     const lastProd = lastProdSnapshot.docs[0].data();
-    idProdotto = "P" + (parseInt(lastProd.idProdotto.substring(1)) + 1).toString();
-  } else {
-    idProdotto = "P1"; // Se non ci sono prodotti, inizia da P1
+    idProdotto = "P" + (parseInt(lastProd.idProdotto.substring(1)) + 1);
   }
 
-  // ✅ Aggiunta prodotto
+  // ✅ Aggiungi prodotto
   const docRef = await addDoc(collection(db, "prodotto"), {
     createdAt: serverTimestamp(),
     idProdotto,
@@ -417,18 +401,28 @@ const handleSubmit = async (e) => {
     reparto,
     quantitaOrdinabile,
   });
-  console.log("entrato nel submit")
 
-  // ✅ Associa il prodotto a tutti i clienti
-  await handleProdClien(idProdotto);
+  console.log("✅ Prodotto aggiunto:", idProdotto);
+
+  // ✅ Aggiorna il timestamp in Firestore meta/prodotti
+  const metaRef = doc(db, "meta", "prodotti");
+  const nowMillis = Date.now();
+  await setDoc(metaRef, {
+    updatedAt: new Date(nowMillis),
+    updatedAtMillis: nowMillis
+  }, { merge: true });
+
+  localStorage.setItem("prodottiUpdatedAt", nowMillis.toString());
+  //in questo modo dopo si puo aggiornare i prodotti una volta che vado sulla nota
+  localStorage.removeItem("prodottiCache");
 
   // ✅ Pulizia e chiusura popup
   setIsLoading(false);
-  console.log(isLoading);
   handleClearSet();
   setPopupActive(false);
   setFlagEdit((prev) => prev + 1);
 };
+
 
 
 
@@ -526,25 +520,40 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
   toast.clearWaitingQueue();
 };
 
-  const handleEditNomeProd = async () => {
-    console.log(idProdotto)
-    await updateDoc(doc(db, "prodotto", idDocumentoEdit), { nomeP: nomeP, prezzoIndi, reparto: reparto, fornitore:fornitore,  listino:listino, scontistica:scontistica, quantitaOrdinabile:quantitaOrdinabile, sottoScorta:sottoScorta });
 
-    setFlagEdit(+FlagEdit+1);
 
-    //aggiorno il nome dei prodotti per ogni cliente     va a prendere tutti o prodotti con questo id
-    const q = query(collection(db, "prodottoClin"), where("idProdotto", "==", idProdotto));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {
-      await updateDoc(doc(db, "prodottoClin", hi.id), { nomeP: nomeP});  //va a cambiare il nome al singolo prodotto per cliente
-    });
-    
+const handleEditNomeProd = async () => {
+  console.log(idProdotto);
 
-  
-    handleClearSet();
-    setPopupActiveScortaEdit(false);
-    toast.clearWaitingQueue(); 
-  };
+  await updateDoc(doc(db, "prodotto", idDocumentoEdit), {
+    nomeP: nomeP,
+    prezzoIndi,
+    reparto: reparto,
+    fornitore: fornitore,
+    listino: listino,
+    scontistica: scontistica,
+    quantitaOrdinabile: quantitaOrdinabile,
+    sottoScorta: sottoScorta
+  });
+
+  // ⏱ Aggiorna il timestamp globale in Firestore
+  const metaRef = doc(db, "meta", "prodotti");
+  const nowMillis = Date.now();
+  await setDoc(metaRef, {
+    updatedAt: new Date(nowMillis),
+    updatedAtMillis: nowMillis
+  }, { merge: true });
+
+  // 🧹 Invalida cache e aggiorna timestamp locale
+  localStorage.setItem("prodottiUpdatedAt", nowMillis.toString());
+  localStorage.removeItem("prodottiCache");
+
+  setFlagEdit(+FlagEdit + 1);
+  handleClearSet();
+  setPopupActiveScortaEdit(false);
+  toast.clearWaitingQueue(); 
+};
+
   //****************************************************************************************** */
   const handleReparto = async () => {
     console.log("entrato")
@@ -602,30 +611,46 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
 
 //**************************************************************************** */
   const handleDelete = async (id, nomeProd, IdProdP) => {
-    console.log({nomeProd})
-    console.log({IdProdP})
-        // se si elimina il prodotto dalla scorta, questo prodotto viene eliminato per tutti i clienti
-        const q = query(collection(db, "prodottoClin"), where("idProdotto", "==", IdProdP));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach(async (hi) => {
-          await deleteDoc(doc(db, "prodottoClin", hi.id));  
-        });
+  console.log({ nomeProd });
+  console.log({ IdProdP });
 
-        const p = query(collection(db, "cronologia"), where("idProdotto", "==", IdProdP));  //vado ad eliminare il prodotto nella cronologia Qta
-        const querySnapshotP = await getDocs(p);
-        querySnapshotP.forEach(async (hi) => {
-          console.log("entrato cronologia 1")
-          await deleteDoc(doc(db, "cronologia", hi.id));  
-        });
+  // 🧹 Elimina sottocollezione "prezzi_custom"
+  const prezziCustomRef = collection(db, "prodotto", IdProdP, "prezzi_custom");
+  const prezziSnapshot = await getDocs(prezziCustomRef);
+  for (const docSnap of prezziSnapshot.docs) {
+    await deleteDoc(doc(db, "prodotto", IdProdP, "prezzi_custom", docSnap.id));
+  }
 
-        const s = query(collection(db, "cronologiaPa"), where("idProdotto", "==", IdProdP));  //vado ad eliminare il prodotto nella Tabella Pa
-        const querySnapshotS = await getDocs(s);
-        querySnapshotS.forEach(async (hi) => {
-          await deleteDoc(doc(db, "cronologiaPa", hi.id));  
-        });
+  // 🧹 Elimina da cronologia quantità
+  const p = query(collection(db, "cronologia"), where("idProdotto", "==", IdProdP));
+  const querySnapshotP = await getDocs(p);
+  for (const hi of querySnapshotP.docs) {
+    await deleteDoc(doc(db, "cronologia", hi.id));
+  }
 
-    await deleteDoc(doc(db, "prodotto", id)); //infine elimina il prodotto
-  };
+  // 🧹 Elimina da cronologia PR
+  const s = query(collection(db, "cronologiaPa"), where("idProdotto", "==", IdProdP));
+  const querySnapshotS = await getDocs(s);
+  for (const hi of querySnapshotS.docs) {
+    await deleteDoc(doc(db, "cronologiaPa", hi.id));
+  }
+
+  // ✅ Elimina il documento prodotto
+  await deleteDoc(doc(db, "prodotto", id));
+
+  // 🔄 Aggiorna Firestore meta/prodotti
+  const metaRef = doc(db, "meta", "prodotti");
+  const nowMillis = Date.now();
+  await setDoc(metaRef, {
+    updatedAt: new Date(nowMillis),
+    updatedAtMillis: nowMillis
+  }, { merge: true });
+
+  // 🧹 Invalida localStorage cache
+  localStorage.setItem("prodottiUpdatedAt", nowMillis.toString());
+  localStorage.removeItem("prodottiCache");
+};
+
 //******************************************************************************************************************************** */
 //                              NICE
 //********************************************************************************************************************************* */
