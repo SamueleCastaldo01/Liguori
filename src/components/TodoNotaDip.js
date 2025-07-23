@@ -99,8 +99,6 @@ await updateDoc(doc(db, "Nota", todo.id), {
   prezzoTotProd: prezzoTotaleOriginale,
 });
 
-
-
   // 2. Crea riga nuova
   const nuovoProd = {
     ...todo,
@@ -118,14 +116,21 @@ await updateDoc(doc(db, "Nota", todo.id), {
   };
   delete nuovoProd.id;
 
-  await addDoc(collection(db, "Nota"), nuovoProd);
+  const nuovoDocRef = await addDoc(collection(db, "Nota"), nuovoProd);
+  const idSplitNota = nuovoDocRef.id;
+
+const nomeTinta = tintaVal ? ` ${tintaVal}` : "";
+
+// Combina prodottoC con la tinta
+const nomeCompleto = `${todo.prodottoC}${nomeTinta}`;
 
   // 3. Aggiungi la quantità selezionata in inOrdine
   await addDoc(collection(db, "inOrdine"), {
     nomeC: todo.nomeC,
     dataC: todo.dataC,
     qtProdotto: qt,
-    prodottoC: todo.prodottoC,
+    prodottoC: nomeCompleto,
+    idSplitNota: idSplitNota,
   });
 
   setSplitQt("");
@@ -133,7 +138,7 @@ await updateDoc(doc(db, "Nota", todo.id), {
 };
 
 
-
+//------------------------------------------------------------------------------
 const handleDeleteSplit = async (docToDelete) => {
   if (!docToDelete.idOriginale) return;
 
@@ -174,12 +179,9 @@ const handleDeleteSplit = async (docToDelete) => {
   await deleteDoc(doc(db, "Nota", docToDelete.id));
 
   // Elimina anche da inOrdine (se presente)
-  const inOrdineQuery = query(
+    const inOrdineQuery = query(
     collection(db, "inOrdine"),
-    where("nomeC", "==", docToDelete.nomeC),
-    where("prodottoC", "==", docToDelete.prodottoC),
-    where("qtProdotto", "==", docToDelete.qtProdotto),
-    where("dataC", "==", docToDelete.dataC)
+    where("idSplitNota", "==", docToDelete.id)
   );
 
   const inOrdineSnap = await getDocs(inOrdineQuery);
