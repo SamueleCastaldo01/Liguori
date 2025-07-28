@@ -483,6 +483,7 @@ const handleChangeAge = (event) => {
     )}
     </div>
 {/************************Prezzo Uni***************************************************************************** */}
+{flagStampa === false &&
 <div className="col-2" style={{ borderLeft:"solid",  borderWidth: "2px", padding: "0px", width: "100px" }}>
 
     {sup ===true && (Completa == 0 || Completa == 5 || Completa == 6) && (todo.simbolo2 != "-" && todo.simbolo2 != "In Omaggio" && todo.simbolo2 != "G. P." )  && ( 
@@ -513,7 +514,8 @@ const handleChangeAge = (event) => {
     }
   </>
 )}
-    </div>
+</div>
+}
 {/***************************Prezzo Tot************************************************************************** */}
 <div className="col-2" style={{width: "100px", borderLeft:"solid",  borderWidth: "2px", padding: "0px", marginBottom:"0px"}}>
     {sup === true && ( 

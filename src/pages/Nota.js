@@ -864,7 +864,7 @@ const print = async () => {
   <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px", width: "410px"}}>Prodotto</div>
-    <div className='col-2' style={{padding:"0px", }}>Prezzo Uni</div>
+    {flagStampa === false &&  <div className='col-2' style={{padding:"0px", }}>Prezzo Uni</div>}
     <div className='col-2' style={{padding:"0px"}}>Prezzo Totale</div>
   </div>
 
