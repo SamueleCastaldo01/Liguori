@@ -257,6 +257,8 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
   {/********************FORNITORE'*********************************************************** */}
   {(sup ===true && FlagStampa == false) && ( 
     <div className="col-2 d-flex align-items-center justify-content-center">
+      {fornitore}
+      {/* 
       <input
       style={{ textDecoration: todo.completed && "line-through", fontSize:"14px" }}
          min="1"
@@ -265,6 +267,7 @@ export default function TodoScorta({ todo, handleEdit, handleAddQuant, handleRem
         onChange={handleChangeFornitore}
         className="inpNumb"
       />
+      */}
     </div>
   )} 
 

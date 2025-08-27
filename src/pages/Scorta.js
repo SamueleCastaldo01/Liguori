@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
 import { auth, db } from "../firebase-config";
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import {  toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { notifyErrorProd, notifyUpdateProd, notifyErrorNumNegativo, notifyErrorProdList, notifyErrorPrezzoProd, notifyError, notifyError1 } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,17 +17,13 @@ import TodoScorta from '../components/TodoScorta';
 import Button from '@mui/material/Button';
 import { supa, guid, tutti, dipen, primary } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
-import RestoreIcon from '@mui/icons-material/Restore';
-import PrintIcon from '@mui/icons-material/Print';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import AddIcon from '@mui/icons-material/Add';
 import CircularProgress from '@mui/material/CircularProgress';
+import Autocomplete from '@mui/material/Autocomplete';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
-import ToggleButton from '@mui/material/ToggleButton';
 import { Modal } from 'react-bootstrap';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
@@ -40,6 +36,7 @@ function Scorta() {
   const [todos, setTodos] = React.useState([]);
   const [crono, setCrono] = React.useState([]);
   const [cronoPa, setCronoPa] = React.useState([]);
+  const [fornitoriOptions, setFornitoriOptions] = React.useState([]);
 
   const [Progress, setProgress] = React.useState(false);
   const [Progress1, setProgress1] = React.useState(false);
@@ -66,6 +63,8 @@ function Scorta() {
   const [sottoScorta, setSottoScorta] = React.useState("");
   const [quantitaOrdinabile, setquantitaOrdinabile] = React.useState("");
   const [nota, setNota] = React.useState("");
+  const selectedFornitoreOption =
+  fornitoriOptions.find(o => o.label === fornitore) || null;
 
   const [flagFiltroDisp, setFlagFiltroDisp] = React.useState(false);
   const [flagFiltroCres, setFlagFiltroCres] = React.useState(false);
@@ -146,6 +145,38 @@ function Scorta() {
         className: "rounded-4"
         })}
 
+
+// Carica fornitori (usa cache se presente)
+const loadFornitori = async () => {
+  try {
+    const cache = localStorage.getItem("fornitoriCache");
+    if (cache) {
+      setFornitoriOptions(JSON.parse(cache));
+      return;
+    }
+    const collectionRef = collection(db, "fornitore");
+    const q = query(collectionRef, orderBy("nomeF", "asc"));
+    const snap = await getDocs(q);
+    const opts = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        label: data?.nomeF || "",
+        id: d.id,
+        idFornitore: data?.idFornitore || "",
+      };
+    }).filter(o => o.label);
+
+    // ordina per label per sicurezza
+    opts.sort((a,b)=> a.label.localeCompare(b.label));
+
+    localStorage.setItem("fornitoriCache", JSON.stringify(opts));
+    setFornitoriOptions(opts);
+  } catch (e) {
+    console.error("Errore caricamento fornitori:", e);
+  }
+};
+
+
 //********************************************************************************** */
     const caricaProdotti = () => {
     const collectionRef = collection(db, "prodotto");
@@ -185,6 +216,11 @@ function Scorta() {
     }, [FlagFilter,FlagEdit]);
 
 
+React.useEffect(() => {
+   loadFornitori();
+}, []);
+
+
 
 //cronologia
   React.useEffect(() => {
@@ -209,7 +245,7 @@ function Scorta() {
   React.useEffect(() => {
     if(popupActiveCronoPa) {
       const collectionRef = collection(db, "cronologiaPa");
-      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
+      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(100));
   
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
@@ -402,6 +438,12 @@ const handleSubmit = async (e) => {
     quantitaOrdinabile,
   });
 
+  await ensureProdottoForn({
+    productDocId: docRef.id,
+    nomeF: fornitore,
+    nomeP
+  });
+
   console.log("✅ Prodotto aggiunto:", idProdotto);
 
   // ✅ Aggiorna il timestamp in Firestore meta/prodotti
@@ -423,9 +465,6 @@ const handleSubmit = async (e) => {
   setFlagEdit((prev) => prev + 1);
 };
 
-
-
-
   const handleClearSet =  () => {   //aggiunta della trupla cronologia quantità
     setNomeP("");
     setReparto(1)
@@ -440,6 +479,35 @@ const handleSubmit = async (e) => {
     setSottoScorta("");
     setquantitaOrdinabile("");
   };
+
+
+
+  // Crea record prodottoForn (se non esiste già un collegamento id+name+nomeP)
+const ensureProdottoForn = async ({ productDocId, nomeF, nomeP }) => {
+  if (!productDocId || !nomeF || !nomeP) return;
+
+  try {
+    const pq = query(
+      collection(db, "prodottoForn"),
+      where("id", "==", productDocId),
+      where("name", "==", nomeF),
+      where("nomeP", "==", nomeP)
+    );
+    const ex = await getDocs(pq);
+    if (!ex.empty) return; // già presente
+
+   await addDoc(collection(db, "prodottoForn"), {
+     author: {
+       id: productDocId,
+       name: nomeF
+     },
+     nomeP
+   });
+  } catch (e) {
+    console.error("Errore ensureProdottoForn:", e);
+  }
+};
+
 
  //******************************************************************************************************** */
   const handleCronologia = async (todo, ag, somma, flag) => {   //aggiunta della trupla cronologia quantità
@@ -516,6 +584,14 @@ const handleEdit = async (todo, nome, SotSco, quaOrd, pap, scon, list, forn, tip
       fornitore: forn
   });
 
+  if (forn) {
+    await ensureProdottoForn({
+      productDocId: todo.id,
+      nomeF: forn,
+      nomeP: nome
+    });
+  }
+
   setFlagEdit(prev => prev + 1);
   toast.clearWaitingQueue();
 };
@@ -534,6 +610,12 @@ const handleEditNomeProd = async () => {
     scontistica: scontistica,
     quantitaOrdinabile: quantitaOrdinabile,
     sottoScorta: sottoScorta
+  });
+
+  await ensureProdottoForn({
+    productDocId: idDocumentoEdit,
+    nomeF: fornitore,
+    nomeP: nomeP
   });
 
   // ⏱ Aggiorna il timestamp globale in Firestore
@@ -735,8 +817,20 @@ const handleEditNomeProd = async () => {
 
       </div>
       <div className='col'>
-      <TextField style={{width: "100%"}} color='secondary' id="filled-basic" label="Fornitore" variant="outlined" autoComplete='off' value={fornitore} 
-          onChange={(e) => setFornitore(e.target.value)}/>
+      <Autocomplete
+        options={fornitoriOptions}
+        value={selectedFornitoreOption}
+        onChange={(e, option) => setFornitore(option ? option.label : "")}
+        getOptionLabel={(opt) => (typeof opt === "string" ? opt : opt?.label || "")}
+        isOptionEqualToValue={(opt, val) => (opt?.label || "") === (val?.label || val || "")}
+        renderInput={(params) => (
+          <TextField {...params} label="Fornitore" variant="outlined" color="secondary" />
+        )}
+        // se vuoi consentire digitazione libera, sblocca la riga sotto:
+        // freeSolo
+        style={{ width: "100%" }}
+      />
+
       </div>
       </div>
       <div className='row mt-4'>
