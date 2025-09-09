@@ -1,4 +1,5 @@
 var s1="lO8rpwnWOEVUaKtf4PSjgoUBCPA3"  //sono io
+var s3="MHwBVpN3W5Nv4vdwZQFoEinm7Gs2" //figlio di Nando
 var s6="9uXrTRBIasMGV1AEqhhfEI7CmRN2"  //Cesario
 var s7="MwUDv28kFlhWq5MmmNTfurSKRLE3"  //Hola
 var s2="GSgY1obKiYRFV1r7IYCXIJQqBI83"   //Nando Liguori
@@ -13,12 +14,12 @@ var g1= "wcRL7pe4fOarFYJeDaWGCsTHKRk2"  //guidatore
 export let primary= "#152c51";
 export let rosso= "#D32F2F";
 
-export let supa= [s1, s2, s7]  //array per i supervisori
+export let supa= [s1, s2, s7, s3]  //array per i supervisori
 
 export let guid= [g1]  //array per i guidatori
 
 export let dipen= [d1, d2]  //array per i dipendenti
 
-export let tutti= [s1,d1, d2, g1,s6, s7, s2,] //array per chi può visualizzare la tabella
+export let tutti= [s1,d1, d2, g1,s6, s7, s2, s3] //array per chi può visualizzare la tabella
 
 
