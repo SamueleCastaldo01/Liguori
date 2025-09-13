@@ -20,6 +20,7 @@ import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
+import ScaletteChiuseTable from '../components/ScaletteChiuseTable';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -923,83 +924,7 @@ React.useEffect(() => {
 
 {/**********tabella in ordine********************** */}
 {popupActiveInOrdine == true && 
-<div className='todo_containerInOrdine mt-5 mb-4' style={{paddingTop: "0px"}}>
-<div className='row' > 
-<div className='col'>
-<p className='colTextTitle'> In ordine </p>
-</div>
-<div className='col'></div>
-<div className='col' style={{ paddingRight: "20px", paddingTop: "8px", paddingBottom: "6px"}}>
-<TextField
-      inputRef={inputRef}
-      className="inputSearch"
-      onChange={event => {setSearchTerm(event.target.value)}}
-      type="text"
-      placeholder="Ricerca Cliente"
-      InputProps={{
-      startAdornment: (
-      <InputAdornment position="start">
-      <SearchIcon color='secondary'/>
-      </InputAdornment>
-                ),
-                }}
-       variant="outlined"/>
-</div>
-</div>
-<div className='row' style={{marginRight: "5px"}}>
-<div className='col-4' >
-<p className='coltext' >Cliente</p>
-</div>
-<div className='col-1' style={{padding: "0px"}}>
-<p className='coltext' >Qt</p>
-</div>
-<div className='col-4' style={{padding: "0px"}}>
-<p className='coltext' >Prodotto</p>
-</div>
-<div className='col-2' style={{padding: "0px"}}>
-<p className='coltext' >Data Inserimento</p>
-</div>
-    <hr style={{margin: "0"}}/>
-</div>
-
-<div className="scroll">
-{Progress2 == false && 
-  <div style={{marginTop: "14px"}}>
-      <CircularProgress />
-  </div>
-}
-{todosInOrdine.filter((val)=> {
-        if(searchTerm === ""){
-          return val
-      } else if (val.nomeC.toLowerCase().includes(searchTerm.toLowerCase()) ) {
-        return val
-                }
-            }).map((todo) => (
-    <div key={todo.id}> 
-    <div className='row' style={{padding: "0px", marginRight: "5px"}}>
-      <div className='col-4 diviCol'><p className='inpTab'>{todo.nomeC} </p> </div>
-      <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.qtProdotto}</p></div>
-      <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.prodottoC}</p></div>
-      <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.dataC}</p></div>
-      {sup ===true && ( 
-        <>
-      <div className="col-1 diviCol" style={{padding:"0px", marginTop:"-8px"}}>
-        <button className="button-delete" onClick={() =>{
-          localStorage.setItem("flagRemove", 1);
-           localStorage.setItem("IDNOTa", todo.id);
-           displayMsg();
-           toast.clearWaitingQueue(); }}>
-          <DeleteIcon id="i" />
-        </button>
-    </div>  
-        </>
-        )}
-      <hr style={{margin: "0"}}/>
-    </div>
-    </div>
-  ))}
-</div>
-  </div>  
+  <ScaletteChiuseTable defaultDays={7} />
   }
 
   </motion.div>
