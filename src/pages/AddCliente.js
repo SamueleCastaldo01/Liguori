@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { notifyErrorCliEm, notifyUpdateCli, notifyErrorCliList } from '../components/Notify';
 import CloseIcon from '@mui/icons-material/Close';
 import TodoClient from '../components/TodoClient';
+import Papa from 'papaparse';
 import Button from '@mui/material/Button';
 import { Modal } from 'react-bootstrap';
 import { supa, guid, tutti, primary, rosso } from '../components/utenti';
@@ -83,7 +84,9 @@ function AddCliente( {getCliId} ) {
   const inputRef= useRef();
   const inputRefDeb= useRef();
   const inputRefCrono= useRef();
+  const fileInputRef = useRef(null);
 
+  const handleClickImport = () => fileInputRef.current?.click();
 
   //permessi utente
   let sup= supa.includes(localStorage.getItem("uid"))
@@ -121,6 +124,7 @@ function AddCliente( {getCliId} ) {
         className: "rounded-4"
         })}
 
+
 //********************************************************************************** */
       //Anagrafiche cliente
 React.useEffect(() => {
@@ -155,6 +159,136 @@ React.useEffect(() => {
       loadDebiti();
   }, [flagDebiCli]);
 
+// import export debito csv -----------------------------------------
+  const parseItNumber = (v) => {
+  if (v === null || v === undefined) return 0;
+  if (typeof v === 'number') return v;
+  const s = String(v).trim();
+  if (!s) return 0;
+  // rimuovo i separatori migliaia, cambio la virgola in punto
+  return Number(s.replace(/\./g, '').replace(',', '.'));
+};
+
+/** formatta come "YYYY-MM-DD_HH-mm-ss" per nome file */
+const nowForFilename = () => moment().format('YYYY-MM-DD_HH-mm-ss');
+
+/** gli stessi filtri della tua tabella Debito (come "si vedono adesso") */
+const getFilteredDebiti = () => {
+  const term = (searchTermDeb || '').toLowerCase();
+  return todosDebi.filter((val) => {
+    if (!term) return true;
+    return (
+      (val.nomeC || '').toLowerCase().includes(term) ||
+      (val.idCliente || '').toLowerCase().includes(term)
+    );
+  });
+};
+
+const exportDebitiCSV = () => {
+  const rows = getFilteredDebiti().map((x) => ({
+    idCliente: x.idCliente || '',
+    nomeC: x.nomeC || '',
+    deb1: x.deb1 ?? 0,
+    deb2: x.deb2 ?? 0,
+    deb3: x.deb3 ?? 0,
+    deb4: x.deb4 ?? 0,
+  }));
+
+  // Tipico per Excel/Italia: separatore ';' (puoi usare ',' se preferisci)
+  const csv = Papa.unparse(rows, { delimiter: ';' });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `debiti_${nowForFilename()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+
+const handleImportCSV = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    //delimiter: ';', 
+    complete: async (res) => {
+      try {
+        const rows = res.data;
+
+        let batch = writeBatch(db);
+        let ops = 0;
+
+        const commitIfNeeded = async (force = false) => {
+          if (ops >= 400 || force) {
+            await batch.commit();
+            batch = writeBatch(db);
+            ops = 0;
+          }
+        };
+
+        for (const r of rows) {
+          const idC =
+            (r.idCliente || r.IDCliente || r.id || '').toString().trim();
+          if (!idC) continue;
+
+          const d1 = parseItNumber(r.deb1);
+          const d2 = parseItNumber(r.deb2);
+          const d3 = parseItNumber(r.deb3);
+          const d4 = parseItNumber(r.deb4);
+          const tot =
+            r.debitoTot !== undefined && r.debitoTot !== ''
+              ? parseItNumber(r.debitoTot)
+              : d1 + d2 + d3 + d4;
+
+          // trova il doc di quel cliente
+          const qDeb = query(
+            collection(db, 'debito'),
+            where('idCliente', '==', idC),
+            limit(1)
+          );
+          const snap = await getDocs(qDeb);
+          if (!snap.empty) {
+            const docSnap = snap.docs[0];
+            const payload = {
+              deb1: d1,
+              deb2: d2,
+              deb3: d3,
+              deb4: d4,
+              debitoTot: tot,
+            };
+            if (r.nomeC) payload.nomeC = r.nomeC;
+
+            batch.update(doc(db, 'debito', docSnap.id), payload);
+            ops++;
+            await commitIfNeeded();
+          } else {
+            console.warn(`idCliente ${idC} non trovato: saltato.`);
+          }
+        }
+
+        await commitIfNeeded(true);
+        await loadDebiti(); // rinfresca tabella
+        toast.success('Import completato!', { theme: 'dark' });
+      } catch (err) {
+        console.error(err);
+        toast.error('Errore durante import CSV', { theme: 'dark' });
+      } finally {
+        e.target.value = '';
+      }
+    },
+    error: (err) => {
+      console.error(err);
+      toast.error('CSV non leggibile', { theme: 'dark' });
+    },
+  });
+};
+
+//----------------------------------------------------------------------------------------------
 
   //somma totale debito
     React.useEffect(() => {
@@ -635,6 +769,27 @@ const sommaTotDebito = () => {
 {/********************tabella Debito***********************************************************************************************/}
 {flagDebiCli &&
 <div className='todo_containerDebCli'>
+  <Button
+    style={{ marginLeft: 8, borderRadius: "0px" }}
+    variant="contained"
+    onClick={exportDebitiCSV}
+  >
+    Export CSV (filtrati)
+  </Button>
+  <input
+    type="file"
+    accept=".csv,text/csv"
+    ref={fileInputRef}
+    style={{ display: 'none' }}
+    onChange={handleImportCSV}
+  />
+  <Button
+    style={{ marginLeft: 8, borderRadius: "0px" }}
+    variant="outlined"
+    onClick={handleClickImport}
+  >
+    Import CSV (update)
+  </Button>
 <div className='row' > 
 <div className='col-7'>
 <p className='colTextTitle'> Debito Clienti </p>
