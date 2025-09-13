@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getDoc, setDoc} from 'firebase/firestore';
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -132,16 +132,23 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
         })}
 //_________________________________________________________________________________________________________________
 const SomAsc = async () => {
-  var sommaTot=0;
+  let sommaTot = 0;
   const q = query(collection(db, "Nota"), where("nomeC", "==", nome), where("dataC", "==", data));
-  const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, "heeey", " => ", doc.data().nomeC, doc.data().dataC, doc.data().prezzoUniProd);
-      sommaTot=+doc.data().prezzoTotProd +sommaTot;
-      });
-      setSumTot(sommaTot);
-      await updateDoc(doc(db, "addNota", id), { sommaTotale:sommaTot});  //aggiorna la somma totale nell'add nota
-}
+  const snap = await getDocs(q);
+  snap.forEach(d => {
+    sommaTot += (+d.data().prezzoTotProd || 0);
+  });
+  setSumTot(sommaTot);
+
+  const ref = doc(db, "addNota", id);
+  const exists = (await getDoc(ref)).exists();
+  if (exists) {
+    await updateDoc(ref, { sommaTotale: sommaTot });
+  } else {
+    // crea il doc se manca
+    await setDoc(ref, { sommaTotale: sommaTot }, { merge: true });
+  }
+};
 
 //********************************************************************************** */
     const cliEffect = async () => {  //funzione per l'anagrafica del cliente
@@ -206,7 +213,6 @@ const createCate = async () => {
 const handleEdit = async ( todo, qt, prod) => {
   await updateDoc(doc(db, "notaForni", todo.id), 
   { quantita: qt, nomeP: prod});
-  notifyUpdateProd();
   toast.clearWaitingQueue(); 
 };
 
@@ -250,18 +256,23 @@ const handleDelete = async (id) => {
 };
 //_________________________________________________________________________________________________________________
   //stampa
- const handlePrint = useReactToPrint({
+const handlePrint = useReactToPrint({
   content: () => componentRef.current,
   documentTitle: 'emp-data',
-  onAfterPrint: () => setFlagStampa(false)
-})
+  onAfterPrint: () => setFlagStampa(false),
+});
 
-const print = async () => {
+const print = () => {
   setFlagStampa(true);
-  setTimeout(function(){
+  setTimeout(() => {
+    if (!componentRef.current) {
+      setFlagStampa(false);
+      console.error('Niente da stampare: ref non pronta');
+      return;
+    }
     handlePrint();
-  },1);
-}
+  }, 150); // un attimo per far renderizzare la vista "stampa"
+};
 //*************************************************************** */
 //************************************************************** */
 //          INTERFACE                                             /

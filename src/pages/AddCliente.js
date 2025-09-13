@@ -300,7 +300,7 @@ const handleImportCSV = (e) => {
   React.useEffect(() => {
     if(popupActiveCrono) {
       const collectionRef = collection(db, "cronologiaDeb");
-      const q = query(collectionRef, limit(50), orderBy("createdAt", "desc"));
+      const q = query(collectionRef, limit(150), orderBy("createdAt", "desc"));
   
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
@@ -529,7 +529,7 @@ const sommaTotDebito = () => {
   //----------------------------------------------------------------------------------------------
   const handleCronologia = async (todo, dd1, debV) => {
     const collectionRef = collection(db, "cronologiaDeb");
-    const q = query(collectionRef, orderBy("createdAt"), limit(100)); // Limite impostato a 10 documenti
+    const q = query(collectionRef, orderBy("createdAt"), limit(150)); // Limite impostato a 10 documenti
   
     await addDoc(collectionRef, {
       autore: auth.currentUser.displayName,
