@@ -9,23 +9,19 @@ import { notifyErrorCliEm, notifyUpdateCli, notifyErrorCliList } from '../compon
 import CloseIcon from '@mui/icons-material/Close';
 import TodoClient from '../components/TodoClient';
 import FormControl from '@mui/material/FormControl';
-import MenuItem from '@mui/material/MenuItem';
 import moment from 'moment/moment';
 import 'moment/locale/it'
 import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import { supa } from '../components/utenti';
 import { guid } from '../components/utenti';
 import { tutti } from '../components/utenti';
-import InputAdornment from '@mui/material/InputAdornment';
-import SearchIcon from '@mui/icons-material/Search';
 import ScaletteChiuseTable from '../components/ScaletteChiuseTable';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import DeleteIcon from "@mui/icons-material/Delete";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { optionsNumCart, optionsTotQuota, optionsVendite } from '../components/OptionsGrafici';
@@ -43,6 +39,7 @@ import {
   Legend,
 } from 'chart.js';
 import { motion } from 'framer-motion';
+import InOrdineTable from '../components/inOrdineTable';
 
 ChartJS.register(
   CategoryScale,
@@ -116,6 +113,7 @@ function HomePage(  ) {
   const [DataConvFine, setDataConvFine] = useState("");
   const [DataMilliFine, setDataMilliFine] = useState("");
   const [activeCalenderFine, setActiveCalenderFine] = useState(false)
+  const [activeTable, setActiveTable] = React.useState('scalette');
 
     //variabili per gestire le date del grafico 2 Incasso
     const [filtroData2, setFlitroData2] = useState(false);
@@ -684,15 +682,43 @@ React.useEffect(() => {
     {!matches ? <h1 className='title mt-3' style={{ textAlign: "left", marginLeft: "70px" }}>Seller Central</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
       <ToggleButtonGroup
-      color="primary"
-      value={alignment}
-      exclusive
-      onChange={handleChangeTogg}
-      aria-label="Platform"
-    >  
-      <ToggleButton onClick={() => {setPopupActive(true); setActiveCalender(false); setPopupActiveInOrdine(true)}} color='secondary' value="scortatinte">In Ordine</ToggleButton>
-  
-    </ToggleButtonGroup>
+        color="primary"
+        value={activeTable}
+        exclusive
+        onChange={(_, val) => { if (val) setActiveTable(val); }}
+      >
+        <ToggleButton
+          value="inordine"
+          sx={{
+            textTransform: 'none',
+            '&.Mui-selected': {
+              backgroundColor: 'primary.main',
+              color: 'primary.contrastText',
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: 'primary.dark',
+            },
+          }}
+        >
+          In Ordine
+        </ToggleButton>
+
+        <ToggleButton
+          value="scalette"
+          sx={{
+            textTransform: 'none',
+            '&.Mui-selected': {
+              backgroundColor: 'primary.main',
+              color: 'primary.contrastText',
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: 'primary.dark',
+            },
+          }}
+        >
+          Scalette chiuse
+        </ToggleButton>
+      </ToggleButtonGroup>
 
 <div className='containerGrafici'>
 {/***************GRAFICO ORDINI********************************************* */}
@@ -923,9 +949,9 @@ React.useEffect(() => {
 
 
 {/**********tabella in ordine********************** */}
-{popupActiveInOrdine == true && 
-  <ScaletteChiuseTable defaultDays={7} />
-  }
+{activeTable === 'inordine' && <InOrdineTable />}
+
+{activeTable === 'scalette' && <ScaletteChiuseTable defaultDays={7} />}
 
   </motion.div>
     </>
