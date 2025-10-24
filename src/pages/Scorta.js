@@ -149,11 +149,6 @@ function Scorta() {
 // Carica fornitori (usa cache se presente)
 const loadFornitori = async () => {
   try {
-    const cache = localStorage.getItem("fornitoriCache");
-    if (cache) {
-      setFornitoriOptions(JSON.parse(cache));
-      return;
-    }
     const collectionRef = collection(db, "fornitore");
     const q = query(collectionRef, orderBy("nomeF", "asc"));
     const snap = await getDocs(q);
@@ -169,7 +164,6 @@ const loadFornitori = async () => {
     // ordina per label per sicurezza
     opts.sort((a,b)=> a.label.localeCompare(b.label));
 
-    localStorage.setItem("fornitoriCache", JSON.stringify(opts));
     setFornitoriOptions(opts);
   } catch (e) {
     console.error("Errore caricamento fornitori:", e);

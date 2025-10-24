@@ -953,6 +953,8 @@ React.useEffect(() => {
 
 {activeTable === 'scalette' && <ScaletteChiuseTable defaultDays={7} />}
 
+<div style={{marginBottom:"200px"}}></div>
+
   </motion.div>
     </>
       )

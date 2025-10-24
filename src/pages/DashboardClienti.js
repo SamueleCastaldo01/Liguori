@@ -394,6 +394,9 @@ const print = async () => {
 <div className='col' style={{padding: "0px"}}>
 <p className='coltext' >Vendita(€)</p>
 </div>
+<div className='col' style={{padding: "0px"}}>
+
+</div>
     <hr style={{margin: "0"}}/>
 </div>
   {Progress == false && 
@@ -444,9 +447,9 @@ const print = async () => {
                       AutoProdCli.length = 0
                                           }}>
       <div className='col diviCol'><p className='inpTab'>{todo.data} </p> </div>
-      <div className='col diviCol'><p className='inpTab'> {todo.quota} </p> </div>
-      <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
-      <div className='col diviCol' style={{padding: "0px"}}><p className='inpTab'>{todo.incassoExtra}</p></div>
+      <div className='col diviCol p-0'><p className='inpTab'> {todo.quota} </p> </div>
+      <div className='col diviCol p-0' style={{padding: "0px"}}><p className='inpTab'>{todo.sommaTotale}</p></div>
+      <div className='col diviCol p-0' style={{padding: "0px"}}><p className='inpTab'>{todo.incassoExtra}</p></div>
       <hr style={{margin: "0"}}/>
     </div>
     }

@@ -547,7 +547,6 @@ width: 110%;
 }
 
 .todo_containerScalet,
-.todo_containerInOrdine,
 .todo_containerCli,
 .todo_containerCronoo,
 .todo_containerScorta,
@@ -556,6 +555,10 @@ width: 110%;
 .todo_containerProdCli{
   max-height: 450;
   padding-right: 0px;
+}
+
+.todo_containerInOrdine{
+  max-height: 300px;
 }
 
 .todo_containerNoteDip{
