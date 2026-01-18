@@ -105,10 +105,15 @@ function AddCliente( {getCliId} ) {
       </div>
     )
 
-      const Remove = () => {
-          handleDelete(localStorage.getItem("IDscal"), localStorage.getItem("IdCliProd") );
-          toast.clearWaitingQueue(); 
-               }
+const Remove = () => {
+    handleDelete(localStorage.getItem("IDscal"), localStorage.getItem("IdCliProd"));
+    
+    setPopupActiveEdit(false);
+    handlerSetClear();
+    
+    toast.dismiss(); 
+    toast.clearWaitingQueue(); 
+};
 
     const displayMsg = () => {
       toast.warn(<Msg/>, {
@@ -160,13 +165,22 @@ React.useEffect(() => {
   }, [flagDebiCli]);
 
 // import export debito csv -----------------------------------------
-  const parseItNumber = (v) => {
+const parseItNumber = (v) => {
   if (v === null || v === undefined) return 0;
   if (typeof v === 'number') return v;
-  const s = String(v).trim();
+  let s = String(v).trim();
   if (!s) return 0;
-  // rimuovo i separatori migliaia, cambio la virgola in punto
-  return Number(s.replace(/\./g, '').replace(',', '.'));
+
+  // 1. Se contiene la virgola, è il formato italiano (es. 50,23 o 1.250,00)
+  if (s.includes(',')) {
+    // In questo caso il punto sono le migliaia (va rimosso) e la virgola è il decimale
+    s = s.replace(/\./g, '').replace(',', '.');
+  } 
+  else {
+  }
+
+  const n = Number(s);
+  return isNaN(n) ? 0 : n;
 };
 
 /** formatta come "YYYY-MM-DD_HH-mm-ss" per nome file */
@@ -240,8 +254,7 @@ const handleImportCSV = (e) => {
           const d2 = parseItNumber(r.deb2);
           const d3 = parseItNumber(r.deb3);
           const d4 = parseItNumber(r.deb4);
-          const tot =
-            r.debitoTot !== undefined && r.debitoTot !== ''
+          const tot = r.debitoTot !== undefined && r.debitoTot !== ''
               ? parseItNumber(r.debitoTot)
               : d1 + d2 + d3 + d4;
 
@@ -525,6 +538,27 @@ const sommaTotDebito = () => {
   }
 };
 
+// Funzione per gestire la cancellazione dal Modal di modifica
+const confirmDeleteFromModal = () => {
+  toast.warn(
+    <div style={{ fontSize: "16px" }}>
+      <p style={{ marginBottom: "0px" }}>Sicuro di voler eliminare questo cliente?</p>
+      <button 
+        className='buttonApply ms-4 mt-2 me-1 rounded-4' 
+        onClick={async () => {
+          await handleDelete(idClinEdit, idCliente); // Usa gli ID caricati nel Modal
+          setPopupActiveEdit(false); // Chiude il modal
+          handlerSetClear(); // Pulisce i campi
+          toast.dismiss(); // Toglie la notifica
+        }}>
+        Si, elimina
+      </button>
+      <button className='buttonClose mt-2 rounded-4' onClick={() => toast.dismiss()}>No</button>
+    </div>, 
+    { position: "top-center", autoClose: false, theme: "dark" }
+  );
+};
+
 
   //----------------------------------------------------------------------------------------------
   const handleCronologia = async (todo, dd1, debV) => {
@@ -541,31 +575,26 @@ const sommaTotDebito = () => {
     });
   };
 
-  const handleDelete = async (id, nomeCli) => { //per cancellare un cliente dal db
-    const colDoc = doc(db, "clin", id); 
+const handleDelete = async (idFirestore, idClienteCustom) => { 
+  try {
+    // 1. ELIMINA IL CLIENTE (usa l'id del documento, es: quello lungo di Firestore)
+    const clienteDocRef = doc(db, "clin", idFirestore); 
+    await deleteDoc(clienteDocRef);
 
-    const prodottiSnap = await getDocs(collection(db, "prodotto"));
-    for (const prodotto of prodottiSnap.docs) {
-      const prezzoDocRef = doc(db, "prodotto", prodotto.id, "prezzi_custom", localStorage.getItem("IdCliProd"));
-      await deleteDoc(prezzoDocRef);  // cancella il prezzo personalizzato
-    }
-     
-  //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
-    const p = query(collection(db, "debito"), where("idCliente", "==", localStorage.getItem("IdCliProd")));
-    const querySnapshotP = await getDocs(p);
-    querySnapshotP.forEach(async (hi) => {
-    await deleteDoc(doc(db, "debito", hi.id));    //elimina il documento che ha lo stesso nome
+    // 2. ELIMINA IL DEBITO (cerca il documento dove idCliente == "C204")
+    const qDebito = query(collection(db, "debito"), where("idCliente", "==", idClienteCustom));
+    const querySnapshotDebito = await getDocs(qDebito);
+    
+    querySnapshotDebito.forEach(async (docDebito) => {
+      await deleteDoc(doc(db, "debito", docDebito.id));
     });
 
-    //elimina la trupla debito, che ha lo stesso nome del cliente che è stato eliminato
-      const s = query(collection(db, "cronologiaDeb"), where("idCliente", "==", localStorage.getItem("IdCliProd")));
-      const querySnapshotS = await getDocs(s);
-      querySnapshotS.forEach(async (hi) => {
-      await deleteDoc(doc(db, "cronologiaDeb", hi.id));    //elimina il documento che ha lo stesso nome
-      });
-    //infine elimina il cliente
-    await deleteDoc(colDoc); 
-  };
+    toast.success("Cliente e Debito eliminati correttamente", { theme: "dark" });
+  } catch (e) {
+    console.error("Errore durante l'eliminazione:", e);
+    toast.error("Errore durante l'eliminazione");
+  }
+};
 
 //**************************************************************************** */
 //                              NICE
@@ -665,7 +694,42 @@ const sommaTotDebito = () => {
                       >
                         {isLoading ? <CircularProgress size={24} color="inherit" /> : "Aggiungi Cliente"}
                       </Button>}
-              {popupActiveEdit && <Button onClick={handleEdit} style={{ width: "100%", height: "50px" }} className='' type='submit' color='primary' variant="contained" >Modifica Cliente </Button>}  
+              {popupActiveEdit && (
+                <div className="row mt-2">
+                  <div className="col">
+                    {/* Tasto Modifica (già presente) */}
+                    <Button 
+                      onClick={handleEdit} 
+                      style={{ width: "100%", height: "50px" }} 
+                      color='primary' 
+                      variant="contained" 
+                    >
+                      Salva Modifiche
+                    </Button>
+                  </div>
+                  <div className="col">
+                    {/* Tasto Elimina - LOGICA TODO CLIENT */}
+                    <Button 
+                      onClick={() => {
+                        // 1. Salviamo i dati nel localStorage come fai in TodoClient
+                        localStorage.setItem("IDscal", idClinEdit); 
+                        localStorage.setItem("IdCliProd", idCliente); 
+                        
+                        // 2. Lanciamo il messaggio di conferma (Msg)
+                        displayMsg(); 
+                        
+                        // 3. Puliamo la coda toast
+                        toast.clearWaitingQueue(); 
+                      }} 
+                      style={{ width: "100%", height: "50px" }} 
+                      color='error' 
+                      variant="contained"
+                    >
+                      Elimina Cliente
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div> 
           </Modal.Body>
@@ -684,19 +748,18 @@ const sommaTotDebito = () => {
       <Button   style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }} onClick={handleButtonAna} variant="contained" value="scorta">Anagrafiche Clienti</Button>
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }}  onClick={handleButtonDebito} variant="contained" value="scortatinte">Debito Clienti</Button>
       <Button  style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px",  borderRadius: "0px" }} onClick={handleButtonCronoDeb} variant="contained" value="cronologia">Cronologia Debito</Button> 
-      {sup == true && <Button style={{borderTopLeftRadius: "0px", borderBottomLeftRadius: "0px" }}   color='error' size="small" onClick={() => {setFlagDelete(!flagDelete)}}  variant="contained">elimina</Button> }
     </div>
 </div>
 
 {/********************tabella Anagrafica Clienti************************************************************************/}
 {flagAnaCli &&
 <div className='todo_containerCli'>
-<div className='row' > 
-<div className='col-7'>
+<div className='d-flex justify-content-between align-items-ceter pe-2' > 
+<div className=''>
 <p className='colTextTitle'>Anagrafica Clienti </p>
 </div>
 
-<div className='col'>
+<div className=''>
 <TextField
       inputRef={inputRef}
       className="inputSearch"
@@ -769,47 +832,47 @@ const sommaTotDebito = () => {
 {/********************tabella Debito***********************************************************************************************/}
 {flagDebiCli &&
 <div className='todo_containerDebCli'>
-  <Button
-    style={{ marginLeft: 8, borderRadius: "0px" }}
-    variant="contained"
-    onClick={exportDebitiCSV}
-  >
-    Export CSV (filtrati)
-  </Button>
-  <input
-    type="file"
-    accept=".csv,text/csv"
-    ref={fileInputRef}
-    style={{ display: 'none' }}
-    onChange={handleImportCSV}
-  />
-  <Button
-    style={{ marginLeft: 8, borderRadius: "0px" }}
-    variant="outlined"
-    onClick={handleClickImport}
-  >
-    Import CSV (update)
-  </Button>
-<div className='row' > 
-<div className='col-7'>
-<p className='colTextTitle'> Debito Clienti </p>
-</div>
-<div className='col' style={{ paddingBottom: "7px"}}>
-<TextField
-      inputRef={inputRefDeb}
-      className="inputSearch"
-      onChange={event => {setSearchTermDeb(event.target.value)}}
-      type="text"
-      placeholder="Ricerca Cliente, Id Cliente"
-      InputProps={{
-      startAdornment: (
-      <InputAdornment position="start">
-      <SearchIcon color='secondary'/>
-      </InputAdornment>
-                ),
-                }}
-       variant="outlined"/>
+<div className='d-flex align-items-center justify-content-between pt-2 pb-4' > 
+  <div >
+  <p className='colTextTitle'> Debito Clienti </p>
   </div>
+  <div className=''>
+      <Button
+      style={{ marginLeft: 8, borderRadius: "0px" }}
+      variant="contained"
+      onClick={exportDebitiCSV}
+    >
+      Export CSV (filtrati)
+    </Button>
+    <input
+      type="file"
+      accept=".csv,text/csv"
+      ref={fileInputRef}
+      style={{ display: 'none' }}
+      onChange={handleImportCSV}
+    />
+    <Button
+      style={{ marginLeft: 8, marginRight: 8, borderRadius: "0px" }}
+      variant="outlined"
+      onClick={handleClickImport}
+    >
+      Import CSV (update)
+    </Button>
+  <TextField
+        inputRef={inputRefDeb}
+        className="inputSearch"
+        onChange={event => {setSearchTermDeb(event.target.value)}}
+        type="text"
+        placeholder="Ricerca Cliente, Id Cliente"
+        InputProps={{
+        startAdornment: (
+        <InputAdornment position="start">
+        <SearchIcon color='secondary'/>
+        </InputAdornment>
+                  ),
+                  }}
+        variant="outlined"/>
+    </div>
 </div>
 {/**********Totale debiti**************************************** */}
 <div className='row' style={{marginRight: "5px"}}>
@@ -952,13 +1015,16 @@ const sommaTotDebito = () => {
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scroll" style={{maxHeight: "320px"}}>
-  {crono.filter((val)=> {
-        if(searchTermCrono === ""){
-          return val
-      } else if (val.nomeC.toLowerCase().includes(searchTermCrono.toLowerCase()) || val.idCliente.toLowerCase().includes(searchTermDeb.toLowerCase()) ) {
-        return val
-                }
-            }).map((col) => (
+  {crono.filter((val) => {
+    if (searchTermCrono === "") {
+      return val;
+    } else if (
+      val.nomeC.toLowerCase().includes(searchTermCrono.toLowerCase()) || 
+      val.idCliente.toLowerCase().includes(searchTermCrono.toLowerCase()) 
+    ) {
+      return val;
+    }
+  }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
       <div className='col-2 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>

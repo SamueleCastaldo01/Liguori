@@ -274,9 +274,7 @@ export default function ScaletteChiuseTable({ defaultDays = 7 }) {
               </div>
 
               <div className='col-3 diviCol' style={{padding: 0}}>
-                <p className='inpTab'>
                   <p className='inpTab'>{formatEuro(r.incasso)}</p>
-                </p>
               </div>
 
               <hr style={{margin: 0}}/>
