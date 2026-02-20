@@ -462,65 +462,91 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 {/*************************tabella ordini evasi************************************************************************** */}
     <div className='row'>
     <div className='col'>
-    <div className='todo_container' style={{width: "420px", maxHeight:"320px"}}>
-              <div className='row'>
-                      <div className='col-7 colTextTitle' style={{color: "orange"}}>
-                       Ordini Evasi
-                      </div>
-                      <div className='col-5'>
-                        <FormControl >
-                        <InputLabel id="demo-simple-select-label"></InputLabel>
-                        <Select sx={{height:39, marginLeft:-1, width: 150}}
-                         labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        defaultValue={0}
-                        onChange={(e) => handleChangeDataSelect(e.target.value)}>
-                        <MenuItem value={0}>Oggi</MenuItem>
-                        <MenuItem value={3}>Ultimi 3 giorni</MenuItem>
-                        <MenuItem value={7}>Ultimi 7 giorni</MenuItem>
-                        <MenuItem value={10}>Ultimi 10 giorni</MenuItem>
-                        <MenuItem value={30}>Ultimi 30 giorni</MenuItem>
-                        <MenuItem value={90}>Ultimi 90 giorni</MenuItem>
-                        <MenuItem value={365}>Ultimi 365 giorni</MenuItem>
-                        </Select>
-                        </FormControl>
-                        </div>
-                        <div className='col'>
+    <div className='todo_container' style={{
+    width: "420px", 
+    height: "320px", // Usiamo height fisso per dare un limite preciso allo scroll
+    display: "flex", 
+    flexDirection: "column" 
+}}>
+    {/* Header: Titolo e Select - flexShrink: 0 impedisce che si rimpicciolisca */}
+    <div className='row' style={{ flexShrink: 0, alignItems: 'center' }}>
+        <div className='col-7 colTextTitle' style={{ color: "orange" }}>
+            Ordini Evasi
+        </div>
+        <div className='col-5'>
+            <FormControl>
+                <InputLabel id="demo-simple-select-label"></InputLabel>
+                <Select 
+                    sx={{ height: 39, marginLeft: -1, width: 150 }}
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    defaultValue={0}
+                    onChange={(e) => handleChangeDataSelect(e.target.value)}
+                >
+                    <MenuItem value={0}>Oggi</MenuItem>
+                    <MenuItem value={3}>Ultimi 3 giorni</MenuItem>
+                    <MenuItem value={7}>Ultimi 7 giorni</MenuItem>
+                    <MenuItem value={10}>Ultimi 10 giorni</MenuItem>
+                    <MenuItem value={30}>Ultimi 30 giorni</MenuItem>
+                    <MenuItem value={90}>Ultimi 90 giorni</MenuItem>
+                    <MenuItem value={365}>Ultimi 365 giorni</MenuItem>
+                </Select>
+            </FormControl>
+        </div>
+    </div>
 
+    {/* Intestazione Tabella - flexShrink: 0 */}
+    <div className='row' style={{ height: "25px", marginTop: "7px", flexShrink: 0 }}>
+        <div className='col-1 coltext' style={{ width: "100px" }}>id Ordine</div>
+        <div className='col-6 coltext'>Cliente</div>
+    </div>
+
+    {/* Loader */}
+    {Progress == false && (
+        <div style={{ marginTop: "14px", flexShrink: 0, textAlign: 'center' }}>
+            <CircularProgress />
+        </div>
+    )}
+
+    {/* --- SEZIONE SCROLLABILE --- */}
+    {/* flexGrow: 1 dice a questo div di "mangiare" tutto lo spazio disponibile */}
+    <div style={{ 
+        flexGrow: 1, 
+        overflowY: "auto", 
+        overflowX: "hidden",
+        marginTop: "10px" 
+    }}>
+        {colle.map((col) => (
+            <div key={col.id}>
+                <div className="diviCol1">
+                    <div className="row d-flex align-items-center">
+                        <div className='col-1' style={{ width: "100px" }}>
+                            <h3 className='inpTab' style={{ color: primary }}>
+                                <b>{col.idOrdine}</b>
+                            </h3>
+                        </div>
+                        <div className='col-7'>
+                            <h3 className='inpTab' onClick={() => {
+                                getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
+                                navigate("/nota")
+                                AutoProdCli.length = 0
+                            }}>
+                                <span style={{ color: primary }}><b>{col.idCliente}</b></span> {col.nomeC}
+                            </h3>
+                        </div>
+                        <div className='col-1' style={{ padding: "0px", marginTop: "-5px", width: "20px" }}>
+                            <button onClick={() => { handleDateChange(col.id) }} style={{ color: "green", marginLeft: "0px" }} className="button-delete">
+                                <PlaylistAddIcon />
+                            </button>
                         </div>
                     </div>
-                    <div className='row' style={{ height: "25px", marginTop: "7px" }}>
-                      <div className='col-1 coltext' style={{ width:"100px" }}>id Ordine</div>
-                      <div className='col-6 coltext'>Cliente</div>
-                    </div>
-
-                    {Progress == false && 
-                    <div style={{marginTop: "14px"}}>
-                      <CircularProgress />
-                    </div>
-                    }
-                <div style={{overflowY: "auto", overflowX: "hidden"}}>
-                {colle.map((col) => (
-                  <div key={col.id}>
-                    <div className="diviCol1" > 
-                      <div className="row">
-                      <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' style={{color: primary}} ><b>{ col.idOrdine }</b></h3></div>
-                      <div className='col-7'><h3 className='inpTab' onClick={()=> {
-                        getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
-                        navigate("/nota")
-                        //auto(col.idCliente);
-                        AutoProdCli.length = 0
-                        }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
-                     <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
-                        <button onClick={() => {handleDateChange(col.id)}} style={{color: "green", marginLeft: "0px"}} className="button-delete"><PlaylistAddIcon/></button>
-                     </div>
-                      </div>
-                    </div>
-                    <hr style={{margin: "0"}}/> 
-                  </div>
-                  ))}
                 </div>
-              </div>
+                <hr style={{ margin: "0" }} />
+            </div>
+        ))}
+    </div>
+
+</div>
         {/**Fine tabella */} 
     </div>
    
@@ -528,68 +554,88 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
 
 {/*************************TABELLA Per la scaletta************************************************************************** */}
     <div className='col mt-lg-0 mt-sm-5'>
-    <div className='d-flex flex-column justify-content-start'>
-          <div className='todo_container' style={{width: "450px", maxHeight:"320px"}}>
-              <div className='row'>
-                      <div className='col-3 colTextTitle' style={{color: primary}}>
-                       Scaletta
-                      </div>
-                      <div className='col-9 d-flex align-items-center gap-1'>
-                        <p className='mb-0'>Seleziona una data:  </p>
-                      <input
-                        type="date"
-                        value={moment(scalettaDataSele, "DD-MM-YYYY").format("YYYY-MM-DD")} // Converti per l'input
-                        onChange={(e) => handleChangeDataScaletta(e)} // Salva in formato gg-mm-yyyy
-                        />
-                        </div>
-                    </div>
-                    <div className='row' style={{ height: "25px", marginTop: "7px" }}>
-                      <div className='col-1 coltext' style={{ width:"100px" }}>N.</div>
-                      <div className='col-6 coltext'>Cliente</div>
-                    </div>
+  <div className='d-flex flex-column justify-content-start'>
+    {/* AGGIUNTO: display flex e flex-direction column */}
+    <div className='todo_container' style={{ 
+      width: "450px", 
+      height: "320px", // Meglio usare height fisso o min-height se vuoi che sia sempre così
+      display: "flex", 
+      flexDirection: "column" 
+    }}>
+      
+      {/* Sezione Header (Titolo e Data) */}
+      <div className='row' style={{ flexShrink: 0 }}> {/* flexShrink: 0 impedisce che l'header si rimpicciolisca */}
+        <div className='col-3 colTextTitle' style={{ color: primary }}>
+          Scaletta
+        </div>
+        <div className='col-9 d-flex align-items-center gap-1'>
+          <p className='mb-0'>Seleziona una data: </p>
+          <input
+            type="date"
+            value={moment(scalettaDataSele, "DD-MM-YYYY").format("YYYY-MM-DD")}
+            onChange={(e) => handleChangeDataScaletta(e)}
+          />
+        </div>
+      </div>
 
-                    {Progress == false && 
-                    <div style={{marginTop: "14px"}}>
-                      <CircularProgress />
-                    </div>
-                    }
-                <div style={{ overflowY: "auto", overflowX: "hidden"}}>
-                {scaletta.map((col) => (
-                  <div key={col.id}>
-                    <>
-                    <div className="diviCol1" > 
-                      <div className="row d-flex algin-items-center">
-                      <div className='col-1' style={{ width:"100px" }}><h3 className='inpTab' style={{color: primary}} ><b>{ col.scalettaOrdine }</b></h3></div>
-                      <div className='col-6'><h3 className='inpTab' onClick={()=> {
-                        getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
-                        navigate("/nota")
-                        //auto(col.idCliente);
-                        AutoProdCli.length = 0
-                        }}><span style={{color: primary}}><b>{col.idCliente}</b></span> { col.nomeC }</h3></div>
-                            <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
-                        <button onClick={() => {moveUp(col.id, col.scalettaOrdine)}} style={{color: "green", marginLeft: "0px"}} className="button-delete"><ArrowUpwardIcon/></button>
-                     </div>
-                     <div className='col-1' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
-                        <button onClick={() => {moveDown(col.id, col.scalettaOrdine)}} style={{color: "blue", marginLeft: "0px"}} className="button-delete"><ArrowDownwardIcon/></button>
-                     </div>
-                     {col.completa !== "2" &&
-                      <div className='col-1 ms-4' style={{padding:"0px", marginTop:"-5px", width: "20px"}}>
-                        <button onClick={() => {handleRemoveFromScaletta(col.id, col.scalettaOrdine)}} style={{color: "red", marginLeft: "0px"}} className="button-delete"><PlaylistRemoveIcon/></button>
-                     </div>
-                     }
-                      </div>
-                    </div>
-                    <hr style={{margin: "0"}}/>
+      {/* Intestazione Tabella */}
+      <div className='row' style={{ height: "25px", marginTop: "7px", flexShrink: 0 }}>
+        <div className='col-1 coltext' style={{ width: "100px" }}>N.</div>
+        <div className='col-6 coltext'>Cliente</div>
+      </div>
 
-                  </>
-                 
-                  </div>
-                  ))}
+      {Progress == false && (
+        <div style={{ marginTop: "14px", flexShrink: 0 }}>
+          <CircularProgress />
+        </div>
+      )}
+
+      {/* --- SEZIONE SCROLLABILE --- */}
+      {/* AGGIUNTO: flex-grow: 1 per occupare tutto lo spazio rimanente */}
+      <div style={{ 
+        flexGrow: 1, 
+        overflowY: "auto", 
+        overflowX: "hidden",
+        marginTop: "10px" 
+      }}>
+        {scaletta.map((col) => (
+          <div key={col.id}>
+            <div className="diviCol1">
+              <div className="row d-flex align-items-center">
+                <div className='col-1' style={{ width: "100px" }}>
+                  <h3 className='inpTab' style={{ color: primary }}><b>{col.scalettaOrdine}</b></h3>
                 </div>
+                <div className='col-6'>
+                  <h3 className='inpTab' onClick={() => {
+                    getNotaId(col.idCliente, col.id, col.cont, col.nomeC, col.data, col.data, col.NumCartoni, col.sommaTotale, col.debitoRes, col.debitoTotale, col.indirizzo, col.tel, col.partitaIva, col.completa, col.idDebito, col.NumBuste)
+                    navigate("/nota")
+                    AutoProdCli.length = 0
+                  }}>
+                    <span style={{ color: primary }}><b>{col.idCliente}</b></span> {col.nomeC}
+                  </h3>
+                </div>
+                <div className='col-1' style={{ padding: "0px", marginTop: "-5px", width: "20px" }}>
+                  <button onClick={() => { moveUp(col.id, col.scalettaOrdine) }} style={{ color: "green" }} className="button-delete"><ArrowUpwardIcon /></button>
+                </div>
+                <div className='col-1' style={{ padding: "0px", marginTop: "-5px", width: "20px" }}>
+                  <button onClick={() => { moveDown(col.id, col.scalettaOrdine) }} style={{ color: "blue" }} className="button-delete"><ArrowDownwardIcon /></button>
+                </div>
+                {col.completa !== "2" &&
+                  <div className='col-1 ms-4' style={{ padding: "0px", marginTop: "-5px", width: "20px" }}>
+                    <button onClick={() => { handleRemoveFromScaletta(col.id, col.scalettaOrdine) }} style={{ color: "red" }} className="button-delete"><PlaylistRemoveIcon /></button>
+                  </div>
+                }
               </div>
             </div>
-        {/**Fine tabella */} 
+            <hr style={{ margin: "0" }} />
+          </div>
+        ))}
+      </div>
+      {/* --- FINE SEZIONE SCROLLABILE --- */}
+      
     </div>
+  </div>
+</div>
     
     </div>    
           
