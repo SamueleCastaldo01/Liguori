@@ -2,10 +2,9 @@ import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs, serverTimestamp, limit} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import { useMediaQuery } from '@mui/material';
-import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
+import ClientAddressInput from '../components/ClientAddressInput';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { auth, db } from "../firebase-config";
-import { Input } from '@mui/material';
 import { Modal } from 'react-bootstrap';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
@@ -22,7 +21,6 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoCompScorta = [];
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAboBq_ZV4MEPbzrPGqvejSQ53QZHRlGA0';
 
 function AddFornitori( {getFornId} ) {
 
@@ -306,31 +304,11 @@ const handleActiveEdit = async (todo) => {
             onChange={(e) => setPartitaIva(e.target.value)}/>
       </div></div>
 
-      <div className='pac-container' style={{ position: "absolute", top: "200px" }}>
-                <Input style={{ width: "765px" }}
-                  fullWidth 
-                  className='inpCli' 
-                  color="primary" 
-                  placeholder='Indirizzo Google Maps'
-                  inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
-                    <Autocomplete
-                      apiKey={GOOGLE_MAPS_API_KEY}
-                      {...props}
-                      onPlaceSelected={(place) => {
-                        setIndirizzo(place.formatted_address)
-                        console.log(place);
-                      }}
-                      options={{
-                        types: ["address"],
-                        componentRestrictions: { country: "it" },
-                      }}
-                      defaultValue={indirizzo}
-                    />
-                  )}
-                />
-          </div>
+      <div className='row mt-4'><div className='col-12'>
+                <ClientAddressInput value={indirizzo} onChange={setIndirizzo} />
+          </div></div>
 
-          <div className='row mt-4' style={{ paddingTop: "60px"  }}><div >
+          <div className='row mt-4'><div >
             <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" type='email' label="Indirizzo email" variant="outlined" autoComplete='off' value={indirizzoEmail} 
             onChange={(e) => setIndirizzoEmail(e.target.value)}/>
         </div></div>

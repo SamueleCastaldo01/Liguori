@@ -25,7 +25,6 @@ import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAboBq_ZV4MEPbzrPGqvejSQ53QZHRlGA0';
 
 
 function AddCliente( {getCliId} ) {
@@ -637,16 +636,15 @@ const handleDelete = async (idFirestore, idClienteCustom) => {
       </div></div>
 
     
-            <div className='pac-container' style={{ position: "absolute", top: "200px" }}>
+            <div className='row mt-4'><div className='col-12'>
                 <ClientAddressInput
-                  apiKey={GOOGLE_MAPS_API_KEY}
                   value={indirizzo}
                   onChange={setIndirizzo}
                 />
-          </div>
+          </div></div>
    
 
-          <div className='row mt-4' style={{ paddingTop: "60px"  }}><div >
+          <div className='row mt-4'><div >
             <TextField className='' style={{width:"100%"}} color='secondary' id="filled-basic" type='email' label="Indirizzo email" variant="outlined" autoComplete='off' value={indirizzoEmail} 
             onChange={(e) => setIndirizzoEmail(e.target.value)}/>
         </div></div>
@@ -1031,7 +1029,6 @@ export default AddCliente;
 fullWidth className='inpCli' color="primary" placeholder='Indirizzo Google Maps'
   inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
     <Autocomplete
-      apiKey={GOOGLE_MAPS_API_KEY}
       {...props}
       onPlaceSelected={(place) => {
         setIndirizzo(place.formatted_address)

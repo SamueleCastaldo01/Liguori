@@ -1,56 +1,128 @@
-[debug] [2026-02-20T13:18:14.924Z] ----------------------------------------------------------------------
-[debug] [2026-02-20T13:18:14.926Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\casta\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
-[debug] [2026-02-20T13:18:14.926Z] CLI Version:   14.0.1
-[debug] [2026-02-20T13:18:14.926Z] Platform:      win32
-[debug] [2026-02-20T13:18:14.926Z] Node Version:  v21.4.0
-[debug] [2026-02-20T13:18:14.927Z] Time:          Fri Feb 20 2026 14:18:14 GMT+0100 (Ora standard dell’Europa centrale)
-[debug] [2026-02-20T13:18:14.927Z] ----------------------------------------------------------------------
+[debug] [2026-10-27T13:12:45.857Z] ----------------------------------------------------------------------
+[debug] [2026-10-27T13:12:45.860Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\TwinPower\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login:list
+[debug] [2026-10-27T13:12:45.860Z] CLI Version:   15.3.1
+[debug] [2026-10-27T13:12:45.861Z] Platform:      win32
+[debug] [2026-10-27T13:12:45.861Z] Node Version:  v22.23.4
+[debug] [2026-10-27T13:12:45.861Z] Time:          Tue Oct 27 2026 14:12:45 GMT+0100 (Ora standard dell’Europa centrale)
+[debug] [2026-10-27T13:12:45.861Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2026-02-20T13:18:14.929Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
-[debug] [2026-02-20T13:18:15.157Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2026-02-20T13:18:15.158Z] > authorizing via signed-in user (castaldo.samuele@gmail.com)
-[debug] [2026-02-20T13:18:15.158Z] [iam] checking project liguorisrl-38c83 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
-[debug] [2026-02-20T13:18:15.158Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:15.158Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:15.159Z] > refreshing access token with scopes: []
-[debug] [2026-02-20T13:18:15.159Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2026-02-20T13:18:15.159Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:15.327Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
-[debug] [2026-02-20T13:18:15.327Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:15.328Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions [none]
-[debug] [2026-02-20T13:18:15.328Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions x-goog-quota-user=projects/liguorisrl-38c83
-[debug] [2026-02-20T13:18:15.328Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
-[debug] [2026-02-20T13:18:15.482Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
-[debug] [2026-02-20T13:18:15.482Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
-[debug] [2026-02-20T13:18:16.135Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions 401
-[debug] [2026-02-20T13:18:16.135Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_TYPE_UNSUPPORTED","metadata":{"service":"cloudresourcemanager.googleapis.com","method":"google.cloudresourcemanager.v1.Projects.TestIamPermissions"}}]}}
-[debug] [2026-02-20T13:18:16.135Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
-[debug] [2026-02-20T13:18:16.135Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:16.136Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:16.136Z] > refreshing access token with scopes: []
-[debug] [2026-02-20T13:18:16.136Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2026-02-20T13:18:16.136Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:16.199Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
-[debug] [2026-02-20T13:18:16.199Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:16.199Z] [iam] error while checking permissions, command may fail: Request to https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
-[debug] [2026-02-20T13:18:16.200Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:16.200Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:16.200Z] > refreshing access token with scopes: []
-[debug] [2026-02-20T13:18:16.200Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2026-02-20T13:18:16.200Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:16.249Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
-[debug] [2026-02-20T13:18:16.249Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:16.250Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 [none]
-[debug] [2026-02-20T13:18:16.969Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 401
-[debug] [2026-02-20T13:18:16.969Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 {"error":{"code":401,"message":"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.","status":"UNAUTHENTICATED"}}
-[debug] [2026-02-20T13:18:16.969Z] Got a 401 Unauthenticated error for a call that required authentication. Refreshing tokens.
-[debug] [2026-02-20T13:18:16.969Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:16.969Z] Checked if tokens are valid: false, expires at: 1743590225199
-[debug] [2026-02-20T13:18:16.969Z] > refreshing access token with scopes: []
-[debug] [2026-02-20T13:18:16.970Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2026-02-20T13:18:16.970Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:17.016Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
-[debug] [2026-02-20T13:18:17.017Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2026-02-20T13:18:17.018Z] Request to https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 had HTTP Error: 401, Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.
-[error] 
-[error] Error: Assertion failed: resolving hosting target of a site with no site name or target name. This should have caused an error earlier
+[info] Logged in as srlliguori@gmail.com
+[debug] [2026-10-27T13:14:01.377Z] ----------------------------------------------------------------------
+[debug] [2026-10-27T13:14:01.379Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\TwinPower\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting --project liguorisrl-38c83 --non-interactive
+[debug] [2026-10-27T13:14:01.379Z] CLI Version:   15.3.1
+[debug] [2026-10-27T13:14:01.380Z] Platform:      win32
+[debug] [2026-10-27T13:14:01.380Z] Node Version:  v22.23.4
+[debug] [2026-10-27T13:14:01.380Z] Time:          Tue Oct 27 2026 14:14:01 GMT+0100 (Ora standard dell’Europa centrale)
+[debug] [2026-10-27T13:14:01.380Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-27T13:14:03.032Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-27T13:14:03.033Z] > authorizing via signed-in user (srlliguori@gmail.com)
+[debug] [2026-10-27T13:14:03.034Z] [iam] checking project liguorisrl-38c83 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-10-27T13:14:03.035Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:03.035Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:03.036Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions [none]
+[debug] [2026-10-27T13:14:03.036Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions x-goog-quota-user=projects/liguorisrl-38c83
+[debug] [2026-10-27T13:14:03.036Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-10-27T13:14:03.864Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions 200
+[debug] [2026-10-27T13:14:03.864Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/liguorisrl-38c83:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-10-27T13:14:03.865Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:03.865Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:03.865Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 [none]
+[debug] [2026-10-27T13:14:04.209Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 200
+[debug] [2026-10-27T13:14:04.210Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/liguorisrl-38c83 {"projectId":"liguorisrl-38c83","projectNumber":"510918580607","displayName":"LiguoriSrl","name":"projects/liguorisrl-38c83","resources":{"hostingSite":"liguorisrl-38c83"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_6b14eccf-3f2b-466f-99b1-e3b69785a755"}
+[info] 
+[info] === Deploying to 'liguorisrl-38c83'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-10-27T13:14:04.215Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:04.215Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:04.215Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions [none]
+[debug] [2026-10-27T13:14:04.215Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-10-27T13:14:05.940Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions 200
+[debug] [2026-10-27T13:14:05.941Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions {"name":"projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[liguorisrl-38c83]: beginning deploy... 
+[info] i  hosting[liguorisrl-38c83]: found 47 files in build 
+[debug] [2026-10-27T13:14:05.957Z] [hosting] uploading with 200 concurrency
+[debug] [2026-10-27T13:14:06.711Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:06.711Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:06.712Z] [hosting] hash cache [YnVpbGQ] stored for 47 files
+[debug] [2026-10-27T13:14:06.712Z] [hosting][hash queue][FINAL] {"max":750,"min":0,"avg":22.29787234042553,"active":0,"complete":47,"success":47,"errored":0,"retried":0,"total":47,"elapsed":754}
+[debug] [2026-10-27T13:14:06.713Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16:populateFiles [none]
+[debug] [2026-10-27T13:14:06.713Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16:populateFiles {"files":{"/robots.txt":"b2090cf9761ef60aa06e4fab97679bd43dfa5e5df073701ead5879d7c68f1ec5\r","/manifest.json":"6e0c0bced3944548f2b0a52270f633cf60ed68d93c5312524f715c5868c81321\r","/logo512.svg":"2f253827708b3e351f0cbc55e21e64f03eb315f84c0680e31ee95419badd3146\r","/logo512.png":"e4c4f0961843b958f1c17a1c1d1e05632e4599a385fd524d08eab5824a6fb067\r","/logo192.svg":"2f253827708b3e351f0cbc55e21e64f03eb315f84c0680e31ee95419badd3146\r","/logo192.png":"2922c564a57f90e87977063faefcf41b241b445aafa1dea54276452d7dd76df6\r","/imageLogin.jpg":"2f8dc624e936e1f0d7e94da4093ff9d191f2b1a2341a132f4d68e83a7157eec9\r","/favicon.ico":"65fe1dbef515b32025837676f711bcd69a4e50bd7754ad1218e783657a7b8c64\r","/dashLiguori.jpg":"de960f2e0c4d70b9971a64cec0daf7d714ef0142d11cd7fbefb6a1d1535b3533\r","/img/uber.png":"813de293bb2dd42c2e8b08eefc2f8ff96f31f816b26fb1a6e9711b1483d64d53\r","/img/rectangle.png":"fbc68767690f8b3d67e2d39c2ce7a6923442ee12fe70bc28d6be4ed36af292fb\r","/img/ellipse.png":"85c6b298bb2076b131deb11a19770591393afb23388801b07c15a0118f041cc8\r","/img/cardImage.png":"6180458120a7c6b8cd927159b8bd917fd371d42248bb5fa09fe4f976fbb2f72f\r","/img/pane/pane5.png":"a142882d95fa0718b9c9eb81a9b4d69fb1acb5f39c902f99395fdec82cfa7901\r","/img/pane/pane4.png":"d4ab45138408e1b3172902ee4e837229828e627b719d3bb47327611107846d39\r","/img/pane/pane3.png":"50c4eccc1f84e3bf0a3d001f39c47100b1a9f7bd8bb991c977734796c18853db\r","/img/pane/pane2.png":"9365b80849eff5e6f97831c2843e5fd4ec6f3bf10bd3bfae2dacbe13fe2d6015\r","/img/pane/pane1.png":"fd89bc6bec6bc0aaa6fab229de5a85241ea701569fd4244277ab85cfd2237e2b\r","/img/pages/promotionImage2.png":"bb31da5f8e17f69bdaa413d4feb9320653f5625e842d4a3ab85506bc5f96a7fd\r","/img/pages/promotionImage.png":"d23d9be627f933f4be2f03755be00621ede620d31ffd35a6de4322be05c9c45e\r","/img/pages/pane.png":"b3eca6b2313135cbe683119ac2f8c472c30399aae3293056bd5b8613eea8658b\r","/img/pages/logo.png":"c23d11a173c69325ad22949f9c702e7873ed295f9f12389b762ea7dc2cf93da3\r","/img/pages/heroImage2.png":"2e9d1b95237cf26b39fa4f6b2398c1ffd77448d52958515fd00b378fa3e14cfd\r","/img/pages/hero404.png":"57eb9c49b22e1520439edc6f3910b351b4c49cca42c15d3e584456e6180f3351\r","/img/overlays/09.png":"306c9660485749095f422b7f8b2204eb902ef89d97b2209f64fc2f19eb7a062e\r","/img/overlays/08.png":"39eefdc30817798f8d35177b8317d411bf4d8ca4124918528f22a19a8eefc4bf\r","/img/overlays/07.png":"42f14a27d8f290ff5643d8cf42cf796624bbe9095dadc54631abf9acb651fff2\r","/img/overlays/06.png":"62dfb9e53d02fe1c288b3302816425a35898c59faaec3105fe129ac23fbded38\r","/img/overlays/05.png":"b5d8113842ebb74decde45d8169c27779cedd0f49980c1bb0c2bc74421e9ae07\r","/img/overlays/04.png":"141887d426c37955c98e7a763dbded1af86d9918b4106e9b3116015113632e75\r","/img/overlays/03.png":"8b0d6ce4855e299eeda24c0b0347a7b511dce735d18f3d98e0a63089b96fb516\r","/img/overlays/02.png":"d6cd5b385cf409a31bbc3205f14b0efd4f3663b39279f4fca8cf483f72f82235\r","/img/overlays/01.png":"26cc35956c8290d48d8bb52baed7d1f89e362a76f84cd3e637cf6e5e2f1a0dbe\r","/index.html":"56632e40cc44005c1f0e9849e6f8c0384cefe5c2de19657c7dc3993cdbf6b9a2","/static/js/main.7337cc60.js.LICENSE.txt":"c3ec63a06f1723a8471e97d05ab3f0d5b49682466e955692a2b7b67995fa4d17","/service-worker.js":"4f49d0de46fb1775eff081813ea089af355979310acf32115b604979de85f1d5","/asset-manifest.json":"b97ea8844cde058cfd60240248683ad45a171be8c648695d4aee593a7ed3f195","/static/js/977.93a2b286.chunk.js.LICENSE.txt":"a0fc519b9d2c714037eac8999e4d3288a6dbb222ac8377dcdc72a7bf27db2a4a","/static/js/977.93a2b286.chunk.js":"0d05740d0440cd59326bcae5b71a400f4348a483766581d31b8b72997c02f493","/static/js/977.93a2b286.chunk.js.map":"c9a5cc443060df357744aa43ee0564b3294dd3f5d15a3803c6a6867d80d51bf8","/static/js/455.d1cb28e3.chunk.js":"89deec46f20ff6fabb14c9a3d3df62c9bbc8032d145af1859bf9bbbf011bbe2f","/service-worker.js.map":"3b1d7cff38310e1930e4505efe5866e0a7402e76c530cae9acdc45fd2f020e92","/static/css/main.3142a229.css":"defba56c54a694fac216c12fc7aa631b356604db5ab81ec7af27c3756e37ec04","/static/js/455.d1cb28e3.chunk.js.map":"7fc51a9ae37e3c649a66383448373dcaa05ea16ed49a88f3a1c644056549f88d","/static/css/main.3142a229.css.map":"211f3c4a93bbafd236b63cf15969cae3da742619c9c09f58967892f2bb24a6bc","/static/js/main.7337cc60.js":"89087563c02a4b94f81577a605f394e8b26c8b3635f00947281e59f366c0181b","/static/js/main.7337cc60.js.map":"a31ae6119599b2bd9cbdd215bf474ef8a59815261949e93e640d4278380be202"}}
+[debug] [2026-10-27T13:14:07.585Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16:populateFiles 200
+[debug] [2026-10-27T13:14:07.586Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16:populateFiles {"uploadRequiredHashes":["4f49d0de46fb1775eff081813ea089af355979310acf32115b604979de85f1d5","56632e40cc44005c1f0e9849e6f8c0384cefe5c2de19657c7dc3993cdbf6b9a2","b97ea8844cde058cfd60240248683ad45a171be8c648695d4aee593a7ed3f195","a31ae6119599b2bd9cbdd215bf474ef8a59815261949e93e640d4278380be202","89087563c02a4b94f81577a605f394e8b26c8b3635f00947281e59f366c0181b"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files"}
+[debug] [2026-10-27T13:14:07.586Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.586Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.586Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.586Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:07.587Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/4f49d0de46fb1775eff081813ea089af355979310acf32115b604979de85f1d5 [none]
+[debug] [2026-10-27T13:14:07.587Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/4f49d0de46fb1775eff081813ea089af355979310acf32115b604979de85f1d5 [stream]
+[debug] [2026-10-27T13:14:07.588Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/56632e40cc44005c1f0e9849e6f8c0384cefe5c2de19657c7dc3993cdbf6b9a2 [none]
+[debug] [2026-10-27T13:14:07.588Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/56632e40cc44005c1f0e9849e6f8c0384cefe5c2de19657c7dc3993cdbf6b9a2 [stream]
+[debug] [2026-10-27T13:14:07.589Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/b97ea8844cde058cfd60240248683ad45a171be8c648695d4aee593a7ed3f195 [none]
+[debug] [2026-10-27T13:14:07.589Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/b97ea8844cde058cfd60240248683ad45a171be8c648695d4aee593a7ed3f195 [stream]
+[debug] [2026-10-27T13:14:07.590Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/a31ae6119599b2bd9cbdd215bf474ef8a59815261949e93e640d4278380be202 [none]
+[debug] [2026-10-27T13:14:07.590Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/a31ae6119599b2bd9cbdd215bf474ef8a59815261949e93e640d4278380be202 [stream]
+[debug] [2026-10-27T13:14:07.591Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/89087563c02a4b94f81577a605f394e8b26c8b3635f00947281e59f366c0181b [none]
+[debug] [2026-10-27T13:14:07.591Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/89087563c02a4b94f81577a605f394e8b26c8b3635f00947281e59f366c0181b [stream]
+[debug] [2026-10-27T13:14:07.592Z] [hosting][populate queue][FINAL] {"max":876,"min":876,"avg":876,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":881}
+[debug] [2026-10-27T13:14:07.592Z] [hosting] uploads queued: 5
+[info] i  hosting: uploading new files [0/5] (0%) 
+[debug] [2026-10-27T13:14:08.660Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/4f49d0de46fb1775eff081813ea089af355979310acf32115b604979de85f1d5 200
+[debug] [2026-10-27T13:14:08.660Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/4f49d0de46fb1775eff081813ea089af355979310acf32115b604979de85f1d5 [stream]
+[debug] [2026-10-27T13:14:08.661Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/b97ea8844cde058cfd60240248683ad45a171be8c648695d4aee593a7ed3f195 200
+[debug] [2026-10-27T13:14:08.661Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/b97ea8844cde058cfd60240248683ad45a171be8c648695d4aee593a7ed3f195 [stream]
+[debug] [2026-10-27T13:14:08.768Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/56632e40cc44005c1f0e9849e6f8c0384cefe5c2de19657c7dc3993cdbf6b9a2 200
+[debug] [2026-10-27T13:14:08.768Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/56632e40cc44005c1f0e9849e6f8c0384cefe5c2de19657c7dc3993cdbf6b9a2 [stream]
+[debug] [2026-10-27T13:14:09.217Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/89087563c02a4b94f81577a605f394e8b26c8b3635f00947281e59f366c0181b 200
+[debug] [2026-10-27T13:14:09.217Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/89087563c02a4b94f81577a605f394e8b26c8b3635f00947281e59f366c0181b [stream]
+[info] i  hosting: uploading new files [4/5] (80%) 
+[debug] [2026-10-27T13:14:10.598Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/a31ae6119599b2bd9cbdd215bf474ef8a59815261949e93e640d4278380be202 200
+[debug] [2026-10-27T13:14:10.598Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/liguorisrl-38c83/versions/64242ee1f5c94c16/files/a31ae6119599b2bd9cbdd215bf474ef8a59815261949e93e640d4278380be202 [stream]
+[debug] [2026-10-27T13:14:10.598Z] [hosting][upload queue][FINAL] {"max":3011,"min":1074,"avg":1594.4,"active":0,"complete":5,"success":5,"errored":0,"retried":0,"total":5,"elapsed":3012}
+[info] i  hosting: upload complete 
+[info] +  hosting[liguorisrl-38c83]: file upload complete 
+[debug] [2026-10-27T13:14:10.599Z] [hosting] deploy completed after 4656ms
+[debug] [2026-10-27T13:14:10.599Z] [
+  {
+    "config": {
+      "site": "liguorisrl-38c83",
+      "public": "build",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    "version": "projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16"
+  }
+]
+[info] i  hosting[liguorisrl-38c83]: finalizing version... 
+[debug] [2026-10-27T13:14:10.600Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:10.600Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:10.600Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions/64242ee1f5c94c16 updateMask=status%2Cconfig
+[debug] [2026-10-27T13:14:10.600Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions/64242ee1f5c94c16 {"status":"FINALIZED","config":{}}
+[debug] [2026-10-27T13:14:12.035Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions/64242ee1f5c94c16 200
+[debug] [2026-10-27T13:14:12.035Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/versions/64242ee1f5c94c16 {"name":"projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-10-27T13:14:05.311559Z","createUser":{"email":"srlliguori@gmail.com"},"finalizeTime":"2026-10-27T13:14:12.484331Z","finalizeUser":{"email":"srlliguori@gmail.com"}}
+[debug] [2026-10-27T13:14:12.035Z] [hosting] finalized version for liguorisrl-38c83:[object Object]
+[info] +  hosting[liguorisrl-38c83]: version finalized 
+[info] i  hosting[liguorisrl-38c83]: releasing new version... 
+[debug] [2026-10-27T13:14:12.036Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:12.036Z] Checked if tokens are valid: true, expires at: 1793109974001
+[debug] [2026-10-27T13:14:12.036Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/channels/live/releases versionName=projects%2F510918580607%2Fsites%2Fliguorisrl-38c83%2Fversions%2F64242ee1f5c94c16
+[debug] [2026-10-27T13:14:12.036Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/channels/live/releases {}
+[debug] [2026-10-27T13:14:13.536Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/channels/live/releases 200
+[debug] [2026-10-27T13:14:13.537Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/liguorisrl-38c83/channels/live/releases {"name":"projects/510918580607/sites/liguorisrl-38c83/channels/live/releases/1793106852923000","version":{"name":"projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-10-27T13:14:05.311559Z","createUser":{"email":"srlliguori@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocK2x4yO1YT67imL4VnGsmjOzKK-IsZQ5mTYI0N_mVn9-HRl4w=mo"},"finalizeTime":"2026-10-27T13:14:12.484331Z","finalizeUser":{"email":"srlliguori@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocK2x4yO1YT67imL4VnGsmjOzKK-IsZQ5mTYI0N_mVn9-HRl4w=mo"}},"type":"DEPLOY","releaseTime":"2026-10-27T13:14:12.923Z","releaseUser":{"email":"srlliguori@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocK2x4yO1YT67imL4VnGsmjOzKK-IsZQ5mTYI0N_mVn9-HRl4w=mo"}}
+[debug] [2026-10-27T13:14:13.537Z] [hosting] release: {"name":"projects/510918580607/sites/liguorisrl-38c83/channels/live/releases/1793106852923000","version":{"name":"projects/510918580607/sites/liguorisrl-38c83/versions/64242ee1f5c94c16","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-10-27T13:14:05.311559Z","createUser":{"email":"srlliguori@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocK2x4yO1YT67imL4VnGsmjOzKK-IsZQ5mTYI0N_mVn9-HRl4w=mo"},"finalizeTime":"2026-10-27T13:14:12.484331Z","finalizeUser":{"email":"srlliguori@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocK2x4yO1YT67imL4VnGsmjOzKK-IsZQ5mTYI0N_mVn9-HRl4w=mo"}},"type":"DEPLOY","releaseTime":"2026-10-27T13:14:12.923Z","releaseUser":{"email":"srlliguori@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocK2x4yO1YT67imL4VnGsmjOzKK-IsZQ5mTYI0N_mVn9-HRl4w=mo"}}
+[info] +  hosting[liguorisrl-38c83]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/liguorisrl-38c83/overview
+[info] Hosting URL: https://liguorisrl-38c83.web.app
