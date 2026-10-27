@@ -1,3 +1,4 @@
+import { shouldHighlightOrderItem } from '../utils/orderHighlight';
 import React from "react";
 import {collection, deleteDoc, doc, getDoc, onSnapshot, updateDoc, query, orderBy, where, getDocs, setDoc} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +21,8 @@ import { FlareSharp } from "@mui/icons-material";
 
 
 export default function TodoNota({ todo, handleDelete, handleEdit, displayMsg, nomeCli, flagStampa, Completa, SommaTot, flagBho, brandTinte, idCliente}) {
+
+  const highlighted = shouldHighlightOrderItem(todo);
 
   const prodottiLocali = JSON.parse(localStorage.getItem("prodottiCache") || "[]");
 
@@ -340,7 +343,7 @@ const handleChangeAge = (event) => {
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
     <div className="col-1" style={{padding:"0px",
-     background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00" }}>    
+     background: highlighted && "#FFFF00" }}>
     {sup ===true && (Completa == 0 || Completa == 5 || Completa == 6) &&  ( 
       <>
       <span style={{padding:"0px"}}>
@@ -359,8 +362,8 @@ const handleChangeAge = (event) => {
     {sup ===true && (Completa == 1 || Completa == 2) &&   
       <>
       {todo.simbolo== "1" ?
-    <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{+todo.qtProdotto-(+todo.meno)}</span></h3> :
-    <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
+    <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: highlighted && "#FFFF00"}}>{+todo.qtProdotto-(+todo.meno)}</span></h3> :
+    <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: highlighted && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
       }
       </>
     }
@@ -368,7 +371,7 @@ const handleChangeAge = (event) => {
 
 {/*******************Prodotto********************************************************************************** */}
 <div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", width: "422px",
- background: (todo.simbolo == " " || (todo.prodottoC == "ROIAL ASCIUGAMANO 60 pz" && (todo.simbolo != "(NO)" && todo.simbolo != "X"))) && "#FFFF00", height: "40px"}}>
+ background: highlighted && "#FFFF00", height: "40px"}}>
       {/***Prodotti non completati (non tinte)********************** */}
     {sup ===true && todo.flagTinte===false && (Completa == 0 || Completa == 5 || Completa == 6) &&( 
       <>
@@ -402,7 +405,7 @@ const handleChangeAge = (event) => {
    {/*****PRD completati************** */}
     {sup ===true && todo.flagTinte===false && (Completa == 1 || Completa == 2 ) &&( 
       <>
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: todo.simbolo == " "  && "#FFFF00"}}>{todo.prodottoC}
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}> <span style={{background: highlighted && "#FFFF00"}}>{todo.prodottoC}
       </span>
          {todo.simbolo=="X" && <span style={{color: "red", fontSize: "16px"}}> {todo.simbolo} </span> } 
        </h3>

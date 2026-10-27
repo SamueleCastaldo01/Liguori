@@ -1,7 +1,9 @@
+import useHistory from '../hooks/useHistory';
+import HistoryControls from '../components/HistoryControls';
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, serverTimestamp, limit, getDocs, getCountFromServer} from 'firebase/firestore';
+import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, serverTimestamp, getDocs, getCountFromServer} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
@@ -34,13 +36,11 @@ import TinteModal from '../components/TinteModal';
 function ScortaTinte() {
 
   const [todos, setTodos] = React.useState([]);
-  const [crono, setCrono] = React.useState([]);
   const [brandTinte, setBrandTinte] = useState([]);
 
   const [arrayOrdinato, setArrayOrdinato] = React.useState([]);
 
   const [Progress, setProgress] = React.useState(false);
-  const [Progress1, setProgress1] = React.useState(false);
 
   const [showAddTinte, setShowAddTinte] = useState(false);
 
@@ -214,22 +214,8 @@ React.useEffect(() => {
   }, [todos]);
 
 
-  React.useEffect(() => {
-    if(popupActiveCrono) {
-      const collectionRef = collection(db, "cronologiaTinte");
-      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
-  
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setCrono(todosArray);
-        setProgress1(true)
-      });
-      return () => unsub();
-    }
-  }, [popupActiveCrono == true]);
+  const quantityHistory = useHistory('cronologiaTinte', popupActiveCrono);
+  const crono = quantityHistory.entries;
 
  //******************************************************************************* */
  //stampa
@@ -752,18 +738,14 @@ function handlePopUp(image, nota) {
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scrollCrono" style={{maxHeight: "400px"}}>
-    {Progress1 == false && 
-  <div style={{marginTop: "14px"}}>
-      <CircularProgress />
-  </div>
-      }
+
   {crono.map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-3 diviCol' style={{width:"220px"}}><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-3 diviCol' style={{width:"220px"}}><p className='inpTab'>{(col.createdAt ? moment(col.createdAt.toDate()).calendar() : "In salvataggio…")}</p></div>
       <div className='col-3 diviCol' style={{padding: "0px", width:"140px"}}><p className='inpTab'>{col.nomeP} </p> </div>
       <div className='col-3 diviCol' style={{padding: "0px", width:"140px"}}><p className='inpTab'>{col.brand} </p> </div>
-      <div className='col-2 diviCol' style={{padding: "0px", width:"90px"}}><p className='inpTab'>{col.autore.substr(0, 7)}..</p></div>
+      <div className='col-2 diviCol' style={{padding: "0px", width:"90px"}}><p className='inpTab'>{String(col.autore ?? '').substr(0, 7)}..</p></div>
       <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantIni}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantAgg}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px", width:"50px"}}><p className='inpTab'>{col.quantFin}</p></div>
@@ -772,6 +754,7 @@ function handlePopUp(image, nota) {
     </div>
     ))}
     </div>
+    <HistoryControls history={quantityHistory} searchable={false} />
   </div>
 }
 

@@ -1,8 +1,11 @@
+import ClientAddressInput from '../components/ClientAddressInput';
+import { buildMapsSearchUrl, getClientAddress } from '../utils/clientMaps';
+import useHistory from '../hooks/useHistory';
+import HistoryControls from '../components/HistoryControls';
 import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, serverTimestamp, getCountFromServer, writeBatch, limit, where, getDocs} from 'firebase/firestore';
 import TextField from '@mui/material/TextField';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Input } from '@mui/material';
 import { auth, db } from "../firebase-config";
 import { toast, Slide } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
@@ -14,7 +17,6 @@ import Button from '@mui/material/Button';
 import { Modal } from 'react-bootstrap';
 import { supa, guid, tutti, primary, rosso } from '../components/utenti';
 import InputAdornment from '@mui/material/InputAdornment';
-import Autocomplete, { usePlacesWidget } from "react-google-autocomplete";
 import TodoDebiCli from '../components/TodoDebiCli';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -23,14 +25,13 @@ import { motion } from 'framer-motion';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyA2327mULUbMv_7eW1baIeXRwbnfYLYBWo';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAboBq_ZV4MEPbzrPGqvejSQ53QZHRlGA0';
 
 
 function AddCliente( {getCliId} ) {
 
   const [todos, setTodos] = React.useState([]);
   const [todosDebi, setTodosDebi] = React.useState([]);
-  const [crono, setCrono] = React.useState([]);
 
   const [idClinEdit, setIdClinEdit] = React.useState([]);
 
@@ -309,22 +310,8 @@ const handleImportCSV = (e) => {
   }, [todosDebi]);
 
 
-  //cronologia debito
-  React.useEffect(() => {
-    if(popupActiveCrono) {
-      const collectionRef = collection(db, "cronologiaDeb");
-      const q = query(collectionRef, limit(150), orderBy("createdAt", "desc"));
-  
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setCrono(todosArray);
-      });
-      return () => unsub();
-    }
-  }, [popupActiveCrono]);
+  const debtHistory = useHistory('cronologiaDeb', popupActiveCrono);
+  const crono = debtHistory.entries;
  //******************************************************************************* */
   //speed
   function handleButtonDebito() {
@@ -393,6 +380,8 @@ const handleSubmit = async (e, id) => {
 
     const batch = writeBatch(db);  // Crea un batch per le scritture
 
+    const address = getClientAddress({ indirizzo, via, numeroCivico, citta, cap, stato });
+
     // Aggiungi cliente alla collezione "clin"
     const clinRef = doc(collection(db, "clin"));
     batch.set(clinRef, {
@@ -407,8 +396,8 @@ const handleSubmit = async (e, id) => {
       cap,
       indirizzoEmail,
       nomeC: nomeCompleto,
-      indirizzo,
-      indirizzoLink: "https://www.google.com/maps/search/?api=1&query=" + indirizzo,
+      indirizzo: address,
+      indirizzoLink: buildMapsSearchUrl(address),
       partitaIva,
       cellulare,
     });
@@ -473,7 +462,8 @@ const handleActiveEdit = async (todo) => {
 };
   const handleEdit = async () => {
     console.log(idClinEdit)
-    await updateDoc(doc(db, "clin", idClinEdit), {nomeC:nome+" "+cognome, nome: nome, cognome:cognome, stato:stato, indirizzo:indirizzo, indirizzoLink: "https://www.google.com/maps/search/?api=1&query="+indirizzo, numeroCivico:numeroCivico, citta:citta, cap:cap, indirizzoEmail:indirizzoEmail, partitaIva:partitaIva, cellulare:cellulare});
+    const address = getClientAddress({ indirizzo, via, numeroCivico, citta, cap, stato });
+    await updateDoc(doc(db, "clin", idClinEdit), {nomeC:nome+" "+cognome, nome: nome, cognome:cognome, stato:stato, indirizzo:address, indirizzoLink: buildMapsSearchUrl(address), via:via, numeroCivico:numeroCivico, citta:citta, cap:cap, indirizzoEmail:indirizzoEmail, partitaIva:partitaIva, cellulare:cellulare});
     
     const q = query(collection(db, "debito"), where("idCliente", "==", idCliente));  //vado a trovare il deb1 vecchio tramite query
     const querySnapshot = await getDocs(q);
@@ -563,7 +553,6 @@ const confirmDeleteFromModal = () => {
   //----------------------------------------------------------------------------------------------
   const handleCronologia = async (todo, dd1, debV) => {
     const collectionRef = collection(db, "cronologiaDeb");
-    const q = query(collectionRef, orderBy("createdAt"), limit(150)); // Limite impostato a 10 documenti
   
     await addDoc(collectionRef, {
       autore: auth.currentUser.displayName,
@@ -649,26 +638,10 @@ const handleDelete = async (idFirestore, idClienteCustom) => {
 
     
             <div className='pac-container' style={{ position: "absolute", top: "200px" }}>
-                <Input style={{ width: "765px" }}
-                  fullWidth 
-                  className='inpCli' 
-                  color="primary" 
-                  placeholder='Indirizzo Google Maps'
-                  inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
-                    <Autocomplete
-                      apiKey={GOOGLE_MAPS_API_KEY}
-                      {...props}
-                      onPlaceSelected={(place) => {
-                        setIndirizzo(place.formatted_address)
-                        console.log(place);
-                      }}
-                      options={{
-                        types: ["address"],
-                        componentRestrictions: { country: "it" },
-                      }}
-                      defaultValue={indirizzo}
-                    />
-                  )}
+                <ClientAddressInput
+                  apiKey={GOOGLE_MAPS_API_KEY}
+                  value={indirizzo}
+                  onChange={setIndirizzo}
                 />
           </div>
    
@@ -1019,18 +992,18 @@ const handleDelete = async (idFirestore, idClienteCustom) => {
     if (searchTermCrono === "") {
       return val;
     } else if (
-      val.nomeC.toLowerCase().includes(searchTermCrono.toLowerCase()) || 
-      val.idCliente.toLowerCase().includes(searchTermCrono.toLowerCase()) 
+      String(val.nomeC ?? '').toLowerCase().includes(searchTermCrono.toLowerCase()) ||
+      String(val.idCliente ?? '').toLowerCase().includes(searchTermCrono.toLowerCase())
     ) {
       return val;
     }
   }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-2 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-2 diviCol'><p className='inpTab'>{(col.createdAt ? moment(col.createdAt.toDate()).calendar() : "In salvataggio…")}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.idCliente} </p> </div>
-      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeC.substr(0, 18)} </p> </div>
-      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore.substr(0, 10)}...</p></div>
+      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{String(col.nomeC ?? '').substr(0, 18)} </p> </div>
+      <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{String(col.autore ?? '').substr(0, 10)}...</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.debv).toFixed(2).replace('.', ',')}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>€{Number(col.deb1).toFixed(2).replace('.', ',')}</p></div>
       <hr style={{margin: "0"}}/>
@@ -1038,6 +1011,7 @@ const handleDelete = async (idFirestore, idClienteCustom) => {
     </div>
     ))}
   </div>
+  <HistoryControls history={debtHistory} />
   </div>
 }
 </motion.div>

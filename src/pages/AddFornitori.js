@@ -22,7 +22,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 export const AutoCompScorta = [];
-const GOOGLE_MAPS_API_KEY = 'AIzaSyA2327mULUbMv_7eW1baIeXRwbnfYLYBWo';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyAboBq_ZV4MEPbzrPGqvejSQ53QZHRlGA0';
 
 function AddFornitori( {getFornId} ) {
 

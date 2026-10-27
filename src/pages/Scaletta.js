@@ -453,7 +453,7 @@ function Scaletta({ getOrdId, getNotaId, TodayData }) {
       exclusive
       aria-label="Platform"
     > 
-    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { navigate("/stampamassiva") }}  variant="contained">Stampa Massiva</Button>
+    <Button  color='primary' style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => { navigate("/stampamassiva", { state: { date: scalettaDataSele, scaletta: true } }) }}  variant="contained">Stampa Massiva</Button>
     </ToggleButtonGroup>
     </div>
 

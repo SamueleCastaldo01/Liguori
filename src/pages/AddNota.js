@@ -400,7 +400,7 @@ const contEffect = async () => {
                 AutoDataScal.length = 0
           }} size="small" variant="contained">Aggiungi cliente alla scaletta</Button>}
           <Button onClick={HandleSpeedAddScalClien} size="small" variant="contained"> Aggiungi Cliente</Button>
-          <Button onClick={ () => {navigate("/stampamassiva"); }} size="small" variant="contained"> Stampa Massiva</Button>
+          <Button onClick={ () => {navigate("/stampamassiva", { state: { date: dataOrd, scaletta: false } }); }} size="small" variant="contained"> Stampa Massiva</Button>
       {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
     </ToggleButtonGroup>
 

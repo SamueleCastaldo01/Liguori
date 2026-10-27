@@ -610,7 +610,8 @@ width: 110%;
 
 
 .todo_containerCronoo {
-  height: 470px;
+  min-height: 470px;
+  height: auto;
 }
 
 .todo_containerFor{

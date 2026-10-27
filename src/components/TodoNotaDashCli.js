@@ -1,3 +1,4 @@
+import { shouldHighlightOrderItem } from '../utils/orderHighlight';
 import React from "react";
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +21,8 @@ import { fontSize } from "@mui/system";
 export const AutoCompProd = [];
 
 export default function TodoNotaDashCli({ todo}) {
+
+  const highlighted = shouldHighlightOrderItem(todo);
 
     //permessi utente
     let sup= supa.includes(localStorage.getItem("uid"))
@@ -60,18 +63,18 @@ export default function TodoNotaDashCli({ todo}) {
 <hr style={{margin: "0"}}/>
     <div className="row " style={{ borderBottom:"solid",  borderWidth: "2px" }}>
 {/**************************QUANTITA'******************************************************************* */}
-    <div className="col-1" style={{padding:"0px", background: todo.simbolo == " " && "#FFFF00" }}>    
+    <div className="col-1" style={{padding:"0px", background: highlighted && "#FFFF00" }}>
 
-      <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: todo.simbolo == " " && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
+      <h3 className="inpTabNota" style={{ textAlign:"center"}}><span style={{ background: highlighted && "#FFFF00"}}>{todo.qtProdotto}</span></h3>
 
     </div>
 
 {/*******************Prodotto********************************************************************************** */}
-<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: todo.simbolo == " " && "#FFFF00"}}>
+<div className="col-6" style={{padding: "0px", borderLeft:"solid",  borderWidth: "2px", background: highlighted && "#FFFF00"}}>
       {/***Prodotti********************** */}
 
     { todo.flagTinte===false &&( 
-      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}><span style={{background: todo.simbolo == " " && "#FFFF00"}}>{todo.prodottoC}</span>  </h3>
+      <h3 className="inpTabNota" style={{ marginLeft: "12px"}}><span style={{background: highlighted && "#FFFF00"}}>{todo.prodottoC}</span>  </h3>
     )}
 
       {/*****Tinte********************************************************************/}
@@ -87,7 +90,7 @@ export default function TodoNotaDashCli({ todo}) {
     )}
     </div>
 {/*****************Simbolo************************************************************************************ */}
-    <div className="col-1" style={{padding: "0px", background: todo.simbolo == " " && "#FFFF00"}}>
+    <div className="col-1" style={{padding: "0px", background: highlighted && "#FFFF00"}}>
         <h3 className="inpTabNota" style={{color: "red", fontSize: "16px", textAlign: "center"}}>{todo.simbolo}</h3>
     </div>
 {/*****************prezzo Unitario************************************************************************************ */}

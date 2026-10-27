@@ -1,3 +1,4 @@
+import { getClientAddress, getClientMapsUrl } from '../utils/clientMaps';
 import React from "react";
 import {collection, query, orderBy, where, getDocs} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
@@ -123,10 +124,10 @@ export default function TodoClient({ todo, handleDelete, handleEdit, displayMsg,
     <div className="col-3 diviCol" style={{padding: "0px", width: "295px"}}>
     <p className="inpTab" ><a
       style={{ textAlign: "center", color: primary}}
-        href={ todo.indirizzoLink }
-        target="_blank"
+        href={getClientMapsUrl(todo)}
+        target="_blank" rel="noopener noreferrer"
         className="linkTab"
-        >{ todo.indirizzo.substr(0, 35)}...</a> </p>
+        >{getClientAddress(todo) ? `${getClientAddress(todo).slice(0, 35)}…` : (getClientMapsUrl(todo) ? 'Apri mappa' : 'Indirizzo non disponibile')}</a> </p>
     </div>
 
 {/************************partita Iva***************************************************************************** */}

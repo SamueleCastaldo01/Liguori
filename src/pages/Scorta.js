@@ -1,3 +1,5 @@
+import useHistory from '../hooks/useHistory';
+import HistoryControls from '../components/HistoryControls';
 import React, { useEffect, useState } from 'react'
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
@@ -34,12 +36,9 @@ import { Textarea } from '@mui/joy';
 function Scorta() {
 
   const [todos, setTodos] = React.useState([]);
-  const [crono, setCrono] = React.useState([]);
-  const [cronoPa, setCronoPa] = React.useState([]);
   const [fornitoriOptions, setFornitoriOptions] = React.useState([]);
 
   const [Progress, setProgress] = React.useState(false);
-  const [Progress1, setProgress1] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
 
@@ -216,42 +215,10 @@ React.useEffect(() => {
 
 
 
-//cronologia
-  React.useEffect(() => {
-    if(popupActiveCrono) {
-      const collectionRef = collection(db, "cronologia");
-      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(50));
-  
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setCrono(todosArray);
-        setProgress1(true)
-      });
-      return () => unsub();
-    }
-  }, [popupActiveCrono]);
-
-
-  //cronologia Pa
-  React.useEffect(() => {
-    if(popupActiveCronoPa) {
-      const collectionRef = collection(db, "cronologiaPa");
-      const q = query(collectionRef, orderBy("createdAt", "desc"), limit(100));
-  
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setCronoPa(todosArray);
-        setProgress1(true)
-      });
-      return () => unsub();
-    }
-  }, [popupActiveCronoPa]);
+  const quantityHistory = useHistory('cronologia', popupActiveCrono);
+  const priceHistory = useHistory('cronologiaPa', popupActiveCronoPa);
+  const crono = quantityHistory.entries;
+  const cronoPa = priceHistory.entries;
 
  //******************************************************************************* */
  //stampa
@@ -1187,21 +1154,17 @@ const handleEditNomeProd = async () => {
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scrollCrono" style={{maxHeight: "320px"}}>
-    {Progress1 == false && 
-  <div style={{marginTop: "14px"}}>
-      <CircularProgress />
-  </div>
-      }
+
   {crono.filter((val)=> {
         if(searchTermCrono === ""){
           return val
-      } else if (val.nomeP.toLowerCase().includes(searchTermCrono.toLowerCase()) ||  val.data.toLowerCase().includes(searchTermCrono.toLowerCase()) ||  val.idProdotto.toLowerCase().includes(searchTermCrono.toLowerCase()) ||  val.autore.toLowerCase().includes(searchTermCrono.toLowerCase()) ) {
+      } else if (String(val.nomeP ?? '').toLowerCase().includes(searchTermCrono.toLowerCase()) ||  String(val.data ?? '').toLowerCase().includes(searchTermCrono.toLowerCase()) ||  String(val.idProdotto ?? '').toLowerCase().includes(searchTermCrono.toLowerCase()) ||  String(val.autore ?? '').toLowerCase().includes(searchTermCrono.toLowerCase()) ) {
         return val
                 }
             }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-2 diviCol' style={{}}><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-2 diviCol' style={{}}><p className='inpTab'>{(col.createdAt ? moment(col.createdAt.toDate()).calendar() : "In salvataggio…")}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.idProdotto} </p> </div>
       <div className='col-3 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
       <div className='col-2 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.autore}</p></div>
@@ -1213,6 +1176,7 @@ const handleEditNomeProd = async () => {
     </div>
     ))}
     </div>
+    <HistoryControls history={quantityHistory} />
   </div>
 }
 
@@ -1279,21 +1243,17 @@ const handleEditNomeProd = async () => {
       <hr style={{margin: "0"}}/>
     </div>
     <div className="scrollCrono" style={{maxHeight: "320px"}}>
-    {Progress1 == false && 
-  <div style={{marginTop: "14px"}}>
-      <CircularProgress />
-  </div>
-      }
+
   {cronoPa.filter((val)=> {
         if(searchTermCronoPa === ""){
           return val
-      } else if (val.nomeP.toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  val.data.toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  val.idProdotto.toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  val.autore.toLowerCase().includes(searchTermCronoPa.toLowerCase())  ) {
+      } else if (String(val.nomeP ?? '').toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  String(val.data ?? '').toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  String(val.idProdotto ?? '').toLowerCase().includes(searchTermCronoPa.toLowerCase()) ||  String(val.autore ?? '').toLowerCase().includes(searchTermCronoPa.toLowerCase())  ) {
         return val
                 }
             }).map((col) => (
     <div key={col.id}>
     <div className='row' style={{padding: "0px"}}>
-      <div className='col-2 diviCol'><p className='inpTab'>{moment(col.createdAt.toDate()).calendar()}</p></div>
+      <div className='col-2 diviCol'><p className='inpTab'>{(col.createdAt ? moment(col.createdAt.toDate()).calendar() : "In salvataggio…")}</p></div>
       <div className='col-1 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.idProdotto} </p> </div>
       <div className='col-4 diviCol' style={{padding: "0px"}}><p className='inpTab'>{col.nomeP} </p> </div>
       {col.tipo &&
@@ -1313,6 +1273,7 @@ const handleEditNomeProd = async () => {
     </div>
     ))}
     </div>
+    <HistoryControls history={priceHistory} />
   </div>
 }
 

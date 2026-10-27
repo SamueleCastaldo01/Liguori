@@ -1,3 +1,4 @@
+import { getClientAddress, getClientMapsUrl } from '../utils/clientMaps';
 import React, { useEffect, useState, useRef } from 'react'
 import {collection, deleteDoc, doc, onSnapshot, query, where, orderBy, serverTimestamp, limit} from 'firebase/firestore';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -191,8 +192,8 @@ function ListaClientiDip() {
     >
         <TableCell component="th" scope="row"><p className='mb-2'>{todo.nomeC}</p> <p className='mb-0 fw-bold'>{todo.cellulare}</p> </TableCell>
         <TableCell align="right">
-            <a href={todo.indirizzoLink} target="_blank" rel="noopener noreferrer">
-                {todo.indirizzo}
+            <a href={getClientMapsUrl(todo)} target="_blank" rel="noopener noreferrer">
+                {getClientAddress(todo) || (getClientMapsUrl(todo) ? 'Apri mappa' : 'Indirizzo non disponibile')}
             </a>
         </TableCell>
     </TableRow>
