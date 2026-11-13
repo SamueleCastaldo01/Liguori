@@ -27,7 +27,7 @@ export default function TodoNotaForni({ todo, handleDelete, handleEdit, displayM
   const [prodInput, setProdInput] = React.useState(toText(todo.nomeP));
 
   // lista opzioni come stringhe
-  const optionsStr = (AutoProdForn || []).map(getLabel);
+  const optionsStr = [...new Set((AutoProdForn || []).map(getLabel).filter(Boolean))];
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -49,10 +49,10 @@ export default function TodoNotaForni({ todo, handleDelete, handleEdit, displayM
     <div style={{ backgroundColor: "white" }} className="prova">
       <form onSubmit={onSubmit}>
         <hr style={{ margin: 0 }} />
-        <div className="row" style={{ borderBottom: "solid", borderWidth: "2px" }}>
+        <div className="row supplier-order-item" style={{ borderBottom: "solid", borderWidth: "2px" }}>
           {/* QUANTITÀ */}
           <div className="col-1" style={{ padding: 0 }}>
-            {sup && (
+            {flagStampa ? <div className="inpTab" style={{ padding: "6px 0", overflowWrap: "anywhere" }}>{newQtProdotto}</div> : sup && (
               <input
                 style={{
                   textDecoration: todo.completed && "line-through",
@@ -77,12 +77,7 @@ export default function TodoNotaForni({ todo, handleDelete, handleEdit, displayM
             {!flagStampa && sup && (
               <Autocomplete
                 freeSolo
-                options={(AutoProdForn || []).map(x => {
-                  if (!x) return '';
-                  if (typeof x === 'string') return x;
-                  if (typeof x === 'object') return x.label ?? x.nome ?? x.name ?? x.value ?? '';
-                  return String(x);
-                })}
+                options={optionsStr}
                 inputValue={prodInput}
                 onInputChange={(_, val) => setProdInput(toText(val))}
                 renderInput={(params) => (

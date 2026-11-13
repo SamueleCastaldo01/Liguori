@@ -55,18 +55,10 @@ function OrdineForniData({ getOrdFornId }) {
 
     const auto = async () => {
       const q = query(collection(db, "fornitore"));
-      const querySnapshot = await  getDocs(q);
-      querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().nomeF);
-
-      let car = { label: doc.data().nomeF }
-      AutoComp2.push(car);
-
-      for(var i=0; i<10; i++) {
-       console.log(AutoComp2[i])
-      }
-      });
-      }
+      const snapshot = await getDocs(q);
+      const names = [...new Set(snapshot.docs.map(entry => entry.data().nomeF).filter(Boolean))];
+      AutoComp2.splice(0, AutoComp2.length, ...names.map(label => ({ label })));
+    };
   //_________________________________________________________________________________________________________________
 
       const handleChangeDataSelect = (ok) => {

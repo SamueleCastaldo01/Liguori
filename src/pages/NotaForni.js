@@ -1,3 +1,6 @@
+import PrintFormatControl from '../components/PrintFormatControl';
+import usePrintFormat from '../hooks/usePrintFormat';
+import { documentPrintStyle } from '../utils/printLayout';
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getDoc, setDoc} from 'firebase/firestore';
 import { useRef } from 'react';
@@ -21,6 +24,8 @@ import { motion } from 'framer-motion';
 
 
 
+
+import { populateSupplierOrder } from '../utils/supplierOrders';
 
 function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
 
@@ -76,7 +81,8 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     const { nome } = useParams();
     const { data } = useParams();
 
-    const [todosNota, setTodosNota] = React.useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const refreshingRef = useRef(false);
     const [todos, setTodos] = React.useState([]);
     const matches = useMediaQuery('(max-width:920px)');  //media query true se è uno smartphone
     let navigate = useNavigate();
@@ -100,6 +106,7 @@ function NotaForni({notaId, nomeForni, dataNota, dataNotaC }) {
     const [sumTot, setSumTot] =React.useState("");
 
     const [Progress, setProgress] = React.useState(false);
+    const [printFormat, setPrintFormat] = usePrintFormat();
     const componentRef = useRef();  //serve per la stampa
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
@@ -164,7 +171,7 @@ const SomAsc = async () => {
   
     const caricaNotaForni = () => {
       const collectionRef = collection(db, "notaForni");
-      const q = query(collectionRef, where("nomeF", "==", nomeForni), where("data", "==", data), orderBy("createdAt"));
+      const q = query(collectionRef, where("nomeF", "==", nome), where("data", "==", data), orderBy("createdAt"));
       const unsub = onSnapshot(q, (querySnapshot) => {
         let todosArray = [];
         querySnapshot.forEach((doc) => {
@@ -180,25 +187,10 @@ const SomAsc = async () => {
     }
 
      React.useEffect(() => {
-        caricaNotaForni()
-      }, []);
+        return caricaNotaForni();
+      }, [nome, data]);
 
 
-    //prodotti fornitori, questa viene attiva una sola volta
-      React.useEffect(() => {
-        const collectionRef = collection(db, "prodottoForn");
-        const q = query(collectionRef, where("author.name", "==", nomeForni));
-    
-        const unsub = onSnapshot(q, (querySnapshot) => {
-          let todosArray = [];
-          querySnapshot.forEach((doc) => {
-            todosArray.push({ ...doc.data(), id: doc.id });
-          });
-          setTodosNota(todosArray);
-        });
-        return () => unsub();
-      }, [flagProdFor]);
-//********************************************************************************** */
 const createCate = async () => {
   await addDoc(collection(db, "notaForni"), {
     data: data,
@@ -207,7 +199,6 @@ const createCate = async () => {
     quantita: 1,
     createdAt: serverTimestamp(),
   });
-  caricaNotaForni();
 };
 //_________________________________________________________________________________________________________________
 const handleEdit = async ( todo, qt, prod) => {
@@ -218,47 +209,32 @@ const handleEdit = async ( todo, qt, prod) => {
 
 
 const handleRefresh = async ( ) => {
-  var flagPresNota = false
-  const collectionRef = collection(db, "prodotto");
-  //ci sono due cicli dentro un ciclo.    Il primo serve per vedere se ci sono i gli stessi prodotti presenti nella nota, il secondo serve per prendere i valori dei prodotti
-todosNota.map( async (todo) => {    //ciclo princiale sui prodotti del fornitore
-  todos.map((tdPrdNot) => {  //primo ciclo per vedere i prodotti presenti nella nota
-    if (todo.nomeP == tdPrdNot.nomeP && todo.author.name == nome) {  //se trova questo prodotto nella nota, allora il flag cambia e non va ad inserire il prodotto nella nota
-      flagPresNota = true 
-    }
-  } )
- if(flagPresNota == false) {  //qui inizia il seconodo ciclo nel ciclo
-  if(todo.author.name == nome ) { //vado a prendere solo i prodotti di quel fornitore che sto andando a inserire
-    const q = query(collectionRef, where("nomeP", "==", todo.nomeP));  // va a prendere lo stesso prodotto, vado a prendere i dati di quel prodotto
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (hi) => {   //questo è il ciclo for della query, dove vado nella scorta
-      if (hi.data().quantita < hi.data().sottoScorta) {  //se la quantità è minore della sottoscorta allora aggiunte il prodotto alla lista
-        await addDoc(collection(db, "notaForni"), {
-          nomeF: nome,
-          data: data,
-          nomeP: todo.nomeP,
-          quantita: hi.data().quantitaOrdinabile,
-          createdAt: serverTimestamp(),
-        }); 
-      }
-    });
+  if (refreshingRef.current) return;
+  refreshingRef.current = true;
+  setRefreshing(true);
+  try {
+    const added = await populateSupplierOrder(nome, data);
+    toast.success(added ? `Aggiunte ${added} voci all'ordine.` : 'Ordine già aggiornato: nessuna nuova voce sotto scorta.');
+  } catch (error) {
+    console.error('Errore aggiornamento ordine:', error);
+    toast.error("Impossibile aggiornare l'ordine. Riprova.");
+  } finally {
+    refreshingRef.current = false;
+    setRefreshing(false);
   }
-}
- flagPresNota = false
-})
 };
 //_________________________________________________________________________________________________________________
 const handleDelete = async (id) => {
   const colDoc = doc(db, "notaForni", id); 
   //infine elimina la data
   await deleteDoc(colDoc); 
-  caricaNotaForni()
 };
 //_________________________________________________________________________________________________________________
   //stampa
 const handlePrint = useReactToPrint({
   content: () => componentRef.current,
   documentTitle: 'emp-data',
+  pageStyle: documentPrintStyle(printFormat),
   onAfterPrint: () => setFlagStampa(false),
 });
 
@@ -292,6 +268,7 @@ const print = () => {
     {!matches ? <h1 className='title mt-3'>Nota Fornitore</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
 
+    <PrintFormatControl value={printFormat} onChange={setPrintFormat} disabled={flagStampa} />
     <span><button onClick={print}>Stampa </button></span>
 
   {sup == true && 
@@ -301,7 +278,7 @@ const print = () => {
        console.log({FlagT})
         createCate()
       }}>Aggiungi Prodotto</button></span>
-      <span><button onClick={handleRefresh}>Refresh</button></span>
+      <span><button onClick={handleRefresh} disabled={refreshing}>{refreshing ? 'Aggiornamento…' : 'Aggiorna da scorte'}</button></span>
 
       <button   onClick={() => {
     setFlagStampa(true);
@@ -336,7 +313,7 @@ const print = () => {
 
     </div>
 {/***********tabella visuallizza prodotto************************************************** */}
-  <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
+  <div className='row supplier-items-heading' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px"}}>Prodotto</div>
   </div>

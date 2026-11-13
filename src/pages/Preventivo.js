@@ -1,3 +1,6 @@
+import PrintFormatControl from '../components/PrintFormatControl';
+import usePrintFormat from '../hooks/usePrintFormat';
+import { documentPrintStyle } from '../utils/printLayout';
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer, limit, clearIndexedDbPersistence } from 'firebase/firestore';
 import { useRef } from 'react';
@@ -77,6 +80,7 @@ function Preventivo({notaId, notaDat, cont, nomeCli, dataNota, nProd, dataNotaC,
     const [prezzoUniProd, setprezzoUniProd] = React.useState("");
     const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
+    const [printFormat, setPrintFormat] = usePrintFormat();
     const componentRef = useRef();  //serve per la stampa
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
@@ -294,6 +298,7 @@ const handleChangeTogg = (event) => {
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
   documentTitle: 'emp-data',
+  pageStyle: documentPrintStyle(printFormat),
   onAfterPrint: () => setFlagStampa(false)
 })
 
@@ -348,6 +353,7 @@ const print = async () => {
     <Button onClick={() => {FlagT=false; createCate(); }} size="small" variant="contained">Aggiungi Prodotto</Button>
     <Button onClick={() => {FlagT=true; createCate();}} size="small" variant="contained">Aggiungi Tinte</Button>
     </>}
+    <PrintFormatControl value={printFormat} onChange={setPrintFormat} disabled={flagStampa} />
     {sup == true &&<Button onClick={print} size="small" variant="contained">Stampa</Button>}
 
     </ToggleButtonGroup>
@@ -514,10 +520,10 @@ const print = async () => {
       </div>
     </div>
 {/***********tabella aggiunta prodotto************************************************** */}
-  <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
+  <div className='row print-items-heading' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px"}}>Prodotto</div>
-    <div className='col-2' style={{padding:"0px"}}>Prezzo Uni</div>
+    {!flagStampa && <div className='col-2' style={{padding:"0px"}}>Prezzo Uni</div>}
     <div className='col-2' style={{padding:"0px"}}>Prezzo Totale</div>
   </div>
 

@@ -41,3 +41,21 @@ Il campo resta utilizzabile manualmente anche senza Google Maps.
 
 Non inserire chiavi in questo README. La chiave Maps per browser sarà visibile
 nel sito compilato: le restrizioni su API e domini devono quindi restare attive.
+
+## Stampa A4/A5 e ordini automatici dei fornitori
+
+Nelle note, nei preventivi e nella stampa massiva scegliere **Formato stampa**
+prima di stampare. La scelta A4/A5 viene ricordata. Nella finestra del browser
+usare lo stesso formato carta e scala **100%**: il documento si adatta alla
+larghezza disponibile, con descrizioni a capo e pagine aggiuntive quando servono.
+
+In **Scorta Tinte > Gestisci famiglie**, selezionare una famiglia (per esempio
+CB), scegliere **Fornitore per ordine automatico** e premere **Aggiorna**.
+La creazione dell'ordine e **Aggiorna da scorte** includono prodotti e nuance
+delle famiglie associate quando la quantità disponibile è inferiore alla
+sottoscorta e la quantità ordinabile è positiva. La quantità inserita è quella
+ordinabile, senza sottrarre la giacenza.
+
+I successivi aggiornamenti aggiungono solo le voci mancanti e conservano le
+quantità modificate nell'ordine. Le righe duplicate già salvate in passato
+restano da verificare manualmente.

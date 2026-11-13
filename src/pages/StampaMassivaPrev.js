@@ -1,3 +1,6 @@
+import PrintFormatControl from '../components/PrintFormatControl';
+import usePrintFormat from '../hooks/usePrintFormat';
+import { documentPrintStyle } from '../utils/printLayout';
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import { useRef } from 'react';
@@ -66,6 +69,7 @@ function StampaMassivaPrev({notaId, cont, nomeCli, dataNotaC, numCart, numBust, 
     const [prezzoUniProd, setprezzoUniProd] = React.useState("");
     const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
+    const [printFormat, setPrintFormat] = usePrintFormat();
     const componentRef = useRef();  //serve per la stampa
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
@@ -173,6 +177,7 @@ const handleDelete = async (id) => {
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
   documentTitle: 'emp-data',
+  pageStyle: documentPrintStyle(printFormat),
   onAfterPrint: () => setFlagStampa(false)
 })
 
@@ -215,13 +220,14 @@ const print = async () => {
       
       {!matches ? <h1 className='title mt-3'> Stampa Massiva  Prevenzione</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
+    <PrintFormatControl value={printFormat} onChange={setPrintFormat} disabled={flagStampa} />
     <span><button onClick={print}>Stampa </button></span>
 
 {/*********************DDT********************************************************************** */}
     <div ref={componentRef} className="foglioA4" style={{paddingLeft:"50px", paddingRight:"50px", paddingTop:"20px"}}>
 
-    {todosAddNota.map((todoAdd) => (
-    <div key={todoAdd.id} style={{height: todoAdd.altezza}}>
+    {todosAddNota.filter(todoAdd => String(todoAdd.completa) === '1' && todoAdd.data === dataNotaC).map((todoAdd) => (
+    <div key={todoAdd.id} className="bulk-order-document" style={{height: todoAdd.altezza}}>
     {todoAdd.completa  == 1 && todoAdd.data == dataNotaC &&  (
       <>
       <div className='row rigaNota' >
@@ -265,10 +271,10 @@ const print = async () => {
       </div>
     </div>
 {/***********tabella aggiunta prodotto************************************************** */}
-  <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
+  <div className='row print-items-heading' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px"}}>Prodotto</div>
-    <div className='col-2' style={{padding:"0px"}}>Prezzo Uni</div>
+    {!flagStampa && <div className='col-2' style={{padding:"0px"}}>Prezzo Uni</div>}
     <div className='col-2' style={{padding:"0px"}}>Prezzo Totale</div>
   </div>
 

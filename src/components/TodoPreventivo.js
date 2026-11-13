@@ -1,3 +1,4 @@
+import BulkOrderItems from './BulkOrderItems';
 import React from "react";
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
 import EditIcon from '@mui/icons-material/Edit';
@@ -191,6 +192,19 @@ export default function TodoPreventivo({ todo, handleDelete, handleEdit, display
 
 //INTERFACCIA ***************************************************************************************************************
 //*************************************************************************************************************************** */
+  if (flagStampa) {
+    if (!sup) return null;
+    return <BulkOrderItems showUnitPrices={false} order={{ completa: Completa, prodotti: [{
+      ...todo,
+      qtProdotto: todo.qtProdotto === '' ? newQtProdotto : todo.qtProdotto,
+      prodottoC: newProdotto,
+      t1: todo.t1 === '' ? newT1 : todo.t1,
+      t2: todo.t2 === '' ? newT2 : todo.t2,
+      t3: todo.t3 === '' ? newT3 : todo.t3,
+      t4: todo.t4 === '' ? newT4 : todo.t4,
+      t5: todo.t5 === '' ? newT5 : todo.t5,
+    }] }} />;
+  }
   return (
     <div className="prova">
 

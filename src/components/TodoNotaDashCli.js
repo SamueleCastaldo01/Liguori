@@ -1,3 +1,4 @@
+import BulkOrderItems from './BulkOrderItems';
 import { shouldHighlightOrderItem } from '../utils/orderHighlight';
 import React from "react";
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, orderBy, where, getDocs} from 'firebase/firestore';
@@ -20,7 +21,7 @@ import { fontSize } from "@mui/system";
 
 export const AutoCompProd = [];
 
-export default function TodoNotaDashCli({ todo}) {
+export default function TodoNotaDashCli({ todo, flagStampa, Completa }) {
 
   const highlighted = shouldHighlightOrderItem(todo);
 
@@ -56,6 +57,7 @@ export default function TodoNotaDashCli({ todo}) {
 
 //INTERFACCIA ***************************************************************************************************************
 //*************************************************************************************************************************** */
+  if (flagStampa) return <BulkOrderItems order={{ completa: Completa, prodotti: [todo] }} showUnitPrices={false} />;
   return (
     <div className="prova">
 

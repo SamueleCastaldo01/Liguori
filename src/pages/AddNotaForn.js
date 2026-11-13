@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import moment from 'moment';
@@ -21,12 +21,15 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { motion } from 'framer-motion';
 
 
+import { populateSupplierOrder } from '../utils/supplierOrders';
+
 export const AutoProdForn = [];
 
 function AddNotaForni({ ordId, dataOrd, dataOrdConf, getNotaForniId }) {
  
     const [todos, setTodos] = React.useState([]);
-    const [todosNota, setTodosNota] = React.useState([]);
+    const [creating, setCreating] = useState(false);
+    const creatingRef = useRef(false);
 
     const [nomeF, setnomeF] = React.useState("");
     const [cont, setCont] = React.useState(1);
@@ -51,14 +54,10 @@ function AddNotaForni({ ordId, dataOrd, dataOrdConf, getNotaForniId }) {
 //_________________________________________________________________________________________________________________
     const auto = async (nomeFli) => {
       const q = query(collection(db, "prodottoForn"), where("author.name", "==", nomeFli));
-      const querySnapshot = await  getDocs(q);
-      querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().nomeP);
-
-      let car = { label: doc.data().nomeP }
-      AutoProdForn.push(car);
-      });
-      }
+      const snapshot = await getDocs(q);
+      const names = [...new Set(snapshot.docs.map(entry => entry.data().nomeP).filter(Boolean))];
+      AutoProdForn.splice(0, AutoProdForn.length, ...names.map(label => ({ label })));
+    };
 //_________________________________________________________________________________________________________________
 const contEffect = async () => {
     console.log({dataOrdConf})
@@ -153,81 +152,39 @@ const contEffect = async () => {
     }, []);
 
 
-    React.useEffect(() => {
-      const collectionRef = collection(db, "prodottoForn");
-      const q = query(collectionRef);
-  
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        let todosArray = [];
-        querySnapshot.forEach((doc) => {
-          todosArray.push({ ...doc.data(), id: doc.id });
-        });
-        setTodosNota(todosArray);
-      });
-      contEffect();
-      return () => unsub();
-    }, []);
-  //****************************************************************************************** */
-
-  const cliEffect = async () => {  //funzione per l'anagrafica del cliente
-    const collectionRef = collection(db, "prodotto");
-        //un ciclo dentro un altro ciclo
-    todosNota.map( async (todo) => {    //ciclo for sui prodotti del fornitore
-        if(todo.author.name == nomeF ) { //vado a prendere solo i prodotti dei quel fornitore che sto andando a inserire
-          const q = query(collectionRef, where("nomeP", "==", todo.nomeP));  // va a prendere lo stesso prodotto, vado a prendere i dati di quel prodotto
-          const querySnapshot = await getDocs(q);
-
-          querySnapshot.forEach(async (hi) => {   //questo è il ciclo for della query, dove vado nella scorta
-            if (hi.data().quantita < hi.data().sottoScorta) {  //se la quantità è minore della sottoscorta allora aggiunte il prodotto alla lista
-              console.log("sono entrato nel if della query");
-              await addDoc(collection(db, "notaForni"), {
-                nomeF,
-                data: dataOrdConf,
-                nomeP: todo.nomeP,
-                quantita: hi.data().quantitaOrdinabile,
-                createdAt: serverTimestamp(),
-              }); 
-            }
-          });
-        }
-    })
-  }
-//****************************************************************************************** */
    //stampa
   function HandleSpeedAddScalClien() {
     setPopupActive(true);
   }
   /******************************************************************************* */
   const createCate = async (e) => {   //crezione nota nomefornitore, cont e data
-    e.preventDefault(); 
-    handleDebitoRes();
-    var bol= true
-    //verifica che non ci sia lo stesso nome del cliente
-    const q = query(collection(db, "addNotaForni"), where("nomeF", "==", nomeF), where("data", "==", dataOrdConf));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-    if (doc.data().nomeF == nomeF) {
-        notifyErrorCli()
-        toast.clearWaitingQueue(); 
-        bol=false
-    }
-    });
-    if(!nomeF) {
+    e.preventDefault();
+    if (creatingRef.current) return;
+    if (!nomeF.trim()) {
       notifyErrorCliEm();
-      toast.clearWaitingQueue(); 
-      return
+      return;
     }
-    if(bol == true) {
-    handleContAdd();
-    await addDoc(collection(db, "addNotaForni"), {
-      cont,
-      nomeF,
-      createdAt: serverTimestamp(),
-      data: dataOrdConf
-    });
-    cliEffect();
-    setnomeF("");
-    setClear();
+    creatingRef.current = true;
+    setCreating(true);
+    try {
+      const q = query(collection(db, "addNotaForni"), where("nomeF", "==", nomeF), where("data", "==", dataOrdConf));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        notifyErrorCli();
+        return;
+      }
+      await addDoc(collection(db, "addNotaForni"), {
+        cont, nomeF, createdAt: serverTimestamp(), data: dataOrdConf,
+      });
+      handleContAdd();
+      await populateSupplierOrder(nomeF, dataOrdConf);
+      setClear();
+    } catch (error) {
+      console.error('Errore ordine automatico:', error);
+      toast.error("Impossibile completare l'ordine automatico. Apri l'ordine e premi Aggiorna da scorte per riprovare.");
+    } finally {
+      creatingRef.current = false;
+      setCreating(false);
     }
   };
     //_____________________________________________________________________________________
@@ -290,7 +247,7 @@ const contEffect = async () => {
       renderInput={(params) => <TextField {...params} label="Fornitore" />}
     />
             <div className="btn_container">
-            <Button className='mt-3' type='submit' variant="outlined">Aggiungi Fornitore</Button>
+            <Button className='mt-3' type='submit' variant="outlined" disabled={creating}>{creating ? 'Creazione ordine…' : 'Aggiungi Fornitore'}</Button>
             </div>
   
         </div>
@@ -329,7 +286,6 @@ const contEffect = async () => {
                 getNotaForniId(todo.id, todo.nomeF, dataOrd, dataOrdConf)
                 navigate("/notaforni/"+todo.id+"/"+todo.nomeF+"/"+dataOrdConf);
                 auto(todo.nomeF);
-                AutoProdForn.length = 0
                          }}>
              <p className="inpTab"  style={{textAlign: "left"}}>{todo.nomeF}</p>
         </div>

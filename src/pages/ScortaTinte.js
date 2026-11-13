@@ -123,23 +123,13 @@ function ScortaTinte() {
         })}
 
 //********************************************************************************** */
-      useEffect(() => {
-        const fetchTinte = async () => {
-          try {
-            const tinteCollection = collection(db, 'tinte');
-            const snapshot = await getDocs(tinteCollection);
-            const lista = snapshot.docs
-              .map(doc => ({ id: doc.id, ...doc.data() }))
-              .sort((a, b) => a.brand.localeCompare(b.brand)); // <-- ordinamento qui
-
-            setBrandTinte(lista);
-          } catch (err) {
-            console.error('Errore nel recupero delle tinte:', err);
-          }
-        };
-
-        fetchTinte();
-      }, []);
+      useEffect(() => onSnapshot(collection(db, 'tinte'), (snapshot) => {
+        setBrandTinte(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id }))
+          .sort((a, b) => a.brand.localeCompare(b.brand)));
+      }, (error) => {
+        console.error('Errore nel recupero delle famiglie:', error);
+        toast.error('Impossibile caricare le famiglie delle tinte.');
+      }), []);
 
 React.useEffect(() => {
     const collectionRef = collection(db, "scortaTinte");
@@ -518,7 +508,7 @@ function handlePopUp(image, nota) {
       <Button style={{color: primary, backgroundColor: "#CCCBCBCC", borderColor: primary, borderStyle: "solid", borderWidth: "2px", borderRadius: "0px" }} onClick={handleSpeedCronologia} color='secondary' value="cronologia">Cronologia</Button> 
     }
       {sup == true && <Button onClick={() => {setFlagDelete(!flagDelete)}} color="error" variant="contained">elimina</Button> }
-      {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => setShowAddTinte(true)} size="small" variant="contained">Aggiungi Brand</Button>}
+      {sup == true &&<Button style={{borderTopRightRadius: "0px", borderBottomRightRadius: "0px" }}  onClick={() => setShowAddTinte(true)} size="small" variant="contained">Gestisci famiglie</Button>}
     </ToggleButtonGroup>
 </div>
     {sup ===true && (
@@ -528,7 +518,6 @@ function handlePopUp(image, nota) {
       <TinteModal
         show={showAddTinte}
         onClose={() => setShowAddTinte(false)}
-        onSave={() => { /* ricarica la lista tinte */ }}
       />
 
 {/******Aggiungi Prodotto  modal***************************************************************************** */}
@@ -551,7 +540,7 @@ function handlePopUp(image, nota) {
           labelId="select-brand-label"
           id="select-brand"
           onChange={handleChangeBrand}
-          defaultValue={brandTinte[0]?.brand || ""}
+          value={brandTinte.some(tinta => tinta.brand === brand) ? brand : ""}
         >
           {brandTinte.map((tinta) => (
             <MenuItem key={tinta.id} value={tinta.brand}>

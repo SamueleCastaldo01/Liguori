@@ -1,3 +1,6 @@
+import PrintFormatControl from '../components/PrintFormatControl';
+import usePrintFormat from '../hooks/usePrintFormat';
+import { documentPrintStyle } from '../utils/printLayout';
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, getDoc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp, getCountFromServer, getDocsFromCache} from 'firebase/firestore';
 import { useRef } from 'react';
@@ -77,6 +80,7 @@ function Nota({idCliente, notaId, cont, nomeCli, dataNota, nProd, dataNotaC, num
     const [prezzoUniProd, setprezzoUniProd] = React.useState("");
     const [prezzoTotProd, setprezzoTotProd] = React.useState("");
 
+    const [printFormat, setPrintFormat] = usePrintFormat();
     const componentRef = useRef();  //serve per la stampa
 
     const sharePdf = async () => {
@@ -639,6 +643,7 @@ const handleChangeTogg = (event) => {
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
   documentTitle: 'emp-data',
+  pageStyle: documentPrintStyle(printFormat),
   onAfterPrint: () => setFlagStampa(false)
 })
 
@@ -690,7 +695,8 @@ const print = async () => {
       <Button className='rounded-0' onClick={() => { setFlagInOrdine(true); setFlagInSospeso(false)}}  variant="contained"  value="scortatinte">In Ordine</Button>
       <Button className='rounded-0' onClick={() => { setFlagInOrdine(false); setFlagInSospeso(true)}}  variant="contained"  value="scortatinte1">In Sospeso</Button>
     </>}
-    <Button className='rounded-0' onClick={print}  variant="contained">Stampa</Button>
+<PrintFormatControl value={printFormat} onChange={setPrintFormat} disabled={flagStampa} />
+        <Button className='rounded-0' onClick={print}  variant="contained">Stampa</Button>
     <button onClick={sharePdf}>Condividi come PDF</button>
      {Completa== 0 ? 
       <button type="button" className="button-delete" style={{padding: "0px", float: "left", }}>
@@ -861,7 +867,7 @@ const print = async () => {
       </div>
     </div>
 {/***********tabella aggiunta prodotto************************************************** */}
-  <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
+  <div className='row print-items-heading' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px", width: "410px"}}>Prodotto</div>
     {flagStampa === false &&  <div className='col-2' style={{padding:"0px", }}>Prezzo Uni</div>}

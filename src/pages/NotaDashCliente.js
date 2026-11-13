@@ -1,3 +1,6 @@
+import PrintFormatControl from '../components/PrintFormatControl';
+import usePrintFormat from '../hooks/usePrintFormat';
+import { documentPrintStyle } from '../utils/printLayout';
 import React, { useEffect, useState } from 'react'
 import {collection, deleteDoc, doc, onSnapshot ,addDoc ,updateDoc, query, where, getDocs, orderBy, serverTimestamp} from 'firebase/firestore';
 import TodoNotaDashCli from '../components/TodoNotaDashCli';
@@ -55,6 +58,7 @@ function NotaDashCliente({}) {
 
     let navigate = useNavigate();
 
+    const [printFormat, setPrintFormat] = usePrintFormat();
     const componentRef = useRef();  //serve per la stampa
    //_________________________________________________________________________________________________________________
      //confirmation notification to remove the collection
@@ -137,6 +141,7 @@ function NotaDashCliente({}) {
  const handlePrint = useReactToPrint({
   content: () => componentRef.current,
   documentTitle: 'emp-data',
+  pageStyle: documentPrintStyle(printFormat),
   onAfterPrint: () => setFlagStampa(false)
 })
 
@@ -175,7 +180,8 @@ const print = async () => {
 
   {matches && <div style={{marginTop: "50px"}}></div>}
 
-      <span><button onClick={print}>Stampa </button></span>
+      <PrintFormatControl value={printFormat} onChange={setPrintFormat} disabled={flagStampa} />
+    <span><button onClick={print}>Stampa </button></span>
 
 {sup == true && 
   <>
@@ -206,10 +212,10 @@ const print = async () => {
     </div>
 
     {/***********tabella note prodotto************************************************** */}
-  <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
+  <div className='row print-items-heading' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-7' style={{padding:"0px"}}>Prodotto</div>
-    <div className='col-2' style={{padding:"0px"}}>Prezzo Uni(€)</div>
+    {!flagStampa && <div className='col-2' style={{padding:"0px"}}>Prezzo Uni(€)</div>}
     <div className='col-2' style={{padding:"0px"}}>Prezzo Tot(€)</div>
   </div>
 

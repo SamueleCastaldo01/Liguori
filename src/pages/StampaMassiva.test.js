@@ -19,9 +19,19 @@ const orders = [
 ];
 
 beforeEach(() => {
+  localStorage.removeItem('printPaperFormat');
   localStorage.setItem('uid', 'test-user');
   useBulkOrders.mockReturnValue({ orders, loading: false, error: null, retry: jest.fn() });
   useReactToPrint.mockReturnValue(jest.fn());
+});
+
+test('selects and remembers A5 with a layout that fits the printable width', () => {
+  showPage();
+  fireEvent.change(screen.getByLabelText('Formato stampa'), { target: { value: 'A5' } });
+  expect(localStorage.getItem('printPaperFormat')).toBe('A5');
+  const options = useReactToPrint.mock.calls[useReactToPrint.mock.calls.length - 1][0];
+  expect(options.pageStyle).toContain('size: A5 portrait');
+  expect(options.pageStyle).toContain('width: 100% !important');
 });
 
 function showPage(state = { date: '2026-10-28', scaletta: true }) {

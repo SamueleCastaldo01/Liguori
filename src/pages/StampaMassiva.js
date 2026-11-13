@@ -1,3 +1,6 @@
+import PrintFormatControl from '../components/PrintFormatControl';
+import usePrintFormat from '../hooks/usePrintFormat';
+import { documentPrintStyle } from '../utils/printLayout';
 import React, { useEffect, useRef, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -23,6 +26,7 @@ function StampaMassiva({ TodayData }) {
   const { orders: todosAddNota, loading, error, retry } = useBulkOrders(scalettaDataSele, switchScaletta);
   const [flagStampa, setFlagStampa] = useState(false);
   const [printError, setPrintError] = useState(false);
+  const [printFormat, setPrintFormat] = usePrintFormat();
   const componentRef = useRef();
   const printReady = useRef(null);
 
@@ -43,17 +47,7 @@ function StampaMassiva({ TodayData }) {
     }),
     onAfterPrint: () => setFlagStampa(false),
     onPrintError: () => { setFlagStampa(false); setPrintError(true); },
-    pageStyle: `
-      @page { size: A4; margin: 8mm; }
-      @media print {
-        html, body { height: auto !important; overflow: visible !important; background: white; }
-        .bulk-print-content { width: auto !important; height: auto !important; padding: 0 !important; overflow: visible !important; }
-        .bulk-order-document { break-after: page; page-break-after: always; min-height: 0 !important; padding-top: 0 !important; }
-        .bulk-order-document:last-child { break-after: auto; page-break-after: auto; }
-        .bulk-order-item { break-inside: avoid; page-break-inside: avoid; }
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      }
-    `,
+    pageStyle: documentPrintStyle(printFormat),
   });
 
   const handleChangeDataScaletta = (event) => {
@@ -88,6 +82,7 @@ function StampaMassiva({ TodayData }) {
       {!matches ? <h1 className='title mt-3'> Stampa Massiva</h1> : <div style={{marginBottom:"60px"}}></div>} 
 
     <div className='d-flex gap-3 align-items-center justify-content-center'>
+    <PrintFormatControl value={printFormat} onChange={setPrintFormat} disabled={flagStampa} />
     <span><button onClick={print} disabled={loading || !!error || !todosAddNota.length || flagStampa}>Stampa</button></span>
            <input
             type="date"
@@ -167,7 +162,7 @@ function StampaMassiva({ TodayData }) {
       </div>
     </div>
 {/***********tabella aggiunta prodotto************************************************** */}
-  <div className='row' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
+  <div className='row print-items-heading' style={{textAlign:"center", background:"#212529", color:"#f6f6f6"}}>
     <div className='col-1' style={{padding:"0px"}}>Qt</div>
     <div className='col-6' style={{padding:"0px"}}>Prodotto</div>
     {!flagStampa && <div className='col-2' style={{padding:"0px"}}>Prezzo Uni</div>}

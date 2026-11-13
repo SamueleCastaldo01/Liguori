@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { collection, addDoc, query, where, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { TextField } from '@mui/material';
+import { MenuItem, TextField } from '@mui/material';
 import { db } from '../firebase-config';
 
 /**
@@ -16,6 +16,9 @@ export default function TinteModal({ show, onClose, onSave }) {
   const [price, setPrice] = useState('');
   const [error, setError] = useState('');
   const [tinte, setTinte] = useState([]);
+  const [fornitori, setFornitori] = useState([]);
+  const [fornitoreId, setFornitoreId] = useState('');
+  const [saving, setSaving] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [tintaToDelete, setTintaToDelete] = useState(null);
 
@@ -23,7 +26,12 @@ export default function TinteModal({ show, onClose, onSave }) {
 
   useEffect(() => {
     if (!show) return;
+    resetForm();
     fetchTinte();
+    getDocs(collection(db, 'fornitore')).then((snapshot) => {
+      setFornitori(snapshot.docs.map(entry => ({ ...entry.data(), id: entry.id }))
+        .sort((a, b) => a.nomeF.localeCompare(b.nomeF)));
+    }).catch(() => setError('Impossibile caricare i fornitori. Riapri la finestra per riprovare.'));
   }, [show]);
 
   const fetchTinte = async () => {
@@ -39,6 +47,7 @@ export default function TinteModal({ show, onClose, onSave }) {
   const resetForm = () => {
     setBrand('');
     setPrice('');
+    setFornitoreId('');
     setError('');
     setSelectedId(null);
   };
@@ -56,6 +65,7 @@ export default function TinteModal({ show, onClose, onSave }) {
     setSelectedId(tinta.id);
     setBrand(tinta.brand);
     setPrice(tinta.prezzo ?? '');
+    setFornitoreId(tinta.fornitoreId || fornitori.find(entry => entry.nomeF === tinta.nomeF)?.id || '');
     setError('');
   };
 
@@ -69,6 +79,7 @@ export default function TinteModal({ show, onClose, onSave }) {
       setTintaToDelete(null);
       fetchTinte();
       resetForm();
+      if (onSave) onSave();
     } catch (err) {
       console.error('Errore eliminazione tinta:', err);
       setError("Errore durante l'eliminazione.");
@@ -76,15 +87,24 @@ export default function TinteModal({ show, onClose, onSave }) {
   };
 
   const handleSave = async () => {
+    if (saving) return;
     if (!brand.trim()) {
       setError('Il campo Brand è obbligatorio');
       return;
     }
 
+    setSaving(true);
     try {
+      const supplier = fornitori.find(entry => entry.id === fornitoreId);
+      const family = {
+        brand: brand.trim(),
+        prezzo: price ? parseFloat(price) : null,
+        fornitoreId,
+        nomeF: supplier?.nomeF || '',
+      };
       const q = query(
         tinteCollection,
-        where('brand', '==', brand)
+        where('brand', '==', family.brand)
       );
       const snapshot = await getDocs(q);
       const exists = snapshot.docs.some(doc => doc.id !== selectedId);
@@ -95,15 +115,9 @@ export default function TinteModal({ show, onClose, onSave }) {
 
       if (selectedId) {
         const tintaRef = doc(db, 'tinte', selectedId);
-        await updateDoc(tintaRef, {
-          brand,
-          prezzo: price ? parseFloat(price) : null
-        });
+        await updateDoc(tintaRef, family);
       } else {
-        await addDoc(tinteCollection, {
-          brand,
-          prezzo: price ? parseFloat(price) : null
-        });
+        await addDoc(tinteCollection, family);
       }
 
       await fetchTinte();
@@ -113,6 +127,8 @@ export default function TinteModal({ show, onClose, onSave }) {
     } catch (err) {
       console.error('Errore salvataggio/update tinta:', err);
       setError("Si è verificato un errore durante l'operazione.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -140,6 +156,14 @@ export default function TinteModal({ show, onClose, onSave }) {
           margin="normal"
           variant="outlined"
         />
+        <TextField select fullWidth label="Fornitore per ordine automatico" value={fornitoreId}
+          onChange={(event) => setFornitoreId(event.target.value)} margin="normal"
+          helperText="Le nuance sotto scorta saranno aggiunte all'ordine del fornitore con la quantità ordinabile impostata.">
+          <MenuItem value="">Nessun fornitore</MenuItem>
+          {fornitoreId && !fornitori.some(entry => entry.id === fornitoreId) &&
+            <MenuItem value={fornitoreId}>Fornitore non disponibile</MenuItem>}
+          {fornitori.map(entry => <MenuItem key={entry.id} value={entry.id}>{entry.nomeF}</MenuItem>)}
+        </TextField>
         {error && <p style={{ color: 'red', marginTop: '0.5rem' }}>{error}</p>}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.7rem', marginTop: '1rem' }}>
@@ -186,7 +210,7 @@ export default function TinteModal({ show, onClose, onSave }) {
         <Button variant="secondary" onClick={() => { resetForm(); onClose(); }}>
           Annulla
         </Button>
-        <Button style={{backgroundColor: "#152C51"}} variant="primary" onClick={handleSave}>
+        <Button style={{backgroundColor: "#152C51"}} variant="primary" onClick={handleSave} disabled={saving}>
           {selectedId ? 'Aggiorna' : 'Conferma'}
         </Button>
       </Modal.Footer>
